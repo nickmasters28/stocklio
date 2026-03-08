@@ -33,7 +33,10 @@ def _public_key() -> str:
 
 
 def _base_url() -> str:
-    return st.secrets.get("propelauth", {}).get("redirect_url", "http://localhost:8501").rstrip("/")
+    try:
+        return st.secrets["propelauth"]["redirect_url"].rstrip("/")
+    except KeyError:
+        return "http://localhost:8501"
 
 
 def login_url() -> str:
