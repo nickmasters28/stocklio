@@ -50,6 +50,15 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { color: #4a5568; }
     .stTabs [aria-selected="true"] { color: #00c896 !important; }
     [data-testid="stSidebar"] * { font-family: 'Inter', sans-serif !important; }
+    /* Smaller sidebar text globally */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stSelectbox div,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span:not(.auth-btn):not(.logo-dot),
+    [data-testid="stSidebar"] h3 { font-size: 0.78rem !important; }
+    /* Keep analyze button normal size */
+    [data-testid="stSidebar"] .stButton > button[kind="primary"] { font-size: 0.85rem !important; }
     /* Hide Streamlit's keyboard-shortcut tooltip near the sidebar */
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarHeader"] > button,
@@ -104,7 +113,7 @@ st.markdown("""
 # -- Sidebar -------------------------------------------------------------------
 with st.sidebar:
     st.markdown(
-        '<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:3rem;font-weight:800;color:#1a202c;letter-spacing:-0.01em;margin-top:-60px;padding:4px 0 2px 0;">stocklio<span style="color:#00c896;">.</span></div>',
+        '<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:3rem;font-weight:800;color:#1a202c;letter-spacing:-0.01em;margin-top:-60px;padding:4px 0 2px 0;">stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>',
         unsafe_allow_html=True,
     )
     st.markdown("---")

@@ -27,15 +27,21 @@ def _auth_url() -> str:
 
 
 def _public_key() -> str:
-    return st.secrets["propelauth"]["public_key"]
+    key = st.secrets["propelauth"]["public_key"]
+    # Handle \n-escaped single-line format used in env vars
+    return key.replace("\\n", "\n")
 
 
-def login_url(redirect: str = "http://localhost:8501") -> str:
-    return f"{_auth_url()}/login?redirect_to={redirect}"
+def _base_url() -> str:
+    return st.secrets.get("propelauth", {}).get("redirect_url", "http://localhost:8501").rstrip("/")
 
 
-def signup_url(redirect: str = "http://localhost:8501") -> str:
-    return f"{_auth_url()}/signup?redirect_to={redirect}"
+def login_url() -> str:
+    return f"{_auth_url()}/en/login?redirect_to={_base_url()}"
+
+
+def signup_url() -> str:
+    return f"{_auth_url()}/en/signup?redirect_to={_base_url()}"
 
 
 # ---------------------------------------------------------------------------
