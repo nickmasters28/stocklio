@@ -16,6 +16,12 @@ st.set_page_config(
 inject_auth_js()
 handle_auth_callback()
 
+# If a ticker was submitted via the search form, switch to the Analyze page
+_submitted_ticker = st.query_params.get("ticker", "")
+if _submitted_ticker:
+    st.session_state["auto_ticker"] = _submitted_ticker.upper().strip()
+    st.switch_page("pages/1_Analyze.py")
+
 _login_url  = login_url()
 _signup_url = signup_url()
 
@@ -268,10 +274,13 @@ st.markdown(f"""
 <div class="lp-nav">
     <div class="lp-logo">stocklio<span class="lp-logo-dot">.</span></div>
     <div class="lp-nav-links">
-        <form onsubmit="event.preventDefault();var t=this.ticker.value.trim().toUpperCase();if(t){{window.location.href='/Analyze?ticker='+encodeURIComponent(t);}}" style="display:inline-flex;gap:0;border:1px solid #cbd5e0;border-radius:8px;overflow:hidden;background:#fff;">
-            <input name="ticker" placeholder="Get a stock forecast, e.g. AAPL" style="border:none;outline:none;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;width:220px;background:transparent;color:#1a202c;">
-            <button type="submit" style="border:none;background:#00c896;color:#fff;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">→</button>
-        </form>
+        <div style="display:inline-flex;gap:0;border:1px solid #cbd5e0;border-radius:8px;overflow:hidden;background:#fff;">
+            <input id="nav-ticker" placeholder="Get a stock forecast, e.g. AAPL"
+                   onkeydown="if(event.key==='Enter'){{var t=this.value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);}}"
+                   style="border:none;outline:none;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;width:220px;background:transparent;color:#1a202c;">
+            <button onclick="var t=document.getElementById('nav-ticker').value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);"
+                    style="border:none;background:#00c896;color:#fff;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">→</button>
+        </div>
         <a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>
         <a href="{_signup_url}" class="lp-btn lp-btn-primary">Sign up free</a>
     </div>
@@ -383,10 +392,13 @@ st.markdown(f"""
 <div class="lp-cta-band">
     <h2>Stop guessing. Start analyzing.</h2>
     <p>Free to use. No credit card required.</p>
-    <form onsubmit="event.preventDefault();var t=this.ticker.value.trim().toUpperCase();if(t){{window.location.href='/Analyze?ticker='+encodeURIComponent(t);}}" style="display:inline-flex;gap:0;border:1px solid #4a5568;border-radius:10px;overflow:hidden;background:#2d3748;margin-bottom:12px;">
-        <input name="ticker" placeholder="Enter a ticker to get your forecast, e.g. NVDA" style="border:none;outline:none;padding:13px 20px;font-family:'Inter',sans-serif;font-size:0.95rem;width:320px;background:transparent;color:#ffffff;">
-        <button type="submit" style="border:none;background:#00c896;color:#fff;padding:13px 24px;font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Forecast →</button>
-    </form>
+    <div style="display:inline-flex;gap:0;border:1px solid #4a5568;border-radius:10px;overflow:hidden;background:#2d3748;margin-bottom:12px;">
+        <input id="cta-ticker" placeholder="Enter a ticker to get your forecast, e.g. NVDA"
+               onkeydown="if(event.key==='Enter'){{var t=this.value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);}}"
+               style="border:none;outline:none;padding:13px 20px;font-family:'Inter',sans-serif;font-size:0.95rem;width:320px;background:transparent;color:#ffffff;">
+        <button onclick="var t=document.getElementById('cta-ticker').value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);"
+                style="border:none;background:#00c896;color:#fff;padding:13px 24px;font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Forecast →</button>
+    </div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
         <a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg">Create an account</a>
     </div>
