@@ -3,7 +3,9 @@
     "allow": [
       "Bash(pip install propelauth-py --quiet)",
       "Bash(pip3 install propelauth-py --quiet)",
-      "Bash(pip3 install PyJWT cryptography --quiet)"
+      "Bash(pip3 install PyJWT cryptography --quiet)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''app.py''\\).read\\(\\)\\); print\\(''app.py OK''\\); ast.parse\\(open\\(''pages/1_Analyze.py''\\).read\\(\\)\\); print\\(''1_Analyze.py OK''\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\(''app.py''\\).read\\(\\)\\); print\\(''app.py OK''\\); ast.parse\\(open\\(''pages/1_Analyze.py''\\).read\\(\\)\\); print\\(''1_Analyze.py OK''\\)\")"
     ]
   }
 }
