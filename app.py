@@ -28,7 +28,8 @@ st.markdown(f"""
     [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],
     button[title*="keyboard" i],
-    [data-testid="stToolbar"] {{ display: none !important; }}
+    [data-testid="stToolbar"],
+    [data-testid="stHeaderActionElements"] {{ display: none !important; }}
 
     /* Nav */
     .lp-nav {{
@@ -64,7 +65,7 @@ st.markdown(f"""
     /* Hero */
     .lp-hero {{
         text-align: center;
-        padding: 72px 20px 60px 20px;
+        padding: 36px 20px 48px 20px;
     }}
     .lp-eyebrow {{
         display: inline-block;
@@ -81,13 +82,13 @@ st.markdown(f"""
         margin-bottom: 20px;
     }}
     .lp-h1 {{
-        font-family: 'Darker Grotesque', sans-serif;
-        font-size: 4.4rem;
+        font-family: 'Darker Grotesque', sans-serif !important;
+        font-size: 3.5rem !important;
         font-weight: 900;
         color: #1a202c;
         line-height: 1.05;
         letter-spacing: -0.02em;
-        margin: 0 0 20px 0;
+        margin: 0 0 4px 0;
     }}
     .lp-h1 span {{ color: #00c896; }}
     .lp-sub {{
@@ -198,7 +199,7 @@ st.markdown(f"""
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
-        padding: 44px 0 0 0;
+        padding: 16px 0 0 0;
     }}
     .lp-step {{ text-align: center; padding: 20px 16px; }}
     .lp-step-num {{
@@ -267,7 +268,10 @@ st.markdown(f"""
 <div class="lp-nav">
     <div class="lp-logo">stocklio<span class="lp-logo-dot">.</span></div>
     <div class="lp-nav-links">
-        <a href="/Analyze" class="lp-btn lp-btn-outline">Open Dashboard</a>
+        <form onsubmit="event.preventDefault();var t=this.ticker.value.trim().toUpperCase();if(t){{window.location.href='/Analyze?ticker='+encodeURIComponent(t);}}" style="display:inline-flex;gap:0;border:1px solid #cbd5e0;border-radius:8px;overflow:hidden;background:#fff;">
+            <input name="ticker" placeholder="Get a stock forecast, e.g. AAPL" style="border:none;outline:none;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;width:220px;background:transparent;color:#1a202c;">
+            <button type="submit" style="border:none;background:#00c896;color:#fff;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">→</button>
+        </form>
         <a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>
         <a href="{_signup_url}" class="lp-btn lp-btn-primary">Sign up free</a>
     </div>
@@ -276,10 +280,10 @@ st.markdown(f"""
 <!-- Hero -->
 <div class="lp-hero">
     <div class="lp-eyebrow">AI Forecast · Prediction Market · Technical Analysis</div>
-    <h1 class="lp-h1">Know where the market is headed<br><span>before it moves.</span></h1>
+    <h1 class="lp-h1">Know where the market is headed<br><span style="display:block;margin-top:-0.15em;">before it moves.</span></h1>
     <div style="display:flex;justify-content:center;width:100%;">
-        <p class="lp-sub" style="text-align:center;max-width:640px;margin:0 auto 36px auto;">
-            Stocklio brings AI analysis, technical signals, and market sentiment together so individual investors can spot opportunities and make better trades faster.
+        <p class="lp-sub" style="text-align:center;max-width:640px;margin:4px auto 24px auto;">
+            Stocklio combines AI analysis, technical signals, and market sentiment to help individual investors spot opportunities and make smarter trades.
         </p>
     </div>
     <div class="lp-hero-cta">
@@ -379,8 +383,11 @@ st.markdown(f"""
 <div class="lp-cta-band">
     <h2>Stop guessing. Start analyzing.</h2>
     <p>Free to use. No credit card required.</p>
+    <form onsubmit="event.preventDefault();var t=this.ticker.value.trim().toUpperCase();if(t){{window.location.href='/Analyze?ticker='+encodeURIComponent(t);}}" style="display:inline-flex;gap:0;border:1px solid #4a5568;border-radius:10px;overflow:hidden;background:#2d3748;margin-bottom:12px;">
+        <input name="ticker" placeholder="Enter a ticker to get your forecast, e.g. NVDA" style="border:none;outline:none;padding:13px 20px;font-family:'Inter',sans-serif;font-size:0.95rem;width:320px;background:transparent;color:#ffffff;">
+        <button type="submit" style="border:none;background:#00c896;color:#fff;padding:13px 24px;font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Forecast →</button>
+    </form>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <a href="/Analyze" class="lp-btn lp-btn-primary lp-btn-lg">Open Dashboard</a>
         <a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg">Create an account</a>
     </div>
 </div>

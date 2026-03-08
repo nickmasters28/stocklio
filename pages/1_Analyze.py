@@ -112,9 +112,13 @@ with st.sidebar:
     st.markdown("---")
 
     st.subheader("🔍 Stock Lookup")
+    # Pre-populate from URL query param (e.g. /Analyze?ticker=NVDA)
+    _url_ticker = st.query_params.get("ticker", "")
+    if _url_ticker and "ticker_input" not in st.session_state:
+        st.session_state["ticker_input"] = _url_ticker.upper()
     ticker_input = st.text_input(
         "Enter Ticker Symbol",
-        value=st.query_params.get("ticker", "AAPL"),
+        key="ticker_input",
         placeholder="e.g. NVDA, MSFT, TSLA",
     ).upper().strip()
 
@@ -160,7 +164,8 @@ with st.sidebar:
         )
 
 # -- Main content --------------------------------------------------------------
-if analyze_btn or ticker_input:
-    render_stock_analysis(ticker_input, period)
+_auto_run = bool(st.query_params.get("ticker", ""))
+if analyze_btn or _auto_run or ticker_input:
+    render_stock_analysis(ticker_input or st.query_params.get("ticker", ""), period)
 else:
     st.info("Enter a ticker in the sidebar and click **Analyze Stock** to get started.")
