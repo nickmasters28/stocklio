@@ -66,4 +66,3 @@ def fetch_info(ticker: str) -> dict:
     except Exception:
         return {}
 
-

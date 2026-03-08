@@ -5,6 +5,7 @@ Run with: streamlit run app.py
 
 import streamlit as st
 from ui.layout import render_stock_analysis
+from auth.propelauth import inject_auth_js, handle_auth_callback, logout, login_url, signup_url
 
 # -- Page config ---------------------------------------------------------------
 st.set_page_config(
@@ -14,11 +15,16 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# -- Auth: inject JS client + validate token on every render ------------------
+inject_auth_js()
+handle_auth_callback()
+
 # -- Theme overrides -----------------------------------------------------------
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp { background-color: #f5f7fa; }
+    .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
     .metric-card {
         background: #ffffff;
         border-radius: 12px;
@@ -49,6 +55,49 @@ st.markdown("""
     [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],
     button[title*="keyboard" i] { display: none !important; }
+    /* Sidebar fixed width */
+    section[data-testid="stSidebar"] { width: 273px !important; min-width: 273px !important; max-width: 273px !important; }
+    section[data-testid="stSidebar"] > div:first-child { width: 273px !important; }
+    /* Auth bar fixed to sidebar bottom */
+    .sidebar-auth-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 273px;
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        padding: 10px 16px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 999;
+    }
+    .auth-btn {
+        width: 100%;
+        text-align: center;
+        padding: 5px 8px;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: default;
+        border: 1px solid #e2e8f0;
+        background: #f5f7fa;
+        color: #4a5568;
+        font-family: 'Inter', sans-serif;
+        box-sizing: border-box;
+    }
+    .auth-btn-primary {
+        background: #00c896;
+        color: #ffffff;
+        border-color: #00c896;
+    }
+    .auth-avatar {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: #00c896;
+        display: inline-flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 700; font-size: 0.8rem;
+        flex-shrink: 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,33 +130,33 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # -- Auth ------------------------------------------------------------------
+    # -- Auth bar fixed to sidebar bottom -------------------------------------
     if st.session_state.get("logged_in"):
+        email_initial = st.session_state["user_email"][0].upper()
+        email_display = st.session_state["user_email"]
         st.markdown(
-            f'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;">'
-            f'<div style="width:32px;height:32px;border-radius:50%;background:#00c896;'
-            f'display:flex;align-items:center;justify-content:center;'
-            f'color:#fff;font-weight:700;font-size:0.9rem;">'
-            f'{st.session_state["user_email"][0].upper()}</div>'
-            f'<div style="font-size:0.85rem;color:#1a202c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'
-            f'{st.session_state["user_email"]}</div>'
+            f'<div class="sidebar-auth-bar">'
+            f'<div class="auth-avatar">{email_initial}</div>'
+            f'<div style="font-size:0.78rem;color:#1a202c;flex:1;overflow:hidden;'
+            f'text-overflow:ellipsis;white-space:nowrap;">{email_display}</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("Log out", use_container_width=True):
-            st.session_state.pop("logged_in", None)
-            st.session_state.pop("user_email", None)
+        if st.button("Log out", use_container_width=True, key="logout_btn"):
+            logout()
             st.rerun()
     else:
-        with st.popover("Log in", use_container_width=True):
-            st.markdown("### Sign in to Stocklio")
-            email    = st.text_input("Email", placeholder="you@example.com", key="login_email")
-            password = st.text_input("Password", type="password", key="login_password")
-            if st.button("Sign in", use_container_width=True, type="primary", key="login_submit"):
-                # Backend auth wired up later
-                st.info("Auth backend not configured yet.")
-
-    st.markdown("---")
+        _login_url  = login_url()
+        _signup_url = signup_url()
+        st.markdown(
+            f'<div class="sidebar-auth-bar">'
+            f'<a href="{_login_url}" class="auth-btn auth-btn-primary" '
+            f'style="text-decoration:none;cursor:pointer;">Log in</a>'
+            f'<a href="{_signup_url}" class="auth-btn" '
+            f'style="text-decoration:none;cursor:pointer;">Sign up</a>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
 # -- Main content --------------------------------------------------------------
 if analyze_btn or ticker_input:

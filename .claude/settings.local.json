@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install propelauth-py --quiet)",
+      "Bash(pip3 install propelauth-py --quiet)",
+      "Bash(pip3 install PyJWT cryptography --quiet)"
+    ]
+  }
+}
