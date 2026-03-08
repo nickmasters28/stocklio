@@ -1,6 +1,5 @@
 """
-app.py -- Stocklio landing page.
-Fast-loading static page. Analysis lives at /Analyze.
+app.py -- Stocklio. Landing page or analysis view depending on session state.
 """
 
 import streamlit as st
@@ -16,15 +15,81 @@ st.set_page_config(
 inject_auth_js()
 handle_auth_callback()
 
-# If a ticker was submitted via the search form, redirect to the Analyze page
-_submitted_ticker = st.query_params.get("ticker", "")
-if _submitted_ticker:
-    st.session_state["auto_ticker"] = _submitted_ticker.upper().strip()
-    st.markdown(
-        f'<meta http-equiv="refresh" content="0;url=/Analyze">',
-        unsafe_allow_html=True,
-    )
+# Determine active ticker from URL param or session state
+_url_ticker = st.query_params.get("ticker", "").upper().strip()
+if _url_ticker:
+    st.session_state["current_ticker"] = _url_ticker
+
+# If a ticker is active, show the full analysis dashboard instead of the landing page
+if st.session_state.get("current_ticker"):
+    from ui.layout import render_stock_analysis
+    from auth.propelauth import logout
+
+    _ticker = st.session_state["current_ticker"]
+
+    st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    .stApp { background-color: #f5f7fa; }
+    .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
+    .metric-card { background:#ffffff;border-radius:12px;padding:16px 20px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .bullish { color:#00a878;font-weight:700; } .bearish { color:#e53e3e;font-weight:700; } .neutral { color:#dd6b20;font-weight:700; }
+    .signal-badge { display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;margin:2px; }
+    .badge-bull { background:#e6faf5;color:#00a878;border:1px solid #00a878; }
+    .badge-bear { background:#fff5f5;color:#e53e3e;border:1px solid #e53e3e; }
+    .badge-neut { background:#fffaf0;color:#dd6b20;border:1px solid #dd6b20; }
+    h1, h2, h3 { color:#1a202c !important; }
+    [data-testid="stSidebar"] * { font-family:'Inter',sans-serif !important; }
+    [data-testid="stSidebar"] label,[data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stSelectbox div,[data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span:not(.auth-btn):not(.logo-dot),
+    [data-testid="stSidebar"] h3 { font-size:0.78rem !important; }
+    [data-testid="stSidebar"] .stButton > button[kind="primary"] { font-size:0.85rem !important; }
+    [data-testid="stSidebarCollapseButton"],[data-testid="stSidebarHeader"] > button,
+    button[aria-label*="keyboard" i],button[title*="keyboard" i] { display:none !important; }
+    section[data-testid="stSidebar"] { width:273px !important;min-width:273px !important;max-width:273px !important; }
+    section[data-testid="stSidebar"] > div:first-child { width:273px !important; }
+    .sidebar-auth-bar { position:fixed;bottom:0;left:0;width:273px;background:#ffffff;border-top:1px solid #e2e8f0;padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px;z-index:999; }
+    .auth-btn { width:100%;text-align:center;padding:5px 8px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:default;border:1px solid #e2e8f0;background:#f5f7fa;color:#4a5568;font-family:'Inter',sans-serif;box-sizing:border-box; }
+    .auth-btn-primary { background:#00c896;color:#ffffff;border-color:#00c896; }
+    .auth-avatar { width:28px;height:28px;border-radius:50%;background:#00c896;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;flex-shrink:0; }
+</style>
+""", unsafe_allow_html=True)
+
+    with st.sidebar:
+        st.markdown(
+            '<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:3rem;font-weight:800;'
+            'color:#1a202c;letter-spacing:-0.01em;margin-top:-60px;padding:4px 0 2px 0;">'
+            'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>',
+            unsafe_allow_html=True,
+        )
+        if st.button("← Back to home", use_container_width=False):
+            del st.session_state["current_ticker"]
+            st.rerun()
+        st.markdown("---")
+        st.subheader("🔍 Stock Lookup")
+        ticker_input = st.text_input("Enter Ticker Symbol", value=_ticker, placeholder="e.g. NVDA, MSFT, TSLA").upper().strip()
+        period_map = {"1 Month":"1mo","3 Months":"3mo","6 Months":"6mo","1 Year":"1y","2 Years":"2y"}
+        period = period_map[st.selectbox("Analysis Period", list(period_map.keys()), index=3)]
+        if st.button("🔎 Analyze Stock", use_container_width=True, type="primary"):
+            st.session_state["current_ticker"] = ticker_input
+            st.rerun()
+        st.markdown("---")
+        _lu = login_url(); _su = signup_url()
+        if st.session_state.get("logged_in"):
+            ei = st.session_state["user_email"][0].upper()
+            st.markdown(f'<div class="sidebar-auth-bar"><div class="auth-avatar">{ei}</div><div style="font-size:0.78rem;color:#1a202c;">{st.session_state["user_email"]}</div></div>', unsafe_allow_html=True)
+            if st.button("Log out", use_container_width=True):
+                logout(); st.rerun()
+        else:
+            st.markdown(f'<div class="sidebar-auth-bar"><a href="{_lu}" class="auth-btn auth-btn-primary" style="text-decoration:none;">Log in</a><a href="{_su}" class="auth-btn" style="text-decoration:none;">Sign up</a></div>', unsafe_allow_html=True)
+
+    render_stock_analysis(ticker_input if 'ticker_input' in dir() else _ticker, period if 'period' in dir() else "1y")
     st.stop()
+
+# ============================================================
+# LANDING PAGE
+# ============================================================
 
 _login_url  = login_url()
 _signup_url = signup_url()
@@ -70,13 +135,9 @@ st.markdown(f"""
         cursor: pointer;
     }}
     .lp-btn-outline {{ border: 1px solid #cbd5e0; color: #1a202c; background: #ffffff; }}
-    .lp-btn-primary {{ background: #00c896; color: #ffffff; border: 1px solid #00c896; }}
+    .lp-btn-primary {{ background: #00c896; color: #ffffff !important; border: 1px solid #00c896; }}
 
     /* Hero */
-    .lp-hero {{
-        text-align: center;
-        padding: 36px 20px 48px 20px;
-    }}
     .lp-eyebrow {{
         display: inline-block;
         background: #e6faf5;
@@ -100,18 +161,50 @@ st.markdown(f"""
         letter-spacing: -0.02em;
         margin: 0 0 4px 0;
     }}
-    .lp-h1 span {{ color: #00c896; }}
     .lp-sub {{
         font-family: 'Inter', sans-serif;
         font-size: 1.1rem;
         color: #4a5568;
         max-width: 640px;
-        margin: 0 auto 36px auto;
+        margin: 0 auto 0 auto;
         line-height: 1.7;
         text-align: center;
     }}
-    .lp-hero-cta {{ display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }}
-    .lp-btn-lg {{ padding: 13px 32px; font-size: 0.95rem; border-radius: 10px; }}
+
+    /* Native Streamlit search form styling */
+    div[data-testid="stForm"] {{
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+    }}
+    div[data-testid="stForm"] > div {{
+        gap: 8px !important;
+    }}
+    .lp-search-wrap .stTextInput input {{
+        border-radius: 10px !important;
+        border: 1.5px solid #cbd5e0 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1rem !important;
+        padding: 12px 16px !important;
+        background: #ffffff !important;
+        color: #1a202c !important;
+    }}
+    .lp-search-wrap .stTextInput input:focus {{
+        border-color: #00c896 !important;
+        box-shadow: 0 0 0 2px rgba(0,200,150,0.15) !important;
+    }}
+    .lp-search-wrap button[kind="primaryFormSubmit"],
+    .lp-search-wrap button[kind="primary"] {{
+        background: #00c896 !important;
+        border-color: #00c896 !important;
+        color: #ffffff !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        border-radius: 10px !important;
+        padding: 12px 28px !important;
+        width: 100% !important;
+    }}
 
     /* Stats strip */
     .lp-stats {{
@@ -244,9 +337,9 @@ st.markdown(f"""
     .lp-cta-band {{
         background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
         border-radius: 16px;
-        padding: 52px 40px;
+        padding: 52px 40px 36px 40px;
         text-align: center;
-        margin: 56px 0 40px 0;
+        margin: 56px 0 0 0;
     }}
     .lp-cta-band h2 {{
         font-family: 'Darker Grotesque', sans-serif;
@@ -260,7 +353,7 @@ st.markdown(f"""
         font-family: 'Inter', sans-serif;
         font-size: 1rem;
         color: #a0aec0;
-        margin: 0 0 28px 0;
+        margin: 0;
     }}
 
     /* Footer */
@@ -278,33 +371,46 @@ st.markdown(f"""
 <div class="lp-nav">
     <div class="lp-logo">stocklio<span class="lp-logo-dot">.</span></div>
     <div class="lp-nav-links">
-        <div style="display:inline-flex;gap:0;border:1px solid #cbd5e0;border-radius:8px;overflow:hidden;background:#fff;">
-            <input id="nav-ticker" placeholder="Get a stock forecast, e.g. AAPL"
-                   onkeydown="if(event.key==='Enter'){{var t=this.value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);}}"
-                   style="border:none;outline:none;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;width:220px;background:transparent;color:#1a202c;">
-            <button onclick="var t=document.getElementById('nav-ticker').value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);"
-                    style="border:none;background:#00c896;color:#fff;padding:7px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">→</button>
-        </div>
         <a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>
         <a href="{_signup_url}" class="lp-btn lp-btn-primary">Sign up free</a>
     </div>
 </div>
 
-<!-- Hero -->
-<div class="lp-hero">
+<!-- Hero heading & subtext -->
+<div style="text-align:center;padding:36px 20px 24px 20px;">
     <div class="lp-eyebrow">AI Forecast · Prediction Market · Technical Analysis</div>
-    <h1 class="lp-h1"><span style="color:#1a202c;">Know where the market is headed</span><br><span style="display:block;margin-top:-0.15em;">before it moves.</span></h1>
-    <div style="display:flex;justify-content:center;width:100%;">
-        <p class="lp-sub" style="text-align:center;max-width:640px;margin:4px auto 24px auto;">
+    <h1 class="lp-h1"><span style="color:#1a202c;">Know where the market is headed</span><br>
+    <span style="display:block;margin-top:-0.15em;color:#00c896;">before it moves.</span></h1>
+    <div style="display:flex;justify-content:center;width:100%;margin-top:12px;">
+        <p class="lp-sub" style="text-align:center;max-width:640px;margin:0 auto;">
             Stocklio combines AI analysis, technical signals, and market sentiment to help individual investors spot opportunities and make smarter trades.
         </p>
     </div>
-    <div class="lp-hero-cta">
-        <a href="/Analyze" class="lp-btn lp-btn-primary lp-btn-lg">Try Stocklio free</a>
-        <a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg">Create an account</a>
-    </div>
 </div>
+""", unsafe_allow_html=True)
 
+# ── Hero search — native Streamlit (bypasses JS interception entirely) ──
+_, _hero_col, _ = st.columns([1, 2, 1])
+with _hero_col:
+    st.markdown('<div class="lp-search-wrap">', unsafe_allow_html=True)
+    with st.form("hero_search", border=False):
+        _lp_ticker = st.text_input(
+            "ticker",
+            placeholder="Get a stock forecast, e.g. AAPL",
+            label_visibility="collapsed",
+        )
+        _hero_submitted = st.form_submit_button("Get Forecast →", use_container_width=True, type="primary")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if _hero_submitted:
+        _t = _lp_ticker.strip().upper()
+        if _t:
+            st.session_state["current_ticker"] = _t
+            st.rerun()
+        else:
+            st.warning("Please enter a ticker symbol.")
+
+st.markdown(f"""
 <!-- Stats strip -->
 <div class="lp-stats">
     <div style="text-align:center;">
@@ -396,20 +502,41 @@ st.markdown(f"""
 <div class="lp-cta-band">
     <h2>Stop guessing. Start analyzing.</h2>
     <p>Free to use. No credit card required.</p>
-    <div style="display:inline-flex;gap:0;border:1px solid #4a5568;border-radius:10px;overflow:hidden;background:#2d3748;margin-bottom:12px;">
-        <input id="cta-ticker" placeholder="Enter a ticker to get your forecast, e.g. NVDA"
-               onkeydown="if(event.key==='Enter'){{var t=this.value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);}}"
-               style="border:none;outline:none;padding:13px 20px;font-family:'Inter',sans-serif;font-size:0.95rem;width:320px;background:transparent;color:#ffffff;">
-        <button onclick="var t=document.getElementById('cta-ticker').value.trim().toUpperCase();if(t)window.location.href='/?ticker='+encodeURIComponent(t);"
-                style="border:none;background:#00c896;color:#fff;padding:13px 24px;font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Forecast →</button>
-    </div>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg">Create an account</a>
-    </div>
 </div>
+""", unsafe_allow_html=True)
 
+# CTA band buttons (native Streamlit, centered below the dark band)
+_, _cta_col, _ = st.columns([1, 2, 1])
+with _cta_col:
+    st.markdown('<div class="lp-search-wrap" style="margin-top:16px;">', unsafe_allow_html=True)
+    with st.form("cta_search", border=False):
+        _cta_ticker = st.text_input(
+            "cta_ticker",
+            placeholder="Enter a ticker to get your forecast, e.g. NVDA",
+            label_visibility="collapsed",
+        )
+        _cta_submitted = st.form_submit_button("Get Forecast →", use_container_width=True, type="primary")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if _cta_submitted:
+        _t = _cta_ticker.strip().upper()
+        if _t:
+            st.session_state["current_ticker"] = _t
+            st.rerun()
+        else:
+            st.warning("Please enter a ticker symbol.")
+
+    st.markdown(
+        f'<div style="text-align:center;margin-top:8px;">'
+        f'<a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg" '
+        f'style="font-family:\'Inter\',sans-serif;font-size:0.95rem;padding:13px 32px;border-radius:10px;border:1px solid #4a5568;color:#1a202c;background:#ffffff;">'
+        f'Create an account</a></div>',
+        unsafe_allow_html=True,
+    )
+
+st.markdown("""
 <!-- Footer -->
-<div class="lp-footer">
+<div class="lp-footer" style="margin-top:40px;">
     © 2025 Stocklio · Built for investors who want an edge.
 </div>
 """, unsafe_allow_html=True)
