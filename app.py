@@ -16,11 +16,15 @@ st.set_page_config(
 inject_auth_js()
 handle_auth_callback()
 
-# If a ticker was submitted via the search form, switch to the Analyze page
+# If a ticker was submitted via the search form, redirect to the Analyze page
 _submitted_ticker = st.query_params.get("ticker", "")
 if _submitted_ticker:
     st.session_state["auto_ticker"] = _submitted_ticker.upper().strip()
-    st.switch_page("pages/1_Analyze.py")
+    st.markdown(
+        f'<meta http-equiv="refresh" content="0;url=/Analyze">',
+        unsafe_allow_html=True,
+    )
+    st.stop()
 
 _login_url  = login_url()
 _signup_url = signup_url()
@@ -289,7 +293,7 @@ st.markdown(f"""
 <!-- Hero -->
 <div class="lp-hero">
     <div class="lp-eyebrow">AI Forecast · Prediction Market · Technical Analysis</div>
-    <h1 class="lp-h1">Know where the market is headed<br><span style="display:block;margin-top:-0.15em;">before it moves.</span></h1>
+    <h1 class="lp-h1"><span style="color:#1a202c;">Know where the market is headed</span><br><span style="display:block;margin-top:-0.15em;">before it moves.</span></h1>
     <div style="display:flex;justify-content:center;width:100%;">
         <p class="lp-sub" style="text-align:center;max-width:640px;margin:4px auto 24px auto;">
             Stocklio combines AI analysis, technical signals, and market sentiment to help individual investors spot opportunities and make smarter trades.

@@ -112,9 +112,11 @@ with st.sidebar:
     st.markdown("---")
 
     st.subheader("🔍 Stock Lookup")
-    # Pre-populate from landing page search (passed via session state)
+    # Pre-populate from landing page search or default to AAPL
     if "auto_ticker" in st.session_state and "ticker_input" not in st.session_state:
         st.session_state["ticker_input"] = st.session_state.pop("auto_ticker")
+    elif "ticker_input" not in st.session_state:
+        st.session_state["ticker_input"] = "AAPL"
     ticker_input = st.text_input(
         "Enter Ticker Symbol",
         key="ticker_input",
