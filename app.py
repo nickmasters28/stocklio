@@ -19,6 +19,18 @@ st.set_page_config(
 inject_auth_js()
 handle_auth_callback()
 
+# ── Google Analytics ──────────────────────────────────────────────────────────
+st.markdown(
+    '<script async src="https://www.googletagmanager.com/gtag/js?id=G-P4BE4NHFLX"></script>'
+    '<script>'
+    'window.dataLayer=window.dataLayer||[];'
+    'function gtag(){dataLayer.push(arguments);}'
+    "gtag('js',new Date());"
+    "gtag('config','G-P4BE4NHFLX');"
+    '</script>',
+    unsafe_allow_html=True,
+)
+
 # ── Trending ticker bar (server-side, no JS fetch) ───────────────────────────
 _trending = get_trending_tickers()
 

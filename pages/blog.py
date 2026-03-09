@@ -23,7 +23,7 @@ st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp {{ background-color: #f5f7fa; }}
-    .block-container {{ padding-top: 2rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
+    .block-container {{ padding-top: 5.5rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],
@@ -267,6 +267,7 @@ st.markdown(f"""
         <a href="/blog" class="lp-footer-link">Blog</a>
         <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
         <a href="{_login_url}" class="lp-footer-link">Log in</a>
+        <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
     </div>
 </div>
 """, unsafe_allow_html=True)

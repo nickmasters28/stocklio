@@ -12,7 +12,7 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp { background-color: #f5f7fa; }
-    .block-container { padding-top: 3.5rem !important; padding-bottom: 1rem !important; }
+    .block-container { padding-top: 5.5rem !important; padding-bottom: 1rem !important; }
     .metric-card {
         background: #ffffff;
         border-radius: 12px;
@@ -224,6 +224,7 @@ st.markdown(f"""
         <a href="/blog" class="lp-footer-link">Blog</a>
         <a href="{_footer_signup_url}" class="lp-footer-link">Create an account</a>
         <a href="{_footer_login_url}" class="lp-footer-link">Log in</a>
+        <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
