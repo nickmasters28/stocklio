@@ -4,23 +4,15 @@ pages/1_Analyze.py -- Stock analysis dashboard (accessible at /Analyze)
 
 import streamlit as st
 from ui.layout import render_stock_analysis
-from auth.propelauth import inject_auth_js, handle_auth_callback, logout, login_url, signup_url
+from auth.propelauth import logout, login_url, signup_url
 
-st.set_page_config(
-    page_title="Analyze — Stocklio",
-    page_icon="📈",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-inject_auth_js()
-handle_auth_callback()
+# st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp { background-color: #f5f7fa; }
-    .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
+    .block-container { padding-top: 3.5rem !important; padding-bottom: 1rem !important; }
     .metric-card {
         background: #ffffff;
         border-radius: 12px;
@@ -112,8 +104,11 @@ with st.sidebar:
     st.markdown("---")
 
     st.subheader("🔍 Stock Lookup")
-    # Pre-populate from landing page search or default to AAPL
-    if "auto_ticker" in st.session_state and "ticker_input" not in st.session_state:
+    # Pre-populate: URL param > session state handoff > default
+    _url_ticker = st.query_params.get("ticker", "").upper().strip()
+    if _url_ticker and st.session_state.get("ticker_input") != _url_ticker:
+        st.session_state["ticker_input"] = _url_ticker
+    elif "auto_ticker" in st.session_state and "ticker_input" not in st.session_state:
         st.session_state["ticker_input"] = st.session_state.pop("auto_ticker")
     elif "ticker_input" not in st.session_state:
         st.session_state["ticker_input"] = "AAPL"
@@ -166,6 +161,9 @@ with st.sidebar:
 
 # -- Main content --------------------------------------------------------------
 if analyze_btn or ticker_input:
+    # Keep the URL in sync so the browser shows /analyze?ticker=COIN
+    if ticker_input and st.query_params.get("ticker") != ticker_input:
+        st.query_params["ticker"] = ticker_input
     render_stock_analysis(ticker_input, period)
 else:
     st.info("Enter a ticker in the sidebar and click **Analyze Stock** to get started.")

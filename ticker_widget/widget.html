@@ -1,0 +1,242 @@
+<!--
+  Stocklio Trending Tickers Widget
+  =================================
+  Self-contained ticker bar — embed this snippet anywhere on your site.
+
+  CONFIGURATION (search for these labels to find the right line):
+    [BACKEND_URL]     — URL of your /api/trending-tickers endpoint
+    [TICKER_LINK]     — URL pattern for each ticker's destination page
+    [SCROLL_SPEED]    — animation-duration in seconds (lower = faster)
+    [TICKER_COUNT]    — controlled on the backend via MAX_TICKERS
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trending Tickers</title>
+  <style>
+    /* ── Reset ─────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Ticker bar container ───────────────────────────────────────────────
+       This wraps the scrolling track and clips overflow.
+       Set a background here if you want one; defaults to transparent.       */
+    .ticker-bar {
+      width: 100%;
+      overflow: hidden;
+      background: transparent;         /* change to any color if needed */
+      border-bottom: 1px solid #e2e8f0;
+      position: relative;
+    }
+
+    /* Fade edges for a polished look */
+    .ticker-bar::before,
+    .ticker-bar::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 48px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .ticker-bar::before {
+      left: 0;
+      background: linear-gradient(to right, #f5f7fa, transparent);
+    }
+    .ticker-bar::after {
+      right: 0;
+      background: linear-gradient(to left, #f5f7fa, transparent);
+    }
+
+    /* ── Scrolling track ────────────────────────────────────────────────────
+       Items are duplicated so the loop is seamless. The track is translated
+       by exactly -50% (the width of one copy) to complete one cycle.        */
+    .ticker-track {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      will-change: transform;
+
+      /* [SCROLL_SPEED] — change the seconds value to speed up or slow down */
+      animation: ticker-scroll 35s linear infinite;
+    }
+
+    /* Pause on hover so users can read a ticker they're interested in */
+    .ticker-bar:hover .ticker-track {
+      animation-play-state: paused;
+    }
+
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── Individual ticker item ─────────────────────────────────────────────
+       Each <a> is a clickable ticker chip.                                   */
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s ease;
+      user-select: none;
+
+      /* Subtle divider between items */
+      border-right: 1px solid #e2e8f0;
+    }
+
+    .ticker-item:last-child { border-right: none; }
+
+    .ticker-item:hover {
+      background: rgba(0, 200, 150, 0.07);
+    }
+
+    /* Ticker symbol — bold, dark */
+    .ticker-symbol {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #1a202c;
+      letter-spacing: 0.02em;
+    }
+
+    /* Price — muted */
+    .ticker-price {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    /* Percent change — green / red */
+    .ticker-change {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 52px;
+    }
+    .ticker-change.up   { color: #00a878; }
+    .ticker-change.down { color: #e53e3e; }
+
+    /* ── Loading / error state ──────────────────────────────────────────── */
+    .ticker-placeholder {
+      display: inline-block;
+      padding: 8px 24px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.78rem;
+      color: #a0aec0;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="ticker-bar" id="ticker-bar">
+  <div class="ticker-track" id="ticker-track">
+    <span class="ticker-placeholder">Loading market data…</span>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    // [BACKEND_URL] — point this at your /api/trending-tickers endpoint.
+    // In production, replace with your deployed server URL, e.g.:
+    //   "https://ticker-server.yourapp.com/api/trending-tickers"
+    const BACKEND_URL = "http://localhost:3001/api/trending-tickers";
+
+    // [TICKER_LINK] — URL pattern users land on when they click a ticker.
+    // Change "/analyze" to match your app's route if it differs.
+    const tickerLink = (symbol) => `/analyze?ticker=${encodeURIComponent(symbol)}`;
+
+    // ── Render ──────────────────────────────────────────────────────────────
+
+    function buildItem(t) {
+      const isUp  = t.change_pct >= 0;
+      const sign  = isUp ? "+" : "";
+      const cls   = isUp ? "up" : "down";
+      const pct   = Math.abs(t.change_pct).toFixed(2);
+
+      const a = document.createElement("a");
+      a.className = "ticker-item";
+      a.href      = tickerLink(t.ticker);
+
+      // Open in the same tab so Streamlit routing works correctly
+      a.target = "_self";
+
+      a.innerHTML = `
+        <span class="ticker-symbol">${t.ticker}</span>
+        <span class="ticker-price">$${t.price}</span>
+        <span class="ticker-change ${cls}">${sign}${pct}%</span>
+      `;
+
+      return a;
+    }
+
+    async function loadTickers() {
+      const track = document.getElementById("ticker-track");
+
+      try {
+        const res = await fetch(BACKEND_URL, {
+          method:  "GET",
+          headers: { "Accept": "application/json" },
+          // Timeout after 8 s so a slow server doesn't freeze the bar
+          signal:  AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server responded ${res.status}`);
+        }
+
+        const payload = await res.json();
+        const tickers = payload.tickers || [];
+
+        if (tickers.length === 0) {
+          track.innerHTML =
+            '<span class="ticker-placeholder">No market data available.</span>';
+          return;
+        }
+
+        // Build one set of items, then duplicate for seamless looping.
+        // The animation translates -50% so one copy scrolls out as the
+        // identical copy scrolls in — no visible jump.
+        const fragment = document.createDocumentFragment();
+        const fragment2 = document.createDocumentFragment();
+
+        tickers.forEach((t) => {
+          fragment.appendChild(buildItem(t));
+          fragment2.appendChild(buildItem(t));
+        });
+
+        track.innerHTML = "";
+        track.appendChild(fragment);
+        track.appendChild(fragment2);
+
+      } catch (err) {
+        console.warn("[ticker-widget] Failed to load tickers:", err.message);
+        track.innerHTML =
+          '<span class="ticker-placeholder">Market data unavailable.</span>';
+      }
+    }
+
+    // Load immediately, then refresh every 5 minutes to stay in sync
+    // with the server cache without hammering Alpha Vantage.
+    loadTickers();
+    setInterval(loadTickers, 5 * 60 * 1000);
+  })();
+</script>
+
+</body>
+</html>
