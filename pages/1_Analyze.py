@@ -90,45 +90,83 @@ st.markdown("""
         color: #fff; font-weight: 700; font-size: 0.8rem;
         flex-shrink: 0;
     }
+    .lp-footer {
+        padding: 32px 0 36px 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        color: #a0aec0;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 48px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .lp-footer-copy { color: #a0aec0; }
+    .lp-footer-section-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 8px;
+    }
+    .lp-footer-link {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        color: #a0aec0;
+        text-decoration: none !important;
+        margin-bottom: 4px;
+    }
+    .lp-footer-link:hover { color: #4a5568; }
 </style>
 """, unsafe_allow_html=True)
 
 # -- Sidebar -------------------------------------------------------------------
 with st.sidebar:
     st.markdown(
+        '<a href="/" target="_self" style="text-decoration:none;color:#1a202c;">'
         '<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:3rem;font-weight:800;'
         'color:#1a202c;letter-spacing:-0.01em;margin-top:-60px;padding:4px 0 2px 0;">'
-        'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>',
+        'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>'
+        '</a>',
         unsafe_allow_html=True,
     )
     st.markdown("---")
 
     st.subheader("🔍 Stock Lookup")
-    # Pre-populate: URL param > session state handoff > default
+    # Seed ticker on first load, or when URL changes externally (trending bar, direct link).
+    # Never overwrite what the user is actively typing.
     _url_ticker = st.query_params.get("ticker", "").upper().strip()
-    if _url_ticker and st.session_state.get("ticker_input") != _url_ticker:
-        st.session_state["ticker_input"] = _url_ticker
-    elif "auto_ticker" in st.session_state and "ticker_input" not in st.session_state:
-        st.session_state["ticker_input"] = st.session_state.pop("auto_ticker")
-    elif "ticker_input" not in st.session_state:
-        st.session_state["ticker_input"] = "AAPL"
-    ticker_input = st.text_input(
-        "Enter Ticker Symbol",
-        key="ticker_input",
-        placeholder="e.g. NVDA, MSFT, TSLA",
-    ).upper().strip()
+    _last_url   = st.session_state.get("_last_url_ticker", "")
+    if "ticker_input" not in st.session_state:
+        _seed = _url_ticker or st.session_state.pop("auto_ticker", None) or "AAPL"
+        st.session_state["ticker_input"]    = _seed
+        st.session_state["_last_url_ticker"] = _url_ticker
+    elif _url_ticker and _url_ticker != _last_url:
+        # URL changed externally — sync the input
+        st.session_state["ticker_input"]    = _url_ticker
+        st.session_state["_last_url_ticker"] = _url_ticker
 
-    period_map = {
-        "1 Month":  "1mo",
-        "3 Months": "3mo",
-        "6 Months": "6mo",
-        "1 Year":   "1y",
-        "2 Years":  "2y",
-    }
-    selected_period_label = st.selectbox("Analysis Period", list(period_map.keys()), index=3)
-    period = period_map[selected_period_label]
+    with st.form("ticker_form"):
+        ticker_input = st.text_input(
+            "Enter Ticker Symbol",
+            key="ticker_input",
+            placeholder="e.g. NVDA, MSFT, TSLA",
+        ).upper().strip()
 
-    analyze_btn = st.button("🔎 Analyze Stock", use_container_width=True, type="primary")
+        period_map = {
+            "1 Month":  "1mo",
+            "3 Months": "3mo",
+            "6 Months": "6mo",
+            "1 Year":   "1y",
+            "2 Years":  "2y",
+        }
+        selected_period_label = st.selectbox("Analysis Period", list(period_map.keys()), index=3)
+        period = period_map[selected_period_label]
+
+        analyze_btn = st.form_submit_button("🔎 Analyze Stock", use_container_width=True, type="primary")
 
     st.markdown("---")
 
@@ -160,10 +198,32 @@ with st.sidebar:
         )
 
 # -- Main content --------------------------------------------------------------
-if analyze_btn or ticker_input:
-    # Keep the URL in sync so the browser shows /analyze?ticker=COIN
-    if ticker_input and st.query_params.get("ticker") != ticker_input:
+if analyze_btn:
+    if ticker_input:
+        # Update URL and record the applied value so pre-populate won't fight it
+        st.session_state["_last_url_ticker"] = ticker_input
         st.query_params["ticker"] = ticker_input
-    render_stock_analysis(ticker_input, period)
+        st.rerun()
+    else:
+        st.warning("Please enter a ticker symbol.")
+
+_active_ticker = st.query_params.get("ticker", "").upper().strip()
+if _active_ticker:
+    render_stock_analysis(_active_ticker, period)
 else:
     st.info("Enter a ticker in the sidebar and click **Analyze Stock** to get started.")
+
+# -- Footer --------------------------------------------------------------------
+_footer_login_url  = login_url()
+_footer_signup_url = signup_url()
+st.markdown(f"""
+<div class="lp-footer">
+    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
+    <div>
+        <div class="lp-footer-section-title">Resources</div>
+        <a href="/blog" class="lp-footer-link">Blog</a>
+        <a href="{_footer_signup_url}" class="lp-footer-link">Create an account</a>
+        <a href="{_footer_login_url}" class="lp-footer-link">Log in</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)

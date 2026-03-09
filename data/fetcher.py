@@ -59,10 +59,25 @@ def fetch_info(ticker: str) -> dict:
 
     Returns:
         dict of yfinance .info fields; empty dict on failure.
+        Falls back to history_metadata for ETFs/funds when .info is missing name fields.
     """
+    t = yf.Ticker(ticker)
     try:
-        info = yf.Ticker(ticker).info
-        return info or {}
+        info = t.info or {}
     except Exception:
-        return {}
+        info = {}
+
+    # .info can return an empty-ish dict for ETFs/funds (rate-limited or unsupported).
+    # history_metadata is a lighter endpoint that reliably carries longName/shortName.
+    if not info.get("longName") and not info.get("shortName"):
+        try:
+            meta = t.history_metadata or {}
+            if meta.get("longName"):
+                info["longName"] = meta["longName"]
+            elif meta.get("shortName"):
+                info["shortName"] = meta["shortName"]
+        except Exception:
+            pass
+
+    return info
 

@@ -4,6 +4,7 @@ ui/layout.py -- Renders the two main pages of the dashboard:
   - render_stock_analysis()   -> Individual Stock Analysis tab
 """
 
+import html as _html
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -177,9 +178,9 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     forecast            = score_symbol(df, ticker, support, resistance)
 
     # Header info strip
-    company_name = info.get("longName") or info.get("shortName") or ticker
-    sector       = info.get("sector", "")
-    market_cap   = _fmt_large(info.get("marketCap"))
+    company_name = _html.escape(info.get("longName") or info.get("shortName") or ticker)
+    sector       = _html.escape(info.get("sector", ""))
+    market_cap   = _fmt_large(info.get("marketCap") or info.get("totalAssets"))
     last_close   = float(df["Close"].iloc[-1])
     prev_close   = float(df["Close"].iloc[-2]) if len(df) > 1 else last_close
     day_chg      = last_close - prev_close
@@ -205,27 +206,25 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         except Exception:
             pass
 
-    st.markdown(f"""
-    <div style="display:flex;align-items:center;margin-bottom:6px;">
-        {logo_html}
-        <div>
-            <div style="font-size:1.8rem;font-weight:700;color:#1a202c;line-height:1.1;">
-                {company_name}
-            </div>
-            <div style="font-size:1rem;color:#4a5568;margin-top:2px;">
-                <span style="color:#6b7280;">{ticker}</span>
-                &nbsp;&bull;&nbsp;
-                <span style="color:{chg_colour};font-weight:600;">
-                    ${last_close:,.2f} &nbsp;{chg_arrow} {abs(day_chg_pct):.2f}%
-                </span>
-                &nbsp;&bull;&nbsp;
-                {sector or ""}
-                &nbsp;&bull;&nbsp;
-                {market_cap}
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    _sector_html = f'&nbsp;&bull;&nbsp;{sector}' if sector else ''
+    _header_html = (
+        f'<div style="display:flex;align-items:center;margin-bottom:6px;">'
+        f'{logo_html}'
+        f'<div>'
+        f'<div style="font-size:1.8rem;font-weight:700;color:#1a202c;line-height:1.1;">{company_name}</div>'
+        f'<div style="font-size:1rem;color:#4a5568;margin-top:2px;">'
+        f'<span style="color:#6b7280;">{ticker}</span>'
+        f'&nbsp;&bull;&nbsp;'
+        f'<span style="color:{chg_colour};font-weight:600;">'
+        f'${last_close:,.2f}&nbsp;{chg_arrow}&nbsp;{abs(day_chg_pct):.2f}%'
+        f'</span>'
+        f'{_sector_html}'
+        f'&nbsp;&bull;&nbsp;{market_cap}'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(_header_html, unsafe_allow_html=True)
 
     st.markdown("---")
 

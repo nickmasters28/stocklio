@@ -134,14 +134,35 @@ st.markdown(f"""
 
     /* Footer */
     .lp-footer {{
-        text-align: center;
-        padding: 24px 0 32px 0;
+        padding: 32px 0 36px 0;
         font-family: 'Inter', sans-serif;
         font-size: 0.8rem;
         color: #a0aec0;
         border-top: 1px solid #e2e8f0;
         margin-top: 56px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
     }}
+    .lp-footer-copy {{ color: #a0aec0; }}
+    .lp-footer-section-title {{
+        font-family: 'Inter', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 8px;
+    }}
+    .lp-footer-link {{
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        color: #a0aec0;
+        text-decoration: none !important;
+        margin-bottom: 4px;
+    }}
+    .lp-footer-link:hover {{ color: #4a5568; }}
 </style>
 
 <!-- Nav -->
@@ -187,14 +208,18 @@ if _post_slug:
 
         st.markdown(post["content"])
 
-        st.markdown("---")
-        st.markdown(
-            "<p style='font-family:Inter,sans-serif;font-size:0.9rem;color:#4a5568;'>"
-            "Ready to apply these insights? Analyze any stock on Stocklio.</p>",
-            unsafe_allow_html=True,
-        )
-        if st.button("Open Stock Analyzer →", type="primary"):
-            st.switch_page("app.py")
+        st.markdown("""
+<hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0 20px 0;">
+<p style='font-family:Inter,sans-serif;font-size:0.9rem;color:#4a5568;margin-bottom:14px;'>
+    Ready to apply these insights? Analyze any stock on Stocklio.
+</p>
+<a href="/analyze?ticker=NVDA" target="_self"
+   style="display:inline-block;background:#00c896;color:#ffffff;text-decoration:none;
+          font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;
+          padding:10px 22px;border-radius:8px;">
+    Open Stock Analyzer →
+</a>
+""", unsafe_allow_html=True)
 
 else:
     # ── Blog index ───────────────────────────────────────────────────────────
@@ -234,8 +259,14 @@ else:
 
         st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
 
-st.markdown("""
+st.markdown(f"""
 <div class="lp-footer">
-    © 2025 Stocklio · Built for investors who want an edge.
+    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
+    <div>
+        <div class="lp-footer-section-title">Resources</div>
+        <a href="/blog" class="lp-footer-link">Blog</a>
+        <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
+        <a href="{_login_url}" class="lp-footer-link">Log in</a>
+    </div>
 </div>
 """, unsafe_allow_html=True)
