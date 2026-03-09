@@ -29,7 +29,7 @@ if st.session_state.get("current_ticker"):
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp { background-color: #f5f7fa; }
-    .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
+    .block-container { padding-top: 0.5rem !important; padding-bottom: 1rem !important; }
     .metric-card { background:#ffffff;border-radius:12px;padding:16px 20px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.06); }
     .bullish { color:#00a878;font-weight:700; } .bearish { color:#e53e3e;font-weight:700; } .neutral { color:#dd6b20;font-weight:700; }
     .signal-badge { display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;margin:2px; }
@@ -113,7 +113,7 @@ st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp {{ background-color: #f5f7fa; }}
-    .block-container {{ padding-top: 5.5rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
+    .block-container {{ padding-top: 1rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],
@@ -574,14 +574,16 @@ with _cta_col:
 
 st.markdown(f"""
 <!-- Footer -->
-<div class="lp-footer" style="margin-top:40px;">
-    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
-    <div class="lp-footer-section">
-        <div class="lp-footer-section-title">Resources</div>
-        <a href="/blog" class="lp-footer-link">Blog</a>
-        <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
-        <a href="{_login_url}" class="lp-footer-link">Log in</a>
-        <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
+<div class="lp-footer" style="margin-top:40px;flex-direction:column;gap:16px;">
+    <div style="display:flex;justify-content:flex-end;width:100%;">
+        <div class="lp-footer-section">
+            <div class="lp-footer-section-title">Resources</div>
+            <a href="/blog" class="lp-footer-link">Blog</a>
+            <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
+            <a href="{_login_url}" class="lp-footer-link">Log in</a>
+            <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
+        </div>
     </div>
+    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
 </div>
 """, unsafe_allow_html=True)

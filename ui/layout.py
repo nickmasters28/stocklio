@@ -19,6 +19,112 @@ from forecast.engine import score_symbol, analyze_ride_the_nine
 from ui.charts import build_stock_chart, build_score_gauge, build_ride_the_nine_chart, build_sentiment_chart
 
 
+# ── Loading experience ─────────────────────────────────────────────────────────
+
+# CSS injected once per page load — prefixed with stkl- to avoid collisions
+_LOADING_CSS = """
+<style>
+@keyframes stkl-scan {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(500%); }
+}
+@keyframes stkl-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+.stkl-bar {
+  height: 3px; background: #e2e8f0; border-radius: 3px;
+  overflow: hidden; margin: 20px 0 24px 0; position: relative;
+}
+.stkl-bar::after {
+  content: ''; position: absolute; top: 0; left: 0;
+  height: 100%; width: 22%;
+  background: linear-gradient(90deg, transparent, #00c896, transparent);
+  animation: stkl-scan 1.5s ease-in-out infinite;
+}
+.stkl-step {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; font-family: 'Inter', sans-serif; font-size: 0.88rem;
+}
+.stkl-done   { color: #00a878; }
+.stkl-active { color: #1a202c; font-weight: 600; }
+.stkl-wait   { color: #cbd5e0; }
+.stkl-dot {
+  width: 9px; height: 9px; background: #00c896; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+  animation: stkl-pulse 1.1s ease-in-out infinite;
+}
+.stkl-insight {
+  font-family: 'Inter', sans-serif; font-size: 0.82rem;
+  color: #6b7280; line-height: 1.6;
+  border-top: 1px solid #f0f4f8; margin-top: 20px; padding-top: 16px;
+}
+</style>
+"""
+
+_STEPS = [
+    "Pulling live market data",
+    "Scoring technical indicators",
+    "Reading market sentiment",
+    "Generating AI forecast",
+    "Preparing your dashboard",
+]
+
+_INSIGHTS = [
+    "Better decisions come from combining multiple signals, not relying on one chart pattern.",
+    "Technical analysis is stronger when paired with sentiment data.",
+    "Momentum matters more when multiple indicators agree.",
+    "Sentiment can confirm or challenge what the chart is already telling you.",
+]
+
+
+def _loading_html(ticker: str, step: int) -> str:
+    """Return the branded loading card HTML for the given pipeline step."""
+    steps_html = ""
+    for i, label in enumerate(_STEPS):
+        if i < step:
+            steps_html += (
+                f'<div class="stkl-step stkl-done">'
+                f'<span style="font-size:0.72rem;flex-shrink:0;">✓</span>{label}'
+                f'</div>'
+            )
+        elif i == step:
+            steps_html += (
+                f'<div class="stkl-step stkl-active">'
+                f'<span class="stkl-dot"></span>{label}'
+                f'</div>'
+            )
+        else:
+            steps_html += (
+                f'<div class="stkl-step stkl-wait">'
+                f'<span style="font-size:0.72rem;flex-shrink:0;color:#e2e8f0;">○</span>{label}'
+                f'</div>'
+            )
+
+    insight = _INSIGHTS[step % len(_INSIGHTS)]
+
+    return (
+        f'<div style="background:#ffffff;border-radius:16px;padding:32px 36px 26px 36px;'
+        f'border:1px solid #e2e8f0;box-shadow:0 2px 14px rgba(0,0,0,0.05);margin-bottom:20px;">'
+        # Header row: logo left, ticker right
+        f'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">'
+        f'<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:1.55rem;font-weight:800;'
+        f'color:#1a202c;letter-spacing:-0.01em;">'
+        f'stocklio<span style="color:#00c896;">.</span></div>'
+        f'<div style="font-family:\'Inter\',sans-serif;font-size:0.82rem;color:#6b7280;">'
+        f'Analyzing&nbsp;<span style="font-weight:700;color:#1a202c;letter-spacing:.04em;">{_html.escape(ticker)}</span>'
+        f'</div>'
+        f'</div>'
+        # Animated scan bar
+        f'<div class="stkl-bar"></div>'
+        # Step list
+        f'{steps_html}'
+        # Educational insight
+        f'<div class="stkl-insight">💡&nbsp; {insight}</div>'
+        f'</div>'
+    )
+
+
 # -- Helpers -------------------------------------------------------------------
 
 def _colour_class(rating: str) -> str:
@@ -153,29 +259,46 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         st.info("Enter a ticker symbol in the sidebar.")
         return
 
-    # Fetch data
-    with st.spinner(f"Fetching data for {ticker}..."):
-        try:
-            df   = fetch_ohlcv(ticker, period=period)
-            info = fetch_info(ticker)
-        except ValueError as e:
-            st.error(str(e))
-            return
-        except Exception as e:
-            st.error(f"Data fetch failed: {e}")
-            return
+    # Inject loading CSS (harmless to call multiple times — browser dedupes)
+    st.markdown(_LOADING_CSS, unsafe_allow_html=True)
 
-    # Compute indicators
-    with st.spinner("Computing indicators..."):
-        try:
-            df = calculate_indicators(df)
-        except Exception as e:
-            st.error(f"Indicator computation failed: {e}")
-            return
+    # Single placeholder for the loading card — updated at each pipeline step
+    _slot = st.empty()
 
+    # ── Step 0: Pulling live market data ──────────────────────────────────────
+    _slot.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)
+    try:
+        df   = fetch_ohlcv(ticker, period=period)
+        info = fetch_info(ticker)
+    except ValueError as e:
+        _slot.empty()
+        st.error(str(e))
+        return
+    except Exception as e:
+        _slot.empty()
+        st.error(f"Data fetch failed: {e}")
+        return
+
+    # ── Step 1: Scoring technical indicators ──────────────────────────────────
+    _slot.markdown(_loading_html(ticker, 1), unsafe_allow_html=True)
+    try:
+        df = calculate_indicators(df)
+    except Exception as e:
+        _slot.empty()
+        st.error(f"Indicator computation failed: {e}")
+        return
+
+    # ── Step 2: Reading market sentiment ──────────────────────────────────────
+    _slot.markdown(_loading_html(ticker, 2), unsafe_allow_html=True)
     support, resistance = find_support_resistance(df)
-    regression          = linear_regression_projection(df["Close"])
-    forecast            = score_symbol(df, ticker, support, resistance)
+
+    # ── Step 3: Generating AI forecast ────────────────────────────────────────
+    _slot.markdown(_loading_html(ticker, 3), unsafe_allow_html=True)
+    regression = linear_regression_projection(df["Close"])
+    forecast   = score_symbol(df, ticker, support, resistance)
+
+    # ── Step 4: Preparing dashboard — pre-compute everything before clearing ──
+    _slot.markdown(_loading_html(ticker, 4), unsafe_allow_html=True)
 
     # Header info strip
     company_name = _html.escape(info.get("longName") or info.get("shortName") or ticker)
@@ -224,6 +347,9 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         f'</div>'
         f'</div>'
     )
+    # All data is ready — clear loading card, render dashboard
+    _slot.empty()
+
     st.markdown(_header_html, unsafe_allow_html=True)
 
     st.markdown("---")

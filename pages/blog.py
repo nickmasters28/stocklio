@@ -23,7 +23,7 @@ st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp {{ background-color: #f5f7fa; }}
-    .block-container {{ padding-top: 5.5rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
+    .block-container {{ padding-top: 1rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],
@@ -260,14 +260,16 @@ else:
         st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
 
 st.markdown(f"""
-<div class="lp-footer">
-    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
-    <div>
-        <div class="lp-footer-section-title">Resources</div>
-        <a href="/blog" class="lp-footer-link">Blog</a>
-        <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
-        <a href="{_login_url}" class="lp-footer-link">Log in</a>
-        <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
+<div class="lp-footer" style="flex-direction:column;gap:16px;">
+    <div style="display:flex;justify-content:flex-end;width:100%;">
+        <div>
+            <div class="lp-footer-section-title">Resources</div>
+            <a href="/blog" class="lp-footer-link">Blog</a>
+            <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
+            <a href="{_login_url}" class="lp-footer-link">Log in</a>
+            <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
+        </div>
     </div>
+    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
 </div>
 """, unsafe_allow_html=True)

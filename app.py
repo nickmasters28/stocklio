@@ -6,6 +6,7 @@ It sets page config, handles auth, and registers all routes via st.navigation().
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 from auth.propelauth import inject_auth_js, handle_auth_callback
 from data.trending import get_trending_tickers
 
@@ -19,16 +20,18 @@ st.set_page_config(
 inject_auth_js()
 handle_auth_callback()
 
-# ── Google Analytics ──────────────────────────────────────────────────────────
-st.markdown(
+# ── Google Analytics ─────────────────────────────────────────────────────────
+# st.markdown() uses dangerouslySetInnerHTML which browsers block from executing
+# <script> tags. components.html() renders in a real iframe where scripts run.
+components.html(
     '<script async src="https://www.googletagmanager.com/gtag/js?id=G-P4BE4NHFLX"></script>'
     '<script>'
     'window.dataLayer=window.dataLayer||[];'
     'function gtag(){dataLayer.push(arguments);}'
-    "gtag('js',new Date());"
-    "gtag('config','G-P4BE4NHFLX');"
+    'gtag("js",new Date());'
+    'gtag("config","G-P4BE4NHFLX");'
     '</script>',
-    unsafe_allow_html=True,
+    height=0,
 )
 
 # ── Trending ticker bar (server-side, no JS fetch) ───────────────────────────
@@ -58,7 +61,10 @@ st.markdown(f"""
 <style>
   [data-testid="stSidebarNav"],
   [data-testid="stSidebarNavItems"],
-  [data-testid="stSidebarNavSeparator"] {{ display: none !important; }}
+  [data-testid="stSidebarNavSeparator"],
+  [data-testid="stMainMenu"],
+  [data-testid="stHeader"],
+  #MainMenu {{ display: none !important; }}
   .tkr-bar {{
     width: 100%;
     overflow: hidden;

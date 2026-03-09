@@ -8,11 +8,31 @@ from auth.propelauth import logout, login_url, signup_url
 
 # st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
 
+# Auto-expand the sidebar on /analyze — app.py starts it collapsed globally.
+# We use sessionStorage so the click only fires once per browser session,
+# not on every Streamlit rerun (which would cause an infinite expand/collapse cycle).
+st.markdown(
+    '<script>'
+    '(function(){'
+    '  if(sessionStorage.getItem("sidebar_expanded_analyze"))return;'
+    '  function expand(){'
+    '    var btn=document.querySelector("[data-testid=\\"stSidebarCollapsedControl\\"] button")'
+    '             ||document.querySelector("button[aria-label=\\"open sidebar\\"]")'
+    '             ||document.querySelector("button[aria-label=\\"Open sidebar\\"]");'
+    '    if(btn){btn.click();sessionStorage.setItem("sidebar_expanded_analyze","1");return;}'
+    '    setTimeout(expand,150);'
+    '  }'
+    '  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",expand);}else{expand();}'
+    '})();'
+    '</script>',
+    unsafe_allow_html=True,
+)
+
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp { background-color: #f5f7fa; }
-    .block-container { padding-top: 5.5rem !important; padding-bottom: 1rem !important; }
+    .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
     .metric-card {
         background: #ffffff;
         border-radius: 12px;
@@ -139,9 +159,15 @@ with st.sidebar:
     # Seed ticker on first load, or when URL changes externally (trending bar, direct link).
     # Never overwrite what the user is actively typing.
     _url_ticker = st.query_params.get("ticker", "").upper().strip()
+    # If home page sent us here via auto_ticker, promote it into the URL so the
+    # analysis fires immediately (same as clicking a direct /analyze?ticker=XYZ link).
+    _auto = st.session_state.pop("auto_ticker", None)
+    if _auto and not _url_ticker:
+        st.query_params["ticker"] = _auto.upper().strip()
+        st.rerun()
     _last_url   = st.session_state.get("_last_url_ticker", "")
     if "ticker_input" not in st.session_state:
-        _seed = _url_ticker or st.session_state.pop("auto_ticker", None) or "AAPL"
+        _seed = _url_ticker or "AAPL"
         st.session_state["ticker_input"]    = _seed
         st.session_state["_last_url_ticker"] = _url_ticker
     elif _url_ticker and _url_ticker != _last_url:
@@ -217,14 +243,16 @@ else:
 _footer_login_url  = login_url()
 _footer_signup_url = signup_url()
 st.markdown(f"""
-<div class="lp-footer">
-    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
-    <div>
-        <div class="lp-footer-section-title">Resources</div>
-        <a href="/blog" class="lp-footer-link">Blog</a>
-        <a href="{_footer_signup_url}" class="lp-footer-link">Create an account</a>
-        <a href="{_footer_login_url}" class="lp-footer-link">Log in</a>
-        <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
+<div class="lp-footer" style="flex-direction:column;gap:16px;">
+    <div style="display:flex;justify-content:flex-end;width:100%;">
+        <div>
+            <div class="lp-footer-section-title">Resources</div>
+            <a href="/blog" class="lp-footer-link">Blog</a>
+            <a href="{_footer_signup_url}" class="lp-footer-link">Create an account</a>
+            <a href="{_footer_login_url}" class="lp-footer-link">Log in</a>
+            <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
+        </div>
     </div>
+    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
 </div>
 """, unsafe_allow_html=True)

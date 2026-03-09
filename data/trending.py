@@ -14,7 +14,7 @@ import streamlit as st
 MAX_TICKERS = 15
 
 
-@st.cache_data(ttl=300)  # 5-minute cache
+@st.cache_data(ttl=3600)  # 1-hour cache — keeps daily calls well within AV free tier (25/day)
 def get_trending_tickers() -> list[dict]:
     """
     Returns a list of dicts with keys: ticker, price, change_pct.
