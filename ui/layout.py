@@ -5,6 +5,7 @@ ui/layout.py -- Renders the two main pages of the dashboard:
 """
 
 import html as _html
+import time
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -122,6 +123,62 @@ def _loading_html(ticker: str, step: int) -> str:
         # Educational insight
         f'<div class="stkl-insight">💡&nbsp; {insight}</div>'
         f'</div>'
+    )
+
+
+# ── Skeleton helpers ──────────────────────────────────────────────────────────
+
+def _sk(h="14px", w="100%", r="5px", mb="9px", d="0s"):
+    """Single animated skeleton block."""
+    return (
+        f'<div style="height:{h};width:{w};background:#edf0f4;border-radius:{r};'
+        f'margin-bottom:{mb};animation:stkl-pulse 1.9s ease-in-out {d} infinite;"></div>'
+    )
+
+def _skel_header():
+    return (
+        '<div style="display:flex;align-items:center;padding:4px 0 8px 0;">'
+        f'<div style="width:54px;height:54px;border-radius:10px;background:#edf0f4;'
+        f'margin-right:16px;flex-shrink:0;animation:stkl-pulse 1.9s ease-in-out infinite;"></div>'
+        '<div style="flex:1;">'
+        + _sk("26px", "240px", "6px", "10px", "0.06s")
+        + _sk("15px", "175px", "4px", "0",    "0.12s")
+        + '</div>'
+        '</div>'
+    )
+
+def _skel_two_col(h="190px", ratio_l=1, ratio_r=2.5):
+    """Two-column skeleton mimicking gauge + card layouts."""
+    fl = ratio_l / (ratio_l + ratio_r)
+    fr = ratio_r / (ratio_l + ratio_r)
+    return (
+        f'<div style="display:flex;gap:20px;margin-top:6px;">'
+        f'<div style="flex:{fl:.3f};height:{h};background:#edf0f4;border-radius:12px;'
+        f'animation:stkl-pulse 1.9s ease-in-out 0.1s infinite;"></div>'
+        f'<div style="flex:{fr:.3f};height:{h};background:#edf0f4;border-radius:12px;'
+        f'animation:stkl-pulse 1.9s ease-in-out 0.22s infinite;"></div>'
+        f'</div>'
+    )
+
+def _skel_rows(n=4, base_w=92):
+    """Generic skeleton row list — simulates a table or list of signals."""
+    rows = "".join(
+        _sk("13px", f"{base_w - i * 5}%", "4px", "8px", f"{i * 0.09:.2f}s")
+        for i in range(n)
+    )
+    return f'<div style="margin-top:6px;">{rows}</div>'
+
+def _skel_chart():
+    return (
+        f'<div style="height:400px;background:#edf0f4;border-radius:12px;margin-top:8px;'
+        f'animation:stkl-pulse 1.9s ease-in-out 0.3s infinite;"></div>'
+    )
+
+def _skel_section(title_w="180px", rows=3):
+    """Section skeleton: fake subheader + row list."""
+    return (
+        _sk("18px", title_w, "5px", "14px")
+        + _skel_rows(rows)
     )
 
 
@@ -253,54 +310,94 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
 # -- Individual Stock Analysis -------------------------------------------------
 
 def render_stock_analysis(ticker: str, period: str = "1y"):
-    """Render the full stock analysis report."""
+    """Render the full stock analysis report with staged skeleton loading."""
 
     if not ticker:
         st.info("Enter a ticker symbol in the sidebar.")
         return
 
-    # Inject loading CSS (harmless to call multiple times — browser dedupes)
     st.markdown(_LOADING_CSS, unsafe_allow_html=True)
 
-    # Single placeholder for the loading card — updated at each pipeline step
-    _slot = st.empty()
+    # ── Create every section placeholder upfront so the page structure appears
+    # immediately — each slot is filled with a skeleton, then replaced with
+    # real content after all data is ready.
+    _s_load     = st.empty()   # loading card
+    _s_header   = st.empty()   # company header
+    _s_d1       = st.empty()   # divider
+    _s_voting   = st.empty()   # prediction market
+    _s_d2       = st.empty()   # divider
+    _s_forecast = st.empty()   # forecast gauge + card
+    _s_rtn      = st.empty()   # ride the nine
+    _s_d3       = st.empty()   # divider
+    _s_signals  = st.empty()   # signal breakdown
+    _s_d4       = st.empty()   # divider
+    _s_sr       = st.empty()   # support & resistance
+    _s_d5       = st.empty()   # divider
+    _s_lr       = st.empty()   # linear regression
+    _s_d6       = st.empty()   # divider
+    _s_chart    = st.empty()   # main chart (last — heaviest render)
 
-    # ── Step 0: Pulling live market data ──────────────────────────────────────
-    _slot.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)
+    # ── Fill all sections with skeletons immediately ───────────────────────────
+    _s_load.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)
+    _s_header.markdown(_skel_header(), unsafe_allow_html=True)
+    _s_d1.markdown("---")
+    _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
+    _s_d2.markdown("---")
+    _s_forecast.markdown(
+        _skel_section("140px", 1) + _skel_two_col("190px"),
+        unsafe_allow_html=True,
+    )
+    _s_rtn.markdown(
+        _skel_section("160px", 1) + _skel_two_col("220px"),
+        unsafe_allow_html=True,
+    )
+    _s_d3.markdown("---")
+    _s_signals.markdown(_skel_section("150px", 5), unsafe_allow_html=True)
+    _s_d4.markdown("---")
+    _s_sr.markdown(_skel_section("140px", 3), unsafe_allow_html=True)
+    _s_d5.markdown("---")
+    _s_lr.markdown(_skel_section("220px", 1), unsafe_allow_html=True)
+    _s_d6.markdown("---")
+    _s_chart.markdown(
+        _skel_section("60px", 0) + _skel_chart(),
+        unsafe_allow_html=True,
+    )
+
+    def _clear_all():
+        for s in [_s_load, _s_header, _s_d1, _s_voting, _s_d2, _s_forecast,
+                  _s_rtn, _s_d3, _s_signals, _s_d4, _s_sr, _s_d5, _s_lr,
+                  _s_d6, _s_chart]:
+            s.empty()
+
+    # ── Step 0 → 1: Fetch market data ─────────────────────────────────────────
     try:
         df   = fetch_ohlcv(ticker, period=period)
         info = fetch_info(ticker)
     except ValueError as e:
-        _slot.empty()
-        st.error(str(e))
-        return
+        _clear_all(); st.error(str(e)); return
     except Exception as e:
-        _slot.empty()
-        st.error(f"Data fetch failed: {e}")
-        return
+        _clear_all(); st.error(f"Data fetch failed: {e}"); return
 
-    # ── Step 1: Scoring technical indicators ──────────────────────────────────
-    _slot.markdown(_loading_html(ticker, 1), unsafe_allow_html=True)
+    # ── Step 1 → 2: Score indicators ──────────────────────────────────────────
+    _s_load.markdown(_loading_html(ticker, 1), unsafe_allow_html=True)
     try:
         df = calculate_indicators(df)
     except Exception as e:
-        _slot.empty()
-        st.error(f"Indicator computation failed: {e}")
-        return
+        _clear_all(); st.error(f"Indicator computation failed: {e}"); return
 
-    # ── Step 2: Reading market sentiment ──────────────────────────────────────
-    _slot.markdown(_loading_html(ticker, 2), unsafe_allow_html=True)
+    # ── Step 2 → 3: Sentiment / S/R ───────────────────────────────────────────
+    _s_load.markdown(_loading_html(ticker, 2), unsafe_allow_html=True)
     support, resistance = find_support_resistance(df)
 
-    # ── Step 3: Generating AI forecast ────────────────────────────────────────
-    _slot.markdown(_loading_html(ticker, 3), unsafe_allow_html=True)
+    # ── Step 3 → 4: Forecast + RTN (all heavy computation done here) ──────────
+    _s_load.markdown(_loading_html(ticker, 3), unsafe_allow_html=True)
     regression = linear_regression_projection(df["Close"])
     forecast   = score_symbol(df, ticker, support, resistance)
+    rtn        = analyze_ride_the_nine(df)   # pre-compute so RTN slot fills fast
 
-    # ── Step 4: Preparing dashboard — pre-compute everything before clearing ──
-    _slot.markdown(_loading_html(ticker, 4), unsafe_allow_html=True)
+    # ── Step 4: Pre-build all display values, then brief hold ─────────────────
+    _s_load.markdown(_loading_html(ticker, 4), unsafe_allow_html=True)
 
-    # Header info strip
     company_name = _html.escape(info.get("longName") or info.get("shortName") or ticker)
     sector       = _html.escape(info.get("sector", ""))
     market_cap   = _fmt_large(info.get("marketCap") or info.get("totalAssets"))
@@ -311,14 +408,13 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     chg_colour   = "#00a878" if day_chg >= 0 else "#e53e3e"
     chg_arrow    = "\u25b2" if day_chg >= 0 else "\u25bc"
 
-    # Build logo URL from company website domain
     logo_html = ""
     website = info.get("website", "")
     if website:
         try:
             from urllib.parse import urlparse
-            domain = urlparse(website).netloc.lstrip("www.")
-            token  = st.secrets["logo_dev"]["token"]
+            domain   = urlparse(website).netloc.lstrip("www.")
+            token    = st.secrets["logo_dev"]["token"]
             logo_url = f"https://img.logo.dev/{domain}?token={token}&size=80&format=png"
             logo_html = (
                 f'<img src="{logo_url}" '
@@ -332,45 +428,45 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _sector_html = f'&nbsp;&bull;&nbsp;{sector}' if sector else ''
     _header_html = (
         f'<div style="display:flex;align-items:center;margin-bottom:6px;">'
-        f'{logo_html}'
-        f'<div>'
+        f'{logo_html}<div>'
         f'<div style="font-size:1.8rem;font-weight:700;color:#1a202c;line-height:1.1;">{company_name}</div>'
         f'<div style="font-size:1rem;color:#4a5568;margin-top:2px;">'
-        f'<span style="color:#6b7280;">{ticker}</span>'
-        f'&nbsp;&bull;&nbsp;'
+        f'<span style="color:#6b7280;">{ticker}</span>&nbsp;&bull;&nbsp;'
         f'<span style="color:{chg_colour};font-weight:600;">'
         f'${last_close:,.2f}&nbsp;{chg_arrow}&nbsp;{abs(day_chg_pct):.2f}%'
-        f'</span>'
-        f'{_sector_html}'
-        f'&nbsp;&bull;&nbsp;{market_cap}'
-        f'</div>'
-        f'</div>'
-        f'</div>'
+        f'</span>{_sector_html}&nbsp;&bull;&nbsp;{market_cap}'
+        f'</div></div></div>'
     )
-    # All data is ready — clear loading card, render dashboard
-    _slot.empty()
 
-    st.markdown(_header_html, unsafe_allow_html=True)
+    # Brief hold at step 4 — lets the user read "Preparing your dashboard"
+    # and ensures the page feels fully settled before content appears.
+    time.sleep(0.45)
 
-    st.markdown("---")
+    # ── Reveal: clear loader, fill each slot in order (chart last) ─────────────
 
-    # -- Prediction Market -----------------------------------------------------
-    _render_voting(ticker, last_close, forecast.rating)
+    _s_load.empty()
 
-    st.markdown("---")
+    # Header
+    _s_header.markdown(_header_html, unsafe_allow_html=True)
 
-    # Forecast panel
-    st.subheader("Stocklio Forecast")
+    # Prediction Market
+    _s_voting.empty()
+    with _s_voting.container():
+        _render_voting(ticker, last_close, forecast.rating)
 
-    col_g, col_f = st.columns([1, 2.5])
-    with col_g:
-        st.plotly_chart(
-            build_score_gauge(forecast.composite_score, forecast.rating),
-            use_container_width=True,
-        )
-    with col_f:
-        rc = _colour_class(forecast.rating)
-        st.markdown(f"""
+    # Forecast
+    _s_forecast.empty()
+    with _s_forecast.container():
+        st.subheader("Stocklio Forecast")
+        col_g, col_f = st.columns([1, 2.5])
+        with col_g:
+            st.plotly_chart(
+                build_score_gauge(forecast.composite_score, forecast.rating),
+                use_container_width=True,
+            )
+        with col_f:
+            rc = _colour_class(forecast.rating)
+            st.markdown(f"""
         <div class="metric-card">
             <div style="font-size:0.9rem; color:#4a5568; margin-bottom:4px;">Composite Rating</div>
             <div class="{rc}" style="font-size:2rem;">{forecast.rating}</div>
@@ -379,90 +475,60 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             <hr style="border-color:#1a202c; margin:10px 0;">
             <p style="color:#1a202c; font-size:0.92rem;">{forecast.summary}</p>
         </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+        if forecast.setups:
+            st.subheader("\u26a1 Notable Setups")
+            for setup in forecast.setups:
+                st.success(setup)
 
-    if forecast.setups:
-        st.subheader("\u26a1 Notable Setups")
-        for setup in forecast.setups:
-            st.success(setup)
+    # Ride the Nine
+    _s_rtn.empty()
+    with _s_rtn.container():
+        st.subheader("Ride the Nine \u2014 9 EMA Strategy")
+        signal      = rtn.get("signal", "Neutral")
+        bias        = rtn.get("bias", "Neutral")
+        bias_colour = "#00a878" if bias == "Bullish" else "#e53e3e" if bias == "Bearish" else "#dd6b20"
+        bias_bg     = "#e6faf5" if bias == "Bullish" else "#fff5f5" if bias == "Bearish" else "#fffaf0"
+        signal_label = (
+            "\u25b2 Riding Up"   if signal == "Above" else
+            "\u25bc Riding Down" if signal == "Below" else
+            "\u2015 At the Nine"
+        )
+        streak    = rtn.get("streak", 0)
+        pct       = rtn.get("pct_from_ema", 0.0)
+        conf_icon = "\u2714\ufe0f" if rtn.get("ema9_vs_sma20") else "\u274c" if rtn.get("ema9_vs_sma20") is False else "\u2014"
+        gap_label = "Widening \u2197" if rtn.get("gap_widening") else "Narrowing \u2198"
 
-    st.markdown("---")
-
-    # -- Ride the Nine (9 EMA Strategy) ---------------------------------------
-    st.subheader("Ride the Nine \u2014 9 EMA Strategy")
-
-    rtn = analyze_ride_the_nine(df)
-
-    # Signal badge colours
-    signal       = rtn.get("signal", "Neutral")
-    bias         = rtn.get("bias", "Neutral")
-    bias_colour  = "#00a878" if bias == "Bullish" else "#e53e3e" if bias == "Bearish" else "#dd6b20"
-    bias_bg      = "#e6faf5"  if bias == "Bullish" else "#fff5f5"  if bias == "Bearish" else "#fffaf0"
-    signal_label = (
-        "\u25b2 Riding Up"   if signal == "Above" else
-        "\u25bc Riding Down" if signal == "Below" else
-        "\u2015 At the Nine"
-    )
-    streak       = rtn.get("streak", 0)
-    pct          = rtn.get("pct_from_ema", 0.0)
-    conf_icon    = "\u2714\ufe0f" if rtn.get("ema9_vs_sma20") else "\u274c" if rtn.get("ema9_vs_sma20") is False else "\u2014"
-    gap_label    = "Widening \u2197" if rtn.get("gap_widening") else "Narrowing \u2198"
-
-    col_rtn_l, col_rtn_r = st.columns([1, 2])
-
-    with col_rtn_l:
-        st.markdown(f"""
+        col_rtn_l, col_rtn_r = st.columns([1, 2])
+        with col_rtn_l:
+            st.markdown(f"""
         <div class="metric-card" style="text-align:center;">
             <div style="font-size:0.8rem; color:#4a5568; margin-bottom:6px;">Current Signal</div>
-            <div style="
-                display:inline-block;
-                background:{bias_bg};
-                color:{bias_colour};
-                border:1px solid {bias_colour};
-                border-radius:8px;
-                padding:8px 18px;
-                font-size:1.15rem;
-                font-weight:700;
-                margin-bottom:14px;">
-                {signal_label}
-            </div>
+            <div style="display:inline-block;background:{bias_bg};color:{bias_colour};
+                border:1px solid {bias_colour};border-radius:8px;padding:8px 18px;
+                font-size:1.15rem;font-weight:700;margin-bottom:14px;">{signal_label}</div>
             <table style="width:100%; font-size:0.85rem; color:#1a202c; border-collapse:collapse;">
-                <tr>
-                    <td style="color:#4a5568; padding:4px 0;">Distance from 9 EMA</td>
-                    <td style="text-align:right; color:{bias_colour}; font-weight:600;">{pct:+.2f}%</td>
-                </tr>
-                <tr>
-                    <td style="color:#4a5568; padding:4px 0;">Streak</td>
-                    <td style="text-align:right;">{streak} session{'s' if streak != 1 else ''}</td>
-                </tr>
-                <tr>
-                    <td style="color:#4a5568; padding:4px 0;">Momentum gap</td>
-                    <td style="text-align:right;">{gap_label}</td>
-                </tr>
-                <tr>
-                    <td style="color:#4a5568; padding:4px 0;">9 EMA &gt; 20 SMA</td>
-                    <td style="text-align:right;">{conf_icon}</td>
-                </tr>
+                <tr><td style="color:#4a5568; padding:4px 0;">Distance from 9 EMA</td>
+                    <td style="text-align:right; color:{bias_colour}; font-weight:600;">{pct:+.2f}%</td></tr>
+                <tr><td style="color:#4a5568; padding:4px 0;">Streak</td>
+                    <td style="text-align:right;">{streak} session{'s' if streak != 1 else ''}</td></tr>
+                <tr><td style="color:#4a5568; padding:4px 0;">Momentum gap</td>
+                    <td style="text-align:right;">{gap_label}</td></tr>
+                <tr><td style="color:#4a5568; padding:4px 0;">9 EMA &gt; 20 SMA</td>
+                    <td style="text-align:right;">{conf_icon}</td></tr>
             </table>
         </div>
-        """, unsafe_allow_html=True)
-
-        if rtn.get("just_crossed"):
-            cross_dir = rtn.get("cross_direction")
-            if cross_dir == "up":
-                st.success("\U0001f7e2 **Fresh cross above 9 EMA** — potential entry signal")
-            else:
-                st.error("\U0001f534 **Fresh cross below 9 EMA** — caution / exit signal")
-
-    with col_rtn_r:
-        st.markdown(f"""
+            """, unsafe_allow_html=True)
+            if rtn.get("just_crossed"):
+                if rtn.get("cross_direction") == "up":
+                    st.success("\U0001f7e2 **Fresh cross above 9 EMA** — potential entry signal")
+                else:
+                    st.error("\U0001f534 **Fresh cross below 9 EMA** — caution / exit signal")
+        with col_rtn_r:
+            st.markdown(f"""
         <div class="metric-card" style="height:100%;">
-            <div style="font-size:0.8rem; color:#4a5568; margin-bottom:8px;">
-                Strategy Analysis
-            </div>
-            <p style="color:#1a202c; font-size:0.92rem; line-height:1.6; margin:0;">
-                {rtn.get("narrative", "")}
-            </p>
+            <div style="font-size:0.8rem; color:#4a5568; margin-bottom:8px;">Strategy Analysis</div>
+            <p style="color:#1a202c; font-size:0.92rem; line-height:1.6; margin:0;">{rtn.get("narrative", "")}</p>
             <hr style="border-color:#1a202c; margin:12px 0 8px 0;">
             <div style="font-size:0.78rem; color:#6b7280;">
                 <b style="color:#4a5568;">How it works:</b>
@@ -472,101 +538,86 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
                 Combine with the 20 SMA for trend confirmation.
             </div>
         </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+        st.plotly_chart(build_ride_the_nine_chart(df, ticker, rtn), use_container_width=True)
 
-    st.plotly_chart(
-        build_ride_the_nine_chart(df, ticker, rtn),
-        use_container_width=True,
-    )
-
-    st.markdown("---")
-
-    # Signal breakdown table
-    st.subheader("Signal Breakdown")
-
-    sig_data = []
-    for s in forecast.signals:
-        icon = "\U0001f7e2" if s.direction == "bullish" else "\U0001f534" if s.direction == "bearish" else "\U0001f7e1"
-        sig_data.append({
-            "Signal":       f"{icon} {s.name}",
-            "Score":        f"{s.score:+.2f}",
-            "Weight":       f"{s.weight:.0%}",
-            "Contribution": f"{s.score * s.weight:+.3f}",
-            "Description":  s.description,
-        })
-
-    sig_df = pd.DataFrame(sig_data)
-    st.dataframe(sig_df, hide_index=True, use_container_width=True)
-
-    st.markdown("---")
+    # Signal Breakdown
+    _s_signals.empty()
+    with _s_signals.container():
+        st.subheader("Signal Breakdown")
+        sig_data = []
+        for s in forecast.signals:
+            icon = "\U0001f7e2" if s.direction == "bullish" else "\U0001f534" if s.direction == "bearish" else "\U0001f7e1"
+            sig_data.append({
+                "Signal":       f"{icon} {s.name}",
+                "Score":        f"{s.score:+.2f}",
+                "Weight":       f"{s.weight:.0%}",
+                "Contribution": f"{s.score * s.weight:+.3f}",
+                "Description":  s.description,
+            })
+        st.dataframe(pd.DataFrame(sig_data), hide_index=True, use_container_width=True)
 
     # Support & Resistance
-    col_s, col_r = st.columns(2)
-    with col_s:
-        st.subheader("\U0001f7e2 Support Levels")
-        if support:
-            for s in reversed(support):
-                pct = (last_close - s) / last_close * 100
-                st.markdown(f"**${s:.2f}** &nbsp; ({pct:.1f}% below price)")
-        else:
-            st.caption("No clear support levels identified.")
+    _s_sr.empty()
+    with _s_sr.container():
+        col_s, col_r = st.columns(2)
+        with col_s:
+            st.subheader("\U0001f7e2 Support Levels")
+            if support:
+                for s in reversed(support):
+                    pct = (last_close - s) / last_close * 100
+                    st.markdown(f"**${s:.2f}** &nbsp; ({pct:.1f}% below price)")
+            else:
+                st.caption("No clear support levels identified.")
+        with col_r:
+            st.subheader("\U0001f534 Resistance Levels")
+            if resistance:
+                for r in resistance:
+                    pct = (r - last_close) / last_close * 100
+                    st.markdown(f"**${r:.2f}** &nbsp; ({pct:.1f}% above price)")
+            else:
+                st.caption("No clear resistance levels identified.")
 
-    with col_r:
-        st.subheader("\U0001f534 Resistance Levels")
-        if resistance:
-            for r in resistance:
-                pct = (r - last_close) / last_close * 100
-                st.markdown(f"**${r:.2f}** &nbsp; ({pct:.1f}% above price)")
-        else:
-            st.caption("No clear resistance levels identified.")
+    # Linear Regression
+    _s_lr.empty()
+    with _s_lr.container():
+        st.subheader("Linear Regression Trend Projection (10 days)")
+        col_lr1, col_lr2, col_lr3, col_lr4 = st.columns(4)
+        col_lr1.metric("Trend",         regression["trend_label"])
+        col_lr2.metric("Slope ($/day)", f"{regression['slope']:+.3f}")
+        col_lr3.metric("Daily drift",   f"{regression['pct_per_day']:+.3f}%")
+        col_lr4.metric("R\u00b2",       f"{regression['r_squared']:.3f}")
+        proj_10d = regression["projected"][-1] if regression["projected"] else None
+        if proj_10d:
+            proj_chg = (proj_10d - last_close) / last_close * 100
+            st.caption(
+                f"Projected price in ~10 trading days: **${proj_10d:.2f}** ({proj_chg:+.1f}%)"
+                " -- based on 30-day regression. *Not a prediction.*"
+            )
 
-    st.markdown("---")
-
-    # Linear Regression Projection
-    st.subheader("Linear Regression Trend Projection (10 days)")
-    col_lr1, col_lr2, col_lr3, col_lr4 = st.columns(4)
-    col_lr1.metric("Trend",         regression["trend_label"])
-    col_lr2.metric("Slope ($/day)", f"{regression['slope']:+.3f}")
-    col_lr3.metric("Daily drift",   f"{regression['pct_per_day']:+.3f}%")
-    col_lr4.metric("R\u00b2",       f"{regression['r_squared']:.3f}")
-
-    proj_10d = regression["projected"][-1] if regression["projected"] else None
-    if proj_10d:
-        proj_chg = (proj_10d - last_close) / last_close * 100
-        st.caption(
-            f"Projected price in ~10 trading days: **${proj_10d:.2f}** ({proj_chg:+.1f}%)"
-            " -- based on 30-day regression. *Not a prediction.*"
+    # Chart — filled last so the page is fully interactive before this renders
+    _s_chart.empty()
+    with _s_chart.container():
+        st.subheader("Chart")
+        chart_opts = st.columns(3)
+        show_bb  = chart_opts[0].checkbox("Bollinger Bands", value=True)
+        show_vol = chart_opts[1].checkbox("Volume Panel",    value=True)
+        show_reg = chart_opts[2].checkbox("LR Projection",   value=True)
+        fig = build_stock_chart(
+            df, ticker,
+            support=support, resistance=resistance,
+            show_bb=show_bb, show_volume=show_vol,
+            regression=regression if show_reg else None,
         )
-
-    st.markdown("---")
-
-    # Main chart
-    st.subheader("Chart")
-
-    chart_opts = st.columns(3)
-    show_bb  = chart_opts[0].checkbox("Bollinger Bands", value=True)
-    show_vol = chart_opts[1].checkbox("Volume Panel", value=True)
-    show_reg = chart_opts[2].checkbox("LR Projection", value=True)
-
-    fig = build_stock_chart(
-        df, ticker,
-        support=support,
-        resistance=resistance,
-        show_bb=show_bb,
-        show_volume=show_vol,
-        regression=regression if show_reg else None,
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Raw data expander
-    with st.expander("\U0001f4cb Raw Data & Indicators"):
-        display_cols = [
-            "Open", "High", "Low", "Close", "Volume",
-            "SMA_50", "SMA_200", "RSI", "MACD", "MACD_sig",
-            "BB_upper", "BB_lower", "ATR", "STOCH_K", "STOCH_D",
-        ]
-        show_cols = [c for c in display_cols if c in df.columns]
-        st.dataframe(
-            df[show_cols].tail(50).round(4).sort_index(ascending=False),
-            use_container_width=True,
-        )
+        st.plotly_chart(fig, use_container_width=True)
+        with st.expander("\U0001f4cb Raw Data & Indicators"):
+            display_cols = [
+                "Open", "High", "Low", "Close", "Volume",
+                "SMA_50", "SMA_200", "RSI", "MACD", "MACD_sig",
+                "BB_upper", "BB_lower", "ATR", "STOCH_K", "STOCH_D",
+            ]
+            show_cols = [c for c in display_cols if c in df.columns]
+            st.dataframe(
+                df[show_cols].tail(50).round(4).sort_index(ascending=False),
+                use_container_width=True,
+            )
