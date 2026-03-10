@@ -17,19 +17,48 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# ── Critical hide CSS — injected as early as possible to prevent FOUC ────────
+# Must come before any network calls (get_trending_tickers, auth, etc.) so the
+# browser receives the hide rules before it has a chance to paint the default
+# Streamlit sidebar nav, header, or menu.
+st.markdown(
+    "<style>"
+    "[data-testid='stSidebarNav'],"
+    "[data-testid='stSidebarNavItems'],"
+    "[data-testid='stSidebarNavSeparator'],"
+    "[data-testid='stMainMenu'],"
+    "[data-testid='stHeader'],"
+    "#MainMenu{display:none!important;}"
+    "</style>",
+    unsafe_allow_html=True,
+)
+
 inject_auth_js()
 handle_auth_callback()
 
 # ── Google Analytics ─────────────────────────────────────────────────────────
-# st.markdown() uses dangerouslySetInnerHTML which browsers block from executing
-# <script> tags. components.html() renders in a real iframe where scripts run.
+# Problem: st.markdown() strips <script> tags (React dangerouslySetInnerHTML).
+#          components.html() runs scripts but inside a sandboxed iframe — so
+#          window.dataLayer stays in the iframe context and GA Tag Assistant
+#          (which inspects the parent window) never detects it.
+# Fix:     Inject the gtag.js script tag *into the parent document* from inside
+#          the iframe using window.parent. Same-origin iframe, so this is allowed.
 components.html(
-    '<script async src="https://www.googletagmanager.com/gtag/js?id=G-P4BE4NHFLX"></script>'
     '<script>'
-    'window.dataLayer=window.dataLayer||[];'
-    'function gtag(){dataLayer.push(arguments);}'
-    'gtag("js",new Date());'
-    'gtag("config","G-P4BE4NHFLX");'
+    '(function(){'
+    '  var p=window.parent;'
+    '  if(!p||p===window)return;'
+    '  if(p.document.getElementById("_ga_stkl"))return;'  # idempotent guard
+    '  var s=p.document.createElement("script");'
+    '  s.id="_ga_stkl";s.async=true;'
+    '  s.src="https://www.googletagmanager.com/gtag/js?id=G-P4BE4NHFLX";'
+    '  p.document.head.appendChild(s);'
+    '  p.dataLayer=p.dataLayer||[];'
+    '  function gtag(){p.dataLayer.push(arguments);}'
+    '  gtag("js",new Date());'
+    '  gtag("config","G-P4BE4NHFLX");'
+    '  p.gtag=gtag;'
+    '})();'
     '</script>',
     height=0,
 )
@@ -59,12 +88,6 @@ else:
 
 st.markdown(f"""
 <style>
-  [data-testid="stSidebarNav"],
-  [data-testid="stSidebarNavItems"],
-  [data-testid="stSidebarNavSeparator"],
-  [data-testid="stMainMenu"],
-  [data-testid="stHeader"],
-  #MainMenu {{ display: none !important; }}
   .tkr-bar {{
     width: 100%;
     overflow: hidden;
@@ -119,9 +142,12 @@ st.markdown(f"""
 
 pg = st.navigation(
     [
-        st.Page("pages/home.py",       title="Home",    url_path="",       default=True),
-        st.Page("pages/blog.py",       title="Blog",    url_path="blog"),
-        st.Page("pages/1_Analyze.py",  title="Analyze", url_path="analyze"),
+        st.Page("pages/home.py",      title="Home",             url_path="",        default=True),
+        st.Page("pages/blog.py",      title="Blog",             url_path="blog"),
+        st.Page("pages/1_Analyze.py", title="Analyze",          url_path="analyze"),
+        st.Page("pages/privacy.py",   title="Privacy Policy",   url_path="privacy"),
+        st.Page("pages/terms.py",     title="Terms of Service", url_path="terms"),
+        st.Page("pages/cookies.py",   title="Cookie Policy",    url_path="cookies"),
     ],
     position="hidden",  # suppress Streamlit's default sidebar nav
 )

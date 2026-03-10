@@ -584,6 +584,11 @@ st.markdown(f"""
             <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
         </div>
     </div>
-    <div class="lp-footer-copy">© 2025 Stocklio · Built for investors who want an edge.</div>
+    <div class="lp-footer-copy">
+        © 2025 Stocklio · Built for investors who want an edge.
+        &nbsp;·&nbsp;<a href="/privacy" style="color:#a0aec0;text-decoration:none;" onmouseover="this.style.color='#4a5568'" onmouseout="this.style.color='#a0aec0'">Privacy Policy</a>
+        &nbsp;·&nbsp;<a href="/terms" style="color:#a0aec0;text-decoration:none;" onmouseover="this.style.color='#4a5568'" onmouseout="this.style.color='#a0aec0'">Terms of Service</a>
+        &nbsp;·&nbsp;<a href="/cookies" style="color:#a0aec0;text-decoration:none;" onmouseover="this.style.color='#4a5568'" onmouseout="this.style.color='#a0aec0'">Cookie Policy</a>
+    </div>
 </div>
 """, unsafe_allow_html=True)

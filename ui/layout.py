@@ -33,6 +33,25 @@ _LOADING_CSS = """
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.35; }
 }
+/* Hide Streamlit's own "Running..." status widget while our overlay is up */
+[data-testid="stStatusWidget"] { display: none !important; }
+/* Full-viewport overlay so the loading card covers all skeleton sections
+   and the Streamlit status bar — removed when _s_load.empty() is called */
+.stkl-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #f8fafc;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.stkl-card {
+  background: #ffffff; border-radius: 16px; padding: 32px 36px 26px 36px;
+  border: 1px solid #e2e8f0; box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+  width: 100%; max-width: 480px;
+}
 .stkl-bar {
   height: 3px; background: #e2e8f0; border-radius: 3px;
   overflow: hidden; margin: 20px 0 24px 0; position: relative;
@@ -105,8 +124,8 @@ def _loading_html(ticker: str, step: int) -> str:
     insight = _INSIGHTS[step % len(_INSIGHTS)]
 
     return (
-        f'<div style="background:#ffffff;border-radius:16px;padding:32px 36px 26px 36px;'
-        f'border:1px solid #e2e8f0;box-shadow:0 2px 14px rgba(0,0,0,0.05);margin-bottom:20px;">'
+        f'<div class="stkl-overlay">'
+        f'<div class="stkl-card">'
         # Header row: logo left, ticker right
         f'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">'
         f'<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:1.55rem;font-weight:800;'
@@ -122,6 +141,7 @@ def _loading_html(ticker: str, step: int) -> str:
         f'{steps_html}'
         # Educational insight
         f'<div class="stkl-insight">💡&nbsp; {insight}</div>'
+        f'</div>'
         f'</div>'
     )
 
