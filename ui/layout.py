@@ -6,6 +6,7 @@ ui/layout.py -- Renders the two main pages of the dashboard:
 
 import html as _html
 import time
+from concurrent.futures import ThreadPoolExecutor
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,6 +19,23 @@ from indicators.calculator import (
 )
 from forecast.engine import score_symbol, analyze_ride_the_nine
 from ui.charts import build_stock_chart, build_score_gauge, build_ride_the_nine_chart, build_sentiment_chart
+
+
+# ── Cached computation pipeline ───────────────────────────────────────────────
+# All heavy computation is bundled into one @st.cache_data function keyed on
+# (ticker, period).  Cache key is two strings — no DataFrame hashing overhead.
+# On a cache hit (same ticker + period within TTL) this returns instantly.
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _compute_analysis(ticker: str, period: str):
+    """Run the full indicator + forecast pipeline; result cached for 5 minutes."""
+    df                  = fetch_ohlcv(ticker, period=period)   # hits its own cache
+    df                  = calculate_indicators(df)
+    support, resistance = find_support_resistance(df)
+    regression          = linear_regression_projection(df["Close"])
+    forecast            = score_symbol(df, ticker, support, resistance)
+    rtn                 = analyze_ride_the_nine(df)
+    return df, support, resistance, regression, forecast, rtn
 
 
 # ── Loading experience ─────────────────────────────────────────────────────────
@@ -33,10 +51,10 @@ _LOADING_CSS = """
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.35; }
 }
-/* Hide Streamlit's own "Running..." status widget while our overlay is up */
+/* Overlay and status-widget rules — re-enable if restoring the loading card animation
 [data-testid="stStatusWidget"] { display: none !important; }
-/* Full-viewport overlay so the loading card covers all skeleton sections
-   and the Streamlit status bar — removed when _s_load.empty() is called */
+*/
+/* Full-viewport overlay — kept here for easy restoration */
 .stkl-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -341,7 +359,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     # ── Create every section placeholder upfront so the page structure appears
     # immediately — each slot is filled with a skeleton, then replaced with
     # real content after all data is ready.
-    _s_load     = st.empty()   # loading card
+    # _s_load   = st.empty()   # loading card — disabled; re-enable to restore step animation
     _s_header   = st.empty()   # company header
     _s_d1       = st.empty()   # divider
     _s_voting   = st.empty()   # prediction market
@@ -358,7 +376,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_chart    = st.empty()   # main chart (last — heaviest render)
 
     # ── Fill all sections with skeletons immediately ───────────────────────────
-    _s_load.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)
+    # _s_load.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)  # loading card disabled
     _s_header.markdown(_skel_header(), unsafe_allow_html=True)
     _s_d1.markdown("---")
     _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
@@ -384,39 +402,35 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     )
 
     def _clear_all():
-        for s in [_s_load, _s_header, _s_d1, _s_voting, _s_d2, _s_forecast,
+        for s in [_s_header, _s_d1, _s_voting, _s_d2, _s_forecast,
                   _s_rtn, _s_d3, _s_signals, _s_d4, _s_sr, _s_d5, _s_lr,
                   _s_d6, _s_chart]:
             s.empty()
 
-    # ── Step 0 → 1: Fetch market data ─────────────────────────────────────────
-    try:
-        df   = fetch_ohlcv(ticker, period=period)
-        info = fetch_info(ticker)
-    except ValueError as e:
-        _clear_all(); st.error(str(e)); return
-    except Exception as e:
-        _clear_all(); st.error(f"Data fetch failed: {e}"); return
+    # ── Steps 0-3: Parallel I/O — _compute_analysis and fetch_info run at the
+    # same time in separate threads.  On a cache hit both return in <10 ms.
+    # On a cold start, _compute_analysis (~2-3 s) overlaps fetch_info (~1-2 s)
+    # instead of running sequentially, saving ~1-2 s of wall-clock time.
+    with ThreadPoolExecutor(max_workers=2) as _pool:
+        _f_compute = _pool.submit(_compute_analysis, ticker, period)
+        _f_info    = _pool.submit(fetch_info, ticker)
 
-    # ── Step 1 → 2: Score indicators ──────────────────────────────────────────
-    _s_load.markdown(_loading_html(ticker, 1), unsafe_allow_html=True)
-    try:
-        df = calculate_indicators(df)
-    except Exception as e:
-        _clear_all(); st.error(f"Indicator computation failed: {e}"); return
+        # _s_load.markdown(_loading_html(ticker, 1), unsafe_allow_html=True)
 
-    # ── Step 2 → 3: Sentiment / S/R ───────────────────────────────────────────
-    _s_load.markdown(_loading_html(ticker, 2), unsafe_allow_html=True)
-    support, resistance = find_support_resistance(df)
+        try:
+            df, support, resistance, regression, forecast, rtn = _f_compute.result()
+        except ValueError as e:
+            _clear_all(); st.error(str(e)); return
+        except Exception as e:
+            _clear_all(); st.error(f"Data fetch failed: {e}"); return
 
-    # ── Step 3 → 4: Forecast + RTN (all heavy computation done here) ──────────
-    _s_load.markdown(_loading_html(ticker, 3), unsafe_allow_html=True)
-    regression = linear_regression_projection(df["Close"])
-    forecast   = score_symbol(df, ticker, support, resistance)
-    rtn        = analyze_ride_the_nine(df)   # pre-compute so RTN slot fills fast
+        # _s_load.markdown(_loading_html(ticker, 2), unsafe_allow_html=True)
+        info = _f_info.result()
 
-    # ── Step 4: Pre-build all display values, then brief hold ─────────────────
-    _s_load.markdown(_loading_html(ticker, 4), unsafe_allow_html=True)
+    # _s_load.markdown(_loading_html(ticker, 3), unsafe_allow_html=True)
+
+    # ── Pre-build display values ───────────────────────────────────────────────
+    # _s_load.markdown(_loading_html(ticker, 4), unsafe_allow_html=True)
 
     company_name = _html.escape(info.get("longName") or info.get("shortName") or ticker)
     sector       = _html.escape(info.get("sector", ""))
@@ -458,13 +472,12 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         f'</div></div></div>'
     )
 
-    # Brief hold at step 4 — lets the user read "Preparing your dashboard"
-    # and ensures the page feels fully settled before content appears.
-    time.sleep(0.45)
+    # Brief hold — re-enable if restoring loading card animation
+    # time.sleep(0.45)
 
-    # ── Reveal: clear loader, fill each slot in order (chart last) ─────────────
+    # ── Reveal: fill each slot in order (chart last) ───────────────────────────
 
-    _s_load.empty()
+    # _s_load.empty()  # clear loading card — disabled with animation
 
     # Header
     _s_header.markdown(_header_html, unsafe_allow_html=True)

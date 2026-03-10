@@ -17,6 +17,7 @@ Indicator reference:
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 
 # -- Try importing `ta`; fall back to manual calculations if unavailable ------
 try:
@@ -55,6 +56,7 @@ def _atr_manual(df: pd.DataFrame, period: int = 14) -> pd.Series:
 
 # -- Main computation function -------------------------------------------------
 
+@st.cache_data(ttl=300, show_spinner=False)
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """
     Attach all technical indicators to the OHLCV DataFrame.
@@ -137,6 +139,7 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 # -- Support & Resistance levels -----------------------------------------------
 
+@st.cache_data(ttl=300, show_spinner=False)
 def find_support_resistance(df: pd.DataFrame, lookback: int = 60, n_levels: int = 3):
     """
     Identify support and resistance levels from recent local highs/lows.
@@ -186,6 +189,7 @@ def find_support_resistance(df: pd.DataFrame, lookback: int = 60, n_levels: int 
 
 # -- Linear Regression Trend Projection ----------------------------------------
 
+@st.cache_data(ttl=300, show_spinner=False)
 def linear_regression_projection(
     close: pd.Series,
     lookback: int = 30,

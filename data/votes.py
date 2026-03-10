@@ -47,7 +47,15 @@ def resolve_outcomes(ticker: str, current_price: float):
     For votes on this ticker that are older than 30 days and still unresolved,
     compare the stored entry price to current_price and write 'correct' or
     'incorrect' back to Supabase.
+
+    Runs at most once per Streamlit session per ticker to avoid a Supabase
+    write on every rerun.
     """
+    _sess_key = f"_rslv_{ticker}"
+    if st.session_state.get(_sess_key):
+        return
+    st.session_state[_sess_key] = True
+
     cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
     client = _client()
     rows = (
@@ -70,6 +78,7 @@ def resolve_outcomes(ticker: str, current_price: float):
         }).eq("id", row["id"]).execute()
 
 
+@st.cache_data(ttl=300, show_spinner=False)
 def sentiment_summary(ticker: str) -> dict:
     """Bull/bear counts and percentages for all votes on a ticker."""
     votes = (
@@ -90,6 +99,7 @@ def sentiment_summary(ticker: str) -> dict:
     }
 
 
+@st.cache_data(ttl=300, show_spinner=False)
 def sentiment_over_time(ticker: str) -> list:
     """Daily % bullish for this ticker over the last 30 days."""
     cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
@@ -122,6 +132,7 @@ def sentiment_over_time(ticker: str) -> list:
     return results
 
 
+@st.cache_data(ttl=300, show_spinner=False)
 def accuracy_stats() -> dict:
     """
     Global community accuracy across all resolved votes in the last 90 days.

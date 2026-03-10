@@ -52,7 +52,7 @@ def fetch_ohlcv(ticker: str, period: str = "1y", interval: str = "1d") -> pd.Dat
     return df
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)  # company metadata rarely changes — 1-hour TTL is safe
 def fetch_info(ticker: str) -> dict:
     """
     Fetch company/index metadata (name, sector, market cap, etc.).
