@@ -124,12 +124,23 @@ _signup_url = signup_url()
 _is_logged_in = st.session_state.get("logged_in", False)
 
 if _is_logged_in:
+    _user_email = st.session_state.get("user_email", "")
+    _welcome_banner = (
+        f'<div class="lp-welcome-bar">'
+        f'<span>Welcome back, <strong>{_user_email}</strong></span>'
+        f'<div class="lp-welcome-actions">'
+        f'<a href="/analyze?ticker=AAPL" class="lp-btn lp-btn-primary" style="padding:6px 16px;font-size:0.82rem;">Open Dashboard</a>'
+        f'<a href="https://auth.stocklio.ai/account" class="lp-btn lp-btn-outline" style="padding:6px 16px;font-size:0.82rem;">My Account</a>'
+        f'</div>'
+        f'</div>'
+    )
     _nav_links = (
         '<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
         '<a href="https://auth.stocklio.ai/account" class="lp-btn lp-btn-outline">My Account</a>'
         '<a href="/analyze?ticker=AAPL" class="lp-btn lp-btn-primary">Open Dashboard</a>'
     )
 else:
+    _welcome_banner = ""
     _nav_links = (
         f'<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
         f'<a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>'
@@ -159,13 +170,29 @@ st.markdown(f"""
     }}
     .lp-logo {{
         font-family: 'Darker Grotesque', sans-serif;
-        font-size: 5rem;
+        font-size: 6rem;
         font-weight: 800;
         color: #1a202c;
         letter-spacing: -0.01em;
         line-height: 1;
     }}
     .lp-logo-dot {{ color: #00c896; }}
+    .lp-welcome-bar {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #e6faf5;
+        border: 1px solid #b2f0e0;
+        border-radius: 10px;
+        padding: 10px 20px;
+        margin: 14px 0 0 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.88rem;
+        color: #1a202c;
+        flex-wrap: wrap;
+        gap: 10px;
+    }}
+    .lp-welcome-actions {{ display: flex; gap: 8px; flex-wrap: wrap; }}
     .lp-nav-links {{ display: flex; gap: 12px; align-items: center; }}
     .lp-btn {{
         display: inline-block;
@@ -197,7 +224,7 @@ st.markdown(f"""
     }}
     .lp-h1 {{
         font-family: 'Darker Grotesque', sans-serif !important;
-        font-size: 3.5rem !important;
+        font-size: 4.5rem !important;
         font-weight: 900;
         color: #1a202c;
         line-height: 1.05;
@@ -440,6 +467,8 @@ st.markdown(f"""
     </div>
 </div>
 
+{_welcome_banner}
+
 <!-- Hero heading & subtext -->
 <div style="text-align:center;padding:36px 20px 24px 20px;">
     <div class="lp-eyebrow">AI Forecast · Prediction Market · Technical Analysis</div>
@@ -564,8 +593,8 @@ st.markdown(f"""
 
 <!-- CTA Band -->
 <div class="lp-cta-band">
-    <h2>Stop guessing. Start analyzing.</h2>
-    <p>Free to use. No credit card required.</p>
+    <h2>{"Your edge is ready." if _is_logged_in else "Stop guessing. Start analyzing."}</h2>
+    <p>{"Open your dashboard and run your next analysis." if _is_logged_in else "Free to use. No credit card required."}</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -614,8 +643,7 @@ st.markdown(f"""
         <div class="lp-footer-section">
             <div class="lp-footer-section-title">Resources</div>
             <a href="/blog" class="lp-footer-link">Blog</a>
-            <a href="{_signup_url}" class="lp-footer-link">Create an account</a>
-            <a href="{_login_url}" class="lp-footer-link">Log in</a>
+            {"<a href='/analyze?ticker=AAPL' class='lp-footer-link'>Open Dashboard</a><a href='https://auth.stocklio.ai/account' class='lp-footer-link'>My Account</a>" if _is_logged_in else f"<a href='{_signup_url}' class='lp-footer-link'>Create an account</a><a href='{_login_url}' class='lp-footer-link'>Log in</a>"}
             <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
         </div>
     </div>
