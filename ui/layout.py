@@ -26,7 +26,7 @@ from ui.charts import build_stock_chart, build_score_gauge, build_ride_the_nine_
 # (ticker, period).  Cache key is two strings — no DataFrame hashing overhead.
 # On a cache hit (same ticker + period within TTL) this returns instantly.
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=1800, show_spinner=False)
 def _compute_analysis(ticker: str, period: str):
     """Run the full indicator + forecast pipeline; result cached for 5 minutes."""
     df                  = fetch_ohlcv(ticker, period=period)   # hits its own cache
@@ -251,10 +251,20 @@ _BEAR_CLR = "#ff4b6e"
 
 def _render_voting(ticker: str, current_price: float, tech_rating: str):
     """Predicta Vote — community prediction panel."""
+    # resolve_outcomes reads/writes st.session_state so must stay on the main thread
     resolve_outcomes(ticker, current_price)
 
+    # Parallelise the three read-only Supabase fetches — each is @st.cache_data
+    # so thread-safe; on a warm cache all three return in <1 ms total.
+    with ThreadPoolExecutor(max_workers=3) as _vpool:
+        _f_acc  = _vpool.submit(accuracy_stats)
+        _f_sent = _vpool.submit(sentiment_summary, ticker)
+        _f_hist = _vpool.submit(sentiment_over_time, ticker)
+        acc     = _f_acc.result()
+        sent    = _f_sent.result()
+        history = _f_hist.result()
+
     # -- Accuracy banner (global, last 90 days) --------------------------------
-    acc = accuracy_stats()
     if acc["resolved"] > 0:
         acc_colour = _BULL_CLR if (acc["accuracy"] or 0) >= 55 else _BEAR_CLR
         st.markdown(
@@ -305,7 +315,6 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
             )
 
     with col_r:
-        sent = sentiment_summary(ticker)
         if sent["total"] > 0:
             bull_w = max(1.0, sent["bull_pct"])
             bear_w = max(1.0, sent["bear_pct"])
@@ -340,7 +349,6 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
         else:
             st.caption("No votes yet — be the first to predict!")
 
-    history = sentiment_over_time(ticker)
     if len(history) > 1:
         st.plotly_chart(build_sentiment_chart(history), use_container_width=True)
 
@@ -348,7 +356,13 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
 # -- Individual Stock Analysis -------------------------------------------------
 
 def render_stock_analysis(ticker: str, period: str = "1y"):
-    """Render the full stock analysis report with staged skeleton loading."""
+    """Render the full stock analysis report with staged skeleton loading.
+
+    Render order (core analysis first, community/chart last):
+      Header → Forecast → Ride the Nine → Signal Breakdown →
+      Support & Resistance → Linear Regression → Prediction Market →
+      Technical Chart (deferred — user must click to load)
+    """
 
     if not ticker:
         st.info("Enter a ticker symbol in the sidebar.")
@@ -356,31 +370,26 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
 
     st.markdown(_LOADING_CSS, unsafe_allow_html=True)
 
-    # ── Create every section placeholder upfront so the page structure appears
-    # immediately — each slot is filled with a skeleton, then replaced with
-    # real content after all data is ready.
+    # ── Create placeholders in display order — core analysis first, voting last.
+    # Chart has no placeholder: it is deferred behind a button.
     # _s_load   = st.empty()   # loading card — disabled; re-enable to restore step animation
     _s_header   = st.empty()   # company header
     _s_d1       = st.empty()   # divider
-    _s_voting   = st.empty()   # prediction market
-    _s_d2       = st.empty()   # divider
     _s_forecast = st.empty()   # forecast gauge + card
-    _s_rtn      = st.empty()   # ride the nine
-    _s_d3       = st.empty()   # divider
+    _s_rtn      = st.empty()   # ride the nine (auto-loaded)
+    _s_d2       = st.empty()   # divider
     _s_signals  = st.empty()   # signal breakdown
-    _s_d4       = st.empty()   # divider
+    _s_d3       = st.empty()   # divider
     _s_sr       = st.empty()   # support & resistance
-    _s_d5       = st.empty()   # divider
+    _s_d4       = st.empty()   # divider
     _s_lr       = st.empty()   # linear regression
-    _s_d6       = st.empty()   # divider
-    _s_chart    = st.empty()   # main chart (last — heaviest render)
+    _s_d5       = st.empty()   # divider
+    _s_voting   = st.empty()   # prediction market (last core section — has Supabase I/O)
 
     # ── Fill all sections with skeletons immediately ───────────────────────────
     # _s_load.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)  # loading card disabled
     _s_header.markdown(_skel_header(), unsafe_allow_html=True)
     _s_d1.markdown("---")
-    _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
-    _s_d2.markdown("---")
     _s_forecast.markdown(
         _skel_section("140px", 1) + _skel_two_col("190px"),
         unsafe_allow_html=True,
@@ -389,28 +398,22 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         _skel_section("160px", 1) + _skel_two_col("220px"),
         unsafe_allow_html=True,
     )
-    _s_d3.markdown("---")
+    _s_d2.markdown("---")
     _s_signals.markdown(_skel_section("150px", 5), unsafe_allow_html=True)
-    _s_d4.markdown("---")
+    _s_d3.markdown("---")
     _s_sr.markdown(_skel_section("140px", 3), unsafe_allow_html=True)
-    _s_d5.markdown("---")
+    _s_d4.markdown("---")
     _s_lr.markdown(_skel_section("220px", 1), unsafe_allow_html=True)
-    _s_d6.markdown("---")
-    _s_chart.markdown(
-        _skel_section("60px", 0) + _skel_chart(),
-        unsafe_allow_html=True,
-    )
+    _s_d5.markdown("---")
+    _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
 
     def _clear_all():
-        for s in [_s_header, _s_d1, _s_voting, _s_d2, _s_forecast,
-                  _s_rtn, _s_d3, _s_signals, _s_d4, _s_sr, _s_d5, _s_lr,
-                  _s_d6, _s_chart]:
+        for s in [_s_header, _s_d1, _s_forecast, _s_rtn, _s_d2, _s_signals,
+                  _s_d3, _s_sr, _s_d4, _s_lr, _s_d5, _s_voting]:
             s.empty()
 
-    # ── Steps 0-3: Parallel I/O — _compute_analysis and fetch_info run at the
-    # same time in separate threads.  On a cache hit both return in <10 ms.
-    # On a cold start, _compute_analysis (~2-3 s) overlaps fetch_info (~1-2 s)
-    # instead of running sequentially, saving ~1-2 s of wall-clock time.
+    # ── Parallel I/O — _compute_analysis and fetch_info run concurrently.
+    # On a cache hit both return in <10 ms.
     with ThreadPoolExecutor(max_workers=2) as _pool:
         _f_compute = _pool.submit(_compute_analysis, ticker, period)
         _f_info    = _pool.submit(fetch_info, ticker)
@@ -475,17 +478,12 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     # Brief hold — re-enable if restoring loading card animation
     # time.sleep(0.45)
 
-    # ── Reveal: fill each slot in order (chart last) ───────────────────────────
+    # ── Reveal: fill each slot in order ───────────────────────────────────────
 
     # _s_load.empty()  # clear loading card — disabled with animation
 
     # Header
     _s_header.markdown(_header_html, unsafe_allow_html=True)
-
-    # Prediction Market
-    _s_voting.empty()
-    with _s_voting.container():
-        _render_voting(ticker, last_close, forecast.rating)
 
     # Forecast
     _s_forecast.empty()
@@ -514,7 +512,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             for setup in forecast.setups:
                 st.success(setup)
 
-    # Ride the Nine
+    # Ride the Nine — always visible, renders automatically
     _s_rtn.empty()
     with _s_rtn.container():
         st.subheader("Ride the Nine \u2014 9 EMA Strategy")
@@ -628,9 +626,28 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
                 " -- based on 30-day regression. *Not a prediction.*"
             )
 
-    # Chart — filled last so the page is fully interactive before this renders
-    _s_chart.empty()
-    with _s_chart.container():
+    # Prediction Market — rendered after core analysis so Supabase I/O
+    # (parallelised internally) does not delay the forecast/signals sections.
+    _s_voting.empty()
+    with _s_voting.container():
+        _render_voting(ticker, last_close, forecast.rating)
+
+    # ── Technical Chart — deferred behind a button. ────────────────────────────
+    # The heavy Plotly render is skipped entirely until the user requests it.
+    # Session state key is per-ticker so the chart collapses when the ticker changes.
+    st.markdown("---")
+    _chart_key = f"_chart_{ticker}"
+    if not st.session_state.get(_chart_key):
+        st.markdown(
+            '<p style="font-family:\'Inter\',sans-serif;font-size:0.85rem;'
+            'color:#6b7280;margin:0 0 10px 0;">'
+            'Full technical chart with overlays (Bollinger Bands, volume, LR projection) '
+            'is available on demand.</p>',
+            unsafe_allow_html=True,
+        )
+        if st.button("📊 View Technical Chart", key=f"btn_chart_{ticker}"):
+            st.session_state[_chart_key] = True
+    if st.session_state.get(_chart_key):
         st.subheader("Chart")
         chart_opts = st.columns(3)
         show_bb  = chart_opts[0].checkbox("Bollinger Bands", value=True)

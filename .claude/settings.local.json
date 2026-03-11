@@ -11,7 +11,10 @@
       "Bash(python -c \"import streamlit; print\\(streamlit.__version__\\)\")",
       "Bash(pip show streamlit)",
       "Bash(python3 -c \"import sys; sys.path.insert\\(0, ''.''\\); from blog_posts import get_all_posts, get_post_by_slug; print\\(''OK'', len\\(get_all_posts\\(\\)\\), ''posts''\\)\")",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "Bash(python -c \"import streamlit, yfinance, pandas, numpy, plotly, ta, supabase, jwt, cryptography\")",
+      "Bash(python3 -c \"import streamlit, yfinance, pandas, numpy, plotly, ta, supabase, jwt, cryptography\")",
+      "Bash(python3 -m streamlit --version)"
     ]
   }
 }

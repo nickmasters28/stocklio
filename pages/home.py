@@ -8,6 +8,19 @@ st.set_page_config and auth init are handled by app.py (the entrypoint shell).
 import streamlit as st
 from auth.propelauth import login_url, signup_url
 
+# Critical hide CSS — injected first to prevent FOUC of Streamlit's default nav.
+# Mirrors the rule in app.py; redundant injection here ensures it's applied
+# immediately when the home page renders, before any other content.
+st.markdown(
+    "<style>"
+    "[data-testid='stSidebarNav'],"
+    "[data-testid='stSidebarNavItems'],"
+    "[data-testid='stSidebarNavSeparator']"
+    "{display:none!important;}"
+    "</style>",
+    unsafe_allow_html=True,
+)
+
 # Determine active ticker from URL param or session state
 _url_ticker = st.query_params.get("ticker", "").upper().strip()
 if _url_ticker:

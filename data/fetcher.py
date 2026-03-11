@@ -10,8 +10,8 @@ import pandas as pd
 import streamlit as st
 from typing import Optional
 
-# Cache data for 5 minutes to avoid hammering the API on re-renders
-@st.cache_data(ttl=300)
+# Cache data for 30 minutes — daily bars are stable intraday for this analysis app
+@st.cache_data(ttl=1800)
 def fetch_ohlcv(ticker: str, period: str = "1y", interval: str = "1d") -> pd.DataFrame:
     """
     Fetch OHLCV data for a given ticker.

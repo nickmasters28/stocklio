@@ -3,29 +3,36 @@ pages/1_Analyze.py -- Stock analysis dashboard (accessible at /Analyze)
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 from ui.layout import render_stock_analysis
 from auth.propelauth import logout, login_url, signup_url
 
 # st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
 
 # Auto-expand the sidebar on /analyze — app.py starts it collapsed globally.
-# We use sessionStorage so the click only fires once per browser session,
-# not on every Streamlit rerun (which would cause an infinite expand/collapse cycle).
-st.markdown(
+# Must use components.html() because st.markdown() strips <script> tags.
+# The script runs inside an iframe, so we target window.parent.document to
+# interact with the real sidebar button. sessionStorage guard prevents the
+# click firing on every Streamlit rerun (which would cause an expand/collapse loop).
+components.html(
     '<script>'
     '(function(){'
-    '  if(sessionStorage.getItem("sidebar_expanded_analyze"))return;'
+    '  var p=window.parent;'
+    '  if(!p||p===window)return;'
+    '  if(p.sessionStorage.getItem("sidebar_expanded_analyze"))return;'
     '  function expand(){'
-    '    var btn=document.querySelector("[data-testid=\\"stSidebarCollapsedControl\\"] button")'
-    '             ||document.querySelector("button[aria-label=\\"open sidebar\\"]")'
-    '             ||document.querySelector("button[aria-label=\\"Open sidebar\\"]");'
-    '    if(btn){btn.click();sessionStorage.setItem("sidebar_expanded_analyze","1");return;}'
+    '    var d=p.document;'
+    '    var btn=d.querySelector("[data-testid=\\"stSidebarCollapsedControl\\"] button")'
+    '             ||d.querySelector("button[aria-label=\\"open sidebar\\"]")'
+    '             ||d.querySelector("button[aria-label=\\"Open sidebar\\"]");'
+    '    if(btn){btn.click();p.sessionStorage.setItem("sidebar_expanded_analyze","1");return;}'
     '    setTimeout(expand,150);'
     '  }'
-    '  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",expand);}else{expand();}'
+    '  if(p.document.readyState==="loading")'
+    '    {p.document.addEventListener("DOMContentLoaded",expand);}else{expand();}'
     '})();'
     '</script>',
-    unsafe_allow_html=True,
+    height=0,
 )
 
 st.markdown("""
