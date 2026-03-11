@@ -54,42 +54,49 @@ def signup_url() -> str:
 
 def inject_auth_js() -> None:
     """
-    Inject the PropelAuth JS client into the page.
+    Inject the PropelAuth JS client into the page via components.html().
 
-    On every page load it checks whether the user already has a valid
-    PropelAuth session (stored in cookies by the hosted login page).
-    If a session exists it appends the access token as ?pa_token=... so
-    Streamlit can read it via st.query_params.
+    st.markdown() strips <script> tags (React dangerouslySetInnerHTML does not
+    execute scripts set via innerHTML). components.html() runs inside a sandboxed
+    iframe where scripts do execute.  We target window.parent to modify the
+    Streamlit app's URL, then reload.  A try/catch silently handles the rare
+    cross-origin case (badly-configured reverse proxy).
+
+    On every page load this checks for a valid PropelAuth session (stored in
+    cookies by the hosted login page).  If one exists it appends ?pa_token=...
+    to the parent URL so handle_auth_callback() can read it.
     """
+    import streamlit.components.v1 as components
     auth_url = _auth_url()
-    st.markdown(f"""
-    <script src="https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/dist/propelauth.js"></script>
-    <script>
-    (function() {{
-        if (window.__paChecked) return;
-        window.__paChecked = true;
-        const client = PropelAuth.createClient({{
-            authUrl: "{auth_url}",
-            enableBackgroundTokenRefresh: true,
-        }});
-        client.getAuthenticationInfoOrNull().then(function(info) {{
-            const cur = new URLSearchParams(window.location.search);
-            if (info && info.accessToken) {{
-                if (cur.get('pa_token') !== info.accessToken) {{
-                    cur.set('pa_token', info.accessToken);
-                    window.history.replaceState(null, '', '?' + cur.toString());
-                    window.location.reload();
-                }}
-            }} else {{
-                if (cur.has('pa_token')) {{
-                    cur.delete('pa_token');
-                    window.history.replaceState(null, '', '?' + cur.toString());
-                }}
-            }}
-        }});
-    }})();
-    </script>
-    """, unsafe_allow_html=True)
+    components.html(
+        f"""<script src="https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/dist/propelauth.js"></script>
+<script>
+(function(){{
+  if(window.__paInit)return;
+  window.__paInit=true;
+  var win=(window.parent&&window.parent!==window)?window.parent:window;
+  PropelAuth.createClient({{
+    authUrl:"{auth_url}",
+    enableBackgroundTokenRefresh:true
+  }}).getAuthenticationInfoOrNull().then(function(info){{
+    try{{
+      var cur=new URLSearchParams(win.location.search);
+      if(info&&info.accessToken){{
+        if(!cur.has('pa_token')){{
+          cur.set('pa_token',info.accessToken);
+          win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
+          win.location.reload();
+        }}
+      }}else if(cur.has('pa_token')){{
+        cur.delete('pa_token');
+        win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
+      }}
+    }}catch(e){{/* cross-origin — silently skip */}}
+  }});
+}})();
+</script>""",
+        height=0,
+    )
 
 
 def _validate_token(token: str):

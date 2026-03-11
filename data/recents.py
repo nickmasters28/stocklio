@@ -19,6 +19,7 @@ sorted by most-recently-searched.
 """
 
 import streamlit as st
+from datetime import datetime, timezone
 
 
 @st.cache_resource
@@ -41,7 +42,7 @@ def record_search(user_id: str, ticker: str) -> None:
         return
     try:
         _client().table("recent_searches").upsert(
-            {"user_id": user_id, "ticker": ticker, "ts": "now()"},
+            {"user_id": user_id, "ticker": ticker, "ts": datetime.now(timezone.utc).isoformat()},
             on_conflict="user_id,ticker",
         ).execute()
     except Exception:
