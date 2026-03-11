@@ -5,6 +5,7 @@ pages/1_Analyze.py -- Stock analysis dashboard (accessible at /Analyze)
 import streamlit as st
 from ui.layout import render_stock_analysis
 from auth.propelauth import logout, login_url, signup_url
+from data.recents import record_search, get_recent_searches
 
 # st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
 # Sidebar is shown via initial_sidebar_state="expanded" in app.py (Streamlit-native,
@@ -51,6 +52,8 @@ st.markdown("""
     [data-testid="stSidebar"] .stButton > button[kind="primary"] { font-size: 0.85rem !important; }
     button[aria-label*="keyboard" i],
     button[title*="keyboard" i] { display: none !important; }
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarHeader"] > button { display: none !important; }
     section[data-testid="stSidebar"] { width: 273px !important; min-width: 273px !important; max-width: 273px !important; }
     section[data-testid="stSidebar"] > div:first-child { width: 273px !important; }
     .sidebar-auth-bar {
@@ -176,6 +179,23 @@ with st.sidebar:
 
         analyze_btn = st.form_submit_button("🔎 Analyze Stock", use_container_width=True, type="primary")
 
+    # Recent searches — only for logged-in users
+    if st.session_state.get("logged_in"):
+        _recents = get_recent_searches(st.session_state["user_id"])
+        if _recents:
+            st.markdown("---")
+            st.markdown(
+                "<p style='font-size:0.72rem;font-weight:600;color:#6b7280;"
+                "text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;'>"
+                "Recent Searches</p>",
+                unsafe_allow_html=True,
+            )
+            for _rt in _recents:
+                if st.button(_rt, key=f"recent_{_rt}", use_container_width=True):
+                    st.session_state["_last_url_ticker"] = _rt
+                    st.query_params["ticker"] = _rt
+                    st.rerun()
+
     st.markdown("---")
 
     if st.session_state.get("logged_in"):
@@ -183,9 +203,13 @@ with st.sidebar:
         email_display = st.session_state["user_email"]
         st.markdown(
             f'<div class="sidebar-auth-bar">'
+            f'<div style="display:flex;align-items:center;gap:8px;">'
             f'<div class="auth-avatar">{email_initial}</div>'
             f'<div style="font-size:0.78rem;color:#1a202c;flex:1;overflow:hidden;'
             f'text-overflow:ellipsis;white-space:nowrap;">{email_display}</div>'
+            f'</div>'
+            f'<a href="https://auth.stocklio.ai/account" class="auth-btn" '
+            f'style="text-decoration:none;cursor:pointer;text-align:center;">My Account</a>'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -217,6 +241,8 @@ if analyze_btn:
 
 _active_ticker = st.query_params.get("ticker", "").upper().strip()
 if _active_ticker:
+    if st.session_state.get("logged_in"):
+        record_search(st.session_state["user_id"], _active_ticker)
     render_stock_analysis(_active_ticker, period)
 else:
     st.info("Enter a ticker in the sidebar and click **Analyze Stock** to get started.")

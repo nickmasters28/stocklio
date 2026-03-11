@@ -121,6 +121,20 @@ if st.session_state.get("current_ticker"):
 
 _login_url  = login_url()
 _signup_url = signup_url()
+_is_logged_in = st.session_state.get("logged_in", False)
+
+if _is_logged_in:
+    _nav_links = (
+        '<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
+        '<a href="https://auth.stocklio.ai/account" class="lp-btn lp-btn-outline">My Account</a>'
+        '<a href="/analyze?ticker=AAPL" class="lp-btn lp-btn-primary">Open Dashboard</a>'
+    )
+else:
+    _nav_links = (
+        f'<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
+        f'<a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>'
+        f'<a href="{_signup_url}" class="lp-btn lp-btn-primary">Sign up free</a>'
+    )
 
 st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -422,9 +436,7 @@ st.markdown(f"""
 <div class="lp-nav">
     <div class="lp-logo">stocklio<span class="lp-logo-dot">.</span></div>
     <div class="lp-nav-links">
-        <a href="/blog" class="lp-btn lp-btn-outline">Blog</a>
-        <a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>
-        <a href="{_signup_url}" class="lp-btn lp-btn-primary">Sign up free</a>
+        {_nav_links}
     </div>
 </div>
 
@@ -578,11 +590,20 @@ with _cta_col:
         else:
             st.warning("Please enter a ticker symbol.")
 
+    if _is_logged_in:
+        _cta_secondary_html = (
+            '<a href="/analyze?ticker=AAPL" class="lp-btn lp-btn-outline lp-btn-lg" '
+            'style="font-family:\'Inter\',sans-serif;font-size:0.95rem;padding:13px 32px;border-radius:10px;border:1px solid #4a5568;color:#1a202c;background:#ffffff;">'
+            'Open Dashboard</a>'
+        )
+    else:
+        _cta_secondary_html = (
+            f'<a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg" '
+            f'style="font-family:\'Inter\',sans-serif;font-size:0.95rem;padding:13px 32px;border-radius:10px;border:1px solid #4a5568;color:#1a202c;background:#ffffff;">'
+            f'Create an account</a>'
+        )
     st.markdown(
-        f'<div style="text-align:center;margin-top:8px;">'
-        f'<a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg" '
-        f'style="font-family:\'Inter\',sans-serif;font-size:0.95rem;padding:13px 32px;border-radius:10px;border:1px solid #4a5568;color:#1a202c;background:#ffffff;">'
-        f'Create an account</a></div>',
+        f'<div style="text-align:center;margin-top:8px;">{_cta_secondary_html}</div>',
         unsafe_allow_html=True,
     )
 

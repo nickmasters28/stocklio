@@ -18,6 +18,7 @@ Secrets required in .streamlit/secrets.toml:
 
 import streamlit as st
 import jwt
+from urllib.parse import quote as _quote
 
 
 # ---------------------------------------------------------------------------
@@ -40,11 +41,13 @@ def _base_url() -> str:
 
 
 def login_url() -> str:
-    return f"{_auth_url()}/en/login?redirect_to={_base_url()}"
+    redirect = f"{_base_url()}/analyze?ticker=AAPL"
+    return f"{_auth_url()}/en/login?redirect_to={_quote(redirect, safe='')}"
 
 
 def signup_url() -> str:
-    return f"{_auth_url()}/en/signup?redirect_to={_base_url()}"
+    redirect = f"{_base_url()}/analyze?ticker=AAPL"
+    return f"{_auth_url()}/en/signup?redirect_to={_quote(redirect, safe='')}"
 
 
 # ---------------------------------------------------------------------------
