@@ -18,6 +18,7 @@ Secrets required in .streamlit/secrets.toml:
 
 import streamlit as st
 import jwt
+import json
 from urllib.parse import quote as _quote
 
 
@@ -56,18 +57,36 @@ def inject_auth_js() -> None:
     """
     Inject the PropelAuth JS client into the page via components.html().
 
-    st.markdown() strips <script> tags (React dangerouslySetInnerHTML does not
-    execute scripts set via innerHTML). components.html() runs inside a sandboxed
-    iframe where scripts do execute.  We target window.parent to modify the
-    Streamlit app's URL, then reload.  A try/catch silently handles the rare
-    cross-origin case (badly-configured reverse proxy).
+    Two-path approach:
+    1. Fast path: check localStorage for a previously-validated token. If found
+       and not expired, inject it into the URL immediately — no network round-trip.
+    2. Slow path: ask PropelAuth's JS client (cross-domain cookie/session check).
+       If a session exists, store the token in localStorage for future fast-path
+       use, then inject into the URL.
 
-    On every page load this checks for a valid PropelAuth session (stored in
-    cookies by the hosted login page).  If one exists it appends ?pa_token=...
-    to the parent URL so handle_auth_callback() can read it.
+    On logout (_pa_just_logged_out session flag), a different iframe is rendered
+    that clears localStorage and calls PropelAuth.logout() before exiting.
     """
     import streamlit.components.v1 as components
     auth_url = _auth_url()
+
+    # On logout: clear localStorage + PropelAuth cookies, then stop.
+    # Different JS content forces Streamlit to recreate the iframe.
+    if st.session_state.pop("_pa_just_logged_out", False):
+        components.html(
+            f"""<script src="https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/dist/propelauth.js"></script>
+<script>
+(function(){{
+  try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
+  try{{
+    PropelAuth.createClient({{authUrl:"{auth_url}",enableBackgroundTokenRefresh:false}}).logout(false);
+  }}catch(e){{}}
+}})();
+</script>""",
+            height=0,
+        )
+        return
+
     components.html(
         f"""<script src="https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/dist/propelauth.js"></script>
 <script>
@@ -75,6 +94,30 @@ def inject_auth_js() -> None:
   if(window.__paInit)return;
   window.__paInit=true;
   var win=(window.parent&&window.parent!==window)?window.parent:window;
+
+  function injectToken(token){{
+    try{{
+      var cur=new URLSearchParams(win.location.search);
+      if(!cur.has('pa_token')){{
+        cur.set('pa_token',token);
+        win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
+        win.location.reload();
+      }}
+    }}catch(e){{/* cross-origin — silently skip */}}
+  }}
+
+  // Fast path: use token cached in localStorage (instant, no network)
+  try{{
+    var stored=localStorage.getItem('pa_token');
+    var expiry=parseInt(localStorage.getItem('pa_expiry')||'0');
+    var now=Math.floor(Date.now()/1000);
+    if(stored&&expiry>now){{
+      injectToken(stored);
+      return;
+    }}
+  }}catch(e){{}}
+
+  // Slow path: ask PropelAuth (cross-domain cookie check, async)
   PropelAuth.createClient({{
     authUrl:"{auth_url}",
     enableBackgroundTokenRefresh:true
@@ -82,14 +125,23 @@ def inject_auth_js() -> None:
     try{{
       var cur=new URLSearchParams(win.location.search);
       if(info&&info.accessToken){{
+        try{{
+          localStorage.setItem('pa_token',info.accessToken);
+          if(info.expiresAtSeconds){{
+            localStorage.setItem('pa_expiry',String(info.expiresAtSeconds));
+          }}
+        }}catch(e){{}}
         if(!cur.has('pa_token')){{
           cur.set('pa_token',info.accessToken);
           win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
           win.location.reload();
         }}
-      }}else if(cur.has('pa_token')){{
-        cur.delete('pa_token');
-        win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
+      }}else{{
+        try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
+        if(cur.has('pa_token')){{
+          cur.delete('pa_token');
+          win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
+        }}
       }}
     }}catch(e){{/* cross-origin — silently skip */}}
   }});
@@ -119,7 +171,11 @@ def handle_auth_callback() -> None:
     """
     Read ?pa_token from the URL, validate it, and populate session state.
     Call this once at the top of every page render (before rendering content).
+    On success, also caches the token in localStorage so inject_auth_js can
+    recover the session instantly on future page loads without a network round-trip.
     """
+    import streamlit.components.v1 as components
+
     token = st.query_params.get("pa_token")
     if not token:
         return
@@ -134,13 +190,21 @@ def handle_auth_callback() -> None:
         st.session_state["user_email"] = payload.get("email", "")
         st.session_state["user_id"]    = payload.get("user_id", "")
         st.session_state["pa_token"]   = token
+        # Cache in localStorage for instant cross-session recovery
+        exp = payload.get("exp", 0)
+        components.html(
+            f"<script>try{{localStorage.setItem('pa_token',{json.dumps(token)});"
+            f"localStorage.setItem('pa_expiry','{exp}');}}catch(e){{}}</script>",
+            height=0,
+        )
     else:
         for key in ("logged_in", "user_email", "user_id", "pa_token"):
             st.session_state.pop(key, None)
 
 
 def logout() -> None:
-    """Clear local session. PropelAuth JS client will clear its cookies."""
+    """Clear local session and signal inject_auth_js to clear localStorage + PropelAuth cookies."""
     for key in ("logged_in", "user_email", "user_id", "pa_token"):
         st.session_state.pop(key, None)
     st.query_params.clear()
+    st.session_state["_pa_just_logged_out"] = True

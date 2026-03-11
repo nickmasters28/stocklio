@@ -131,13 +131,12 @@ st.markdown("""
 # -- Sidebar -------------------------------------------------------------------
 with st.sidebar:
     st.markdown(
-        '<a href="/" target="_self" style="text-decoration:none;color:#1a202c;">'
         '<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:3rem;font-weight:800;'
         'color:#1a202c;letter-spacing:-0.01em;margin-top:-60px;padding:4px 0 2px 0;">'
-        'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>'
-        '</a>',
+        'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>',
         unsafe_allow_html=True,
     )
+    st.page_link("pages/home.py", label="← Home", use_container_width=False)
     st.markdown("---")
 
     st.subheader("🔍 Stock Lookup")
