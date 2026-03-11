@@ -127,6 +127,7 @@ st.markdown(f"""
 <style>
     .stApp {{ background-color: #f5f7fa; }}
     .block-container {{ padding-top: 1rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
+    section[data-testid="stSidebar"] {{ display: none !important; }}
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],

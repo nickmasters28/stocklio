@@ -14,7 +14,7 @@ st.set_page_config(
     page_title="Stocklio — AI-Powered Stock Intelligence",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 # ── Critical hide CSS — injected as early as possible to prevent FOUC ────────

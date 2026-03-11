@@ -3,37 +3,14 @@ pages/1_Analyze.py -- Stock analysis dashboard (accessible at /Analyze)
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 from ui.layout import render_stock_analysis
 from auth.propelauth import logout, login_url, signup_url
 
 # st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
-
-# Auto-expand the sidebar on /analyze — app.py starts it collapsed globally.
-# Must use components.html() because st.markdown() strips <script> tags.
-# The script runs inside an iframe, so we target window.parent.document to
-# interact with the real sidebar button. sessionStorage guard prevents the
-# click firing on every Streamlit rerun (which would cause an expand/collapse loop).
-components.html(
-    '<script>'
-    '(function(){'
-    '  var p=window.parent;'
-    '  if(!p||p===window)return;'
-    '  if(p.sessionStorage.getItem("sidebar_expanded_analyze"))return;'
-    '  function expand(){'
-    '    var d=p.document;'
-    '    var btn=d.querySelector("[data-testid=\\"stSidebarCollapsedControl\\"] button")'
-    '             ||d.querySelector("button[aria-label=\\"open sidebar\\"]")'
-    '             ||d.querySelector("button[aria-label=\\"Open sidebar\\"]");'
-    '    if(btn){btn.click();p.sessionStorage.setItem("sidebar_expanded_analyze","1");return;}'
-    '    setTimeout(expand,150);'
-    '  }'
-    '  if(p.document.readyState==="loading")'
-    '    {p.document.addEventListener("DOMContentLoaded",expand);}else{expand();}'
-    '})();'
-    '</script>',
-    height=0,
-)
+# Sidebar is shown via initial_sidebar_state="expanded" in app.py (Streamlit-native,
+# works in all environments). JS-based auto-expand was removed because components.html()
+# iframes are cross-origin in production (behind a reverse proxy), causing
+# window.parent.document access to throw a SecurityError silently.
 
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -72,8 +49,6 @@ st.markdown("""
     [data-testid="stSidebar"] span:not(.auth-btn):not(.logo-dot),
     [data-testid="stSidebar"] h3 { font-size: 0.78rem !important; }
     [data-testid="stSidebar"] .stButton > button[kind="primary"] { font-size: 0.85rem !important; }
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarHeader"] > button,
     button[aria-label*="keyboard" i],
     button[title*="keyboard" i] { display: none !important; }
     section[data-testid="stSidebar"] { width: 273px !important; min-width: 273px !important; max-width: 273px !important; }
