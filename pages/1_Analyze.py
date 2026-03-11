@@ -198,23 +198,13 @@ with st.sidebar:
     st.markdown("---")
 
     if st.session_state.get("logged_in"):
-        email_initial = st.session_state["user_email"][0].upper()
-        email_display = st.session_state["user_email"]
         st.markdown(
             f'<div class="sidebar-auth-bar">'
-            f'<div style="display:flex;align-items:center;gap:8px;">'
-            f'<div class="auth-avatar">{email_initial}</div>'
-            f'<div style="font-size:0.78rem;color:#1a202c;flex:1;overflow:hidden;'
-            f'text-overflow:ellipsis;white-space:nowrap;">{email_display}</div>'
-            f'</div>'
-            f'<a href="https://auth.stocklio.ai/account" class="auth-btn" '
-            f'style="text-decoration:none;cursor:pointer;text-align:center;">My Account</a>'
+            f'<a href="https://auth.stocklio.ai/account" class="auth-btn auth-btn-primary" '
+            f'style="text-decoration:none;cursor:pointer;">My Account</a>'
             f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("Log out", use_container_width=True, key="logout_btn"):
-            logout()
-            st.rerun()
     else:
         _login_url  = login_url()
         _signup_url = signup_url()

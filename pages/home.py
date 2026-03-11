@@ -123,17 +123,6 @@ _login_url  = login_url()
 _signup_url = signup_url()
 _is_logged_in = st.session_state.get("logged_in", False)
 
-# ── TEMPORARY DEBUG — remove after confirming auth state ──────────────────────
-st.info(
-    f"**DEBUG AUTH STATE**  \n"
-    f"`logged_in` = `{st.session_state.get('logged_in')}`  \n"
-    f"`user_email` = `{st.session_state.get('user_email')}`  \n"
-    f"`pa_token in session` = `{bool(st.session_state.get('pa_token'))}`  \n"
-    f"`pa_token in URL` = `{bool(st.query_params.get('pa_token'))}`  \n"
-    f"`session keys` = `{list(st.session_state.keys())}`  \n"
-    f"`render_branch` = `{'logged_in' if _is_logged_in else 'logged_out'}`"
-)
-# ── END TEMPORARY DEBUG ────────────────────────────────────────────────────────
 
 if _is_logged_in:
     _user_email = st.session_state.get("user_email", "")
