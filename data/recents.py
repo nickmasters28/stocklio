@@ -45,8 +45,8 @@ def record_search(user_id: str, ticker: str) -> None:
             {"user_id": user_id, "ticker": ticker, "ts": datetime.now(timezone.utc).isoformat()},
             on_conflict="user_id,ticker",
         ).execute()
-    except Exception:
-        pass  # never break the app over recents tracking
+    except Exception as e:
+        import sys; print(f"[recents] record_search failed: {e}", file=sys.stderr)
 
 
 def get_recent_searches(user_id: str, limit: int = 10) -> list[str]:
@@ -66,5 +66,6 @@ def get_recent_searches(user_id: str, limit: int = 10) -> list[str]:
             .execute()
         ).data
         return [r["ticker"] for r in rows]
-    except Exception:
+    except Exception as e:
+        import sys; print(f"[recents] get_recent_searches failed: {e}", file=sys.stderr)
         return []

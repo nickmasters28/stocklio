@@ -294,12 +294,16 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
                 if st.button("🟢 Bullish", key=f"vote_bull_{ticker}",
                              use_container_width=True, type="primary"):
                     cast_vote(ticker, "bullish", current_price, tech_rating)
+                    sentiment_summary.clear()
+                    sentiment_over_time.clear()
                     st.session_state[sess_key] = "bullish"
                     st.rerun()
             with rc:
                 if st.button("🔴 Bearish", key=f"vote_bear_{ticker}",
                              use_container_width=True):
                     cast_vote(ticker, "bearish", current_price, tech_rating)
+                    sentiment_summary.clear()
+                    sentiment_over_time.clear()
                     st.session_state[sess_key] = "bearish"
                     st.rerun()
         else:
@@ -351,6 +355,13 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
 
     if len(history) > 1:
         st.plotly_chart(build_sentiment_chart(history), use_container_width=True)
+    else:
+        st.markdown(
+            '<p style="font-size:0.82rem;color:#a0aec0;margin-top:12px;">'
+            'Community Sentiment Chart will appear once enough votes have been cast for this ticker.'
+            '</p>',
+            unsafe_allow_html=True,
+        )
 
 
 # -- Individual Stock Analysis -------------------------------------------------
