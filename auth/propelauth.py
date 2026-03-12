@@ -110,17 +110,20 @@ import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascr
     try{{
       var p=window.parent;
       var cur=new URLSearchParams(p.location.search);
-      if(!cur.has('pa_token')){{
-        cur.set('pa_token',token);
-        p.history.replaceState(null,'',p.location.pathname+'?'+cur.toString());
-        p.location.reload();
-        return;
-      }}
+      if(cur.has('pa_token'))return;  // already in URL — server-side callback handles it
+      cur.set('pa_token',token);
+      p.history.replaceState(null,'',p.location.pathname+'?'+cur.toString());
+      p.location.reload();
+      return;
     }}catch(e){{}}
     // Fallback: cross-origin navigate to Python-constructed URL (write-only, always allowed)
     var sep=redirectBase.indexOf('?')>=0?'&':'?';
     window.parent.location.href=redirectBase+sep+'pa_token='+encodeURIComponent(token);
   }}
+
+  // pa_token already in parent URL — handle_auth_callback() will process it
+  // Must come BEFORE fast path so localStorage token never triggers applyToken when URL already has token
+  try{{if(new URLSearchParams(window.parent.location.search).has('pa_token'))return;}}catch(e){{}}
 
   // Fast path: valid token cached in localStorage
   try{{
@@ -128,9 +131,6 @@ import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascr
     var expiry=parseInt(localStorage.getItem('pa_expiry')||'0');
     if(stored&&expiry>Math.floor(Date.now()/1000)){{applyToken(stored);return;}}
   }}catch(e){{}}
-
-  // pa_token already in parent URL — handle_auth_callback() will process it
-  try{{if(new URLSearchParams(window.parent.location.search).has('pa_token'))return;}}catch(e){{}}
 
   // Slow path: ask PropelAuth whether this user has an active session
   createClient({{
@@ -166,8 +166,10 @@ def _validate_token(token: str):
         )
         return payload
     except jwt.ExpiredSignatureError:
+        import sys; print("[propelauth] token expired", file=sys.stderr)
         return None
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        import sys; print(f"[propelauth] invalid token: {e}", file=sys.stderr)
         return None
 
 
