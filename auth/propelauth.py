@@ -100,8 +100,7 @@ def inject_auth_js() -> None:
       var cur=new URLSearchParams(win.location.search);
       if(!cur.has('pa_token')){{
         cur.set('pa_token',token);
-        win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
-        win.location.reload();
+        win.location.replace(win.location.pathname+'?'+cur.toString());
       }}
     }}catch(e){{/* cross-origin — silently skip */}}
   }}
@@ -133,14 +132,13 @@ def inject_auth_js() -> None:
         }}catch(e){{}}
         if(!cur.has('pa_token')){{
           cur.set('pa_token',info.accessToken);
-          win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
-          win.location.reload();
+          win.location.replace(win.location.pathname+'?'+cur.toString());
         }}
       }}else{{
         try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
         if(cur.has('pa_token')){{
           cur.delete('pa_token');
-          win.history.replaceState(null,'',win.location.pathname+'?'+cur.toString());
+          win.location.replace(win.location.pathname+'?'+cur.toString());
         }}
       }}
     }}catch(e){{/* cross-origin — silently skip */}}

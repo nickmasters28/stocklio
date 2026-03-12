@@ -128,6 +128,44 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# -- Auth gate -----------------------------------------------------------------
+# inject_auth_js() already ran in app.py — its iframe JS will detect an active
+# PropelAuth session and reload with ?pa_token= if the user is logged in.
+# Until that happens, show a login screen and halt rendering.
+if not st.session_state.get("logged_in"):
+    _gate_login  = login_url()
+    _gate_signup = signup_url()
+    st.markdown(
+        f"""
+        <div style="display:flex;flex-direction:column;align-items:center;
+             justify-content:center;min-height:60vh;text-align:center;
+             font-family:'Inter',sans-serif;">
+          <div style="font-family:'Darker Grotesque',sans-serif;font-size:3rem;
+               font-weight:800;color:#1a202c;letter-spacing:-0.01em;margin-bottom:8px;">
+            stocklio<span style="color:#00c896;">.</span>
+          </div>
+          <p style="color:#6b7280;font-size:1rem;margin:0 0 32px 0;">
+            Sign in to access AI-powered stock analysis.
+          </p>
+          <div style="display:flex;gap:12px;justify-content:center;">
+            <a href="{_gate_login}"
+               style="background:#00c896;color:#fff;padding:10px 28px;border-radius:8px;
+                      text-decoration:none;font-weight:600;font-size:0.95rem;">
+              Log in
+            </a>
+            <a href="{_gate_signup}"
+               style="background:#f5f7fa;color:#4a5568;padding:10px 28px;border-radius:8px;
+                      text-decoration:none;font-weight:600;font-size:0.95rem;
+                      border:1px solid #e2e8f0;">
+              Sign up
+            </a>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.stop()
+
 # -- Sidebar -------------------------------------------------------------------
 with st.sidebar:
     st.markdown(
