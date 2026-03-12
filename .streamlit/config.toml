@@ -1,3 +1,6 @@
+[server]
+baseUrlPath = ""
+
 [theme]
 base = "light"
 primaryColor = "#00c896"
