@@ -90,6 +90,7 @@ try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}
 try{{
   createClient({{authUrl:{auth_url_js},enableBackgroundTokenRefresh:false}}).logout(false);
 }}catch(e){{}}
+window.parent.location.href='https://www.stocklio.ai';
 </script>""",
             height=0,
         )

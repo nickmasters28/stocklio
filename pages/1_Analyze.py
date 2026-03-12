@@ -239,7 +239,7 @@ with st.sidebar:
         st.markdown(
             f'<div class="sidebar-auth-bar">'
             f'<a href="https://auth.stocklio.ai/account" class="auth-btn auth-btn-primary" '
-            f'style="text-decoration:none;cursor:pointer;">My Account</a>'
+            f'style="text-decoration:none;cursor:pointer;color:#fff;">My Account</a>'
             f'</div>',
             unsafe_allow_html=True,
         )
