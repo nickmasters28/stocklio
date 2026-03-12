@@ -53,7 +53,7 @@ def signup_url() -> str:
 
 # ---------------------------------------------------------------------------
 
-def inject_auth_js(current_params: dict = None) -> None:
+def inject_auth_js(current_params: dict = None, base_url_override: str = None) -> None:
     """
     Detect the PropelAuth session and inject ?pa_token= into the main page URL.
 
@@ -64,7 +64,8 @@ def inject_auth_js(current_params: dict = None) -> None:
     entirely from Python-side values so we never need to read window.parent.location.
 
     current_params should be dict(st.query_params) from the caller (app.py).
-    This lets JS reconstruct the current page URL without cross-origin reads.
+    base_url_override should be the actual request host (e.g. "https://app.stocklio.ai")
+    so redirects stay on the correct subdomain.
     """
     import streamlit.components.v1 as components
     import urllib.parse
@@ -72,11 +73,12 @@ def inject_auth_js(current_params: dict = None) -> None:
     auth_url    = _auth_url()
     auth_url_js = json.dumps(auth_url)
 
-    # Build the redirect base URL from Python so JS needs no location reads.
-    # Strip any stale pa_token; detect page path from params heuristic.
+    # Build the redirect base URL from the actual request host so that tokens
+    # are injected on the correct subdomain (app. vs www.).
+    base = (base_url_override or _base_url()).rstrip("/")
     safe = {k: v for k, v in (current_params or {}).items() if k != "pa_token"}
     page_path   = "/analyze" if "ticker" in safe else "/"
-    redirect_base = _base_url() + page_path
+    redirect_base = base + page_path
     if safe:
         redirect_base += "?" + urllib.parse.urlencode(safe)
     redirect_base_js = json.dumps(redirect_base)
@@ -84,13 +86,16 @@ def inject_auth_js(current_params: dict = None) -> None:
     # ── Logout path ─────────────────────────────────────────────────────────
     if st.session_state.pop("_pa_just_logged_out", False):
         components.html(
-            f"""<script type="module">
-import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/+esm';
+            # Use a plain <script> for the navigation so it fires even if the
+            # ESM import fails. The module script handles PropelAuth server-side
+            # session invalidation as a best-effort follow-up.
+            f"""<script>
 try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
-try{{
-  createClient({{authUrl:{auth_url_js},enableBackgroundTokenRefresh:false}}).logout(false);
-}}catch(e){{}}
 window.parent.location.href='https://www.stocklio.ai';
+</script>
+<script type="module">
+import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/+esm';
+try{{createClient({{authUrl:{auth_url_js},enableBackgroundTokenRefresh:false}}).logout(false);}}catch(e){{}}
 </script>""",
             height=0,
         )

@@ -33,9 +33,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-inject_auth_js(current_params=dict(st.query_params))
-handle_auth_callback()
-
 # ── Subdomain detection ───────────────────────────────────────────────────────
 # Detect whether we're on app.stocklio.ai (gated) or www.stocklio.ai (public).
 # st.context.headers available in Streamlit 1.37+; fall back to gated (safer).
@@ -44,6 +41,10 @@ try:
 except AttributeError:
     _host = ""
 st.session_state["_is_app_host"] = not _host.startswith("www.")
+_actual_base = f"https://{_host}" if _host else None
+
+inject_auth_js(current_params=dict(st.query_params), base_url_override=_actual_base)
+handle_auth_callback()
 
 # ── Google Analytics ─────────────────────────────────────────────────────────
 # Problem: st.markdown() strips <script> tags (React dangerouslySetInnerHTML).
