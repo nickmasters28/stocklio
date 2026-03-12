@@ -152,7 +152,7 @@ st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
     .stApp {{ background-color: #f5f7fa; }}
-    .block-container {{ padding-top: 1rem !important; padding-bottom: 0 !important; max-width: 1100px; }}
+    .block-container {{ padding-top: 1rem !important; padding-bottom: 0 !important; max-width: 1400px; padding-left: 2rem !important; padding-right: 2rem !important; }}
     section[data-testid="stSidebar"] {{ display: none !important; }}
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarHeader"] > button,
