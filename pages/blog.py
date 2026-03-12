@@ -9,6 +9,7 @@ import streamlit as st
 from datetime import date as _date
 from blog_posts import get_all_posts, get_post_by_slug
 from auth.propelauth import login_url, signup_url
+from ui.ads import lazy_ad_slot, SLOT_BLOG_INDEX_MID, SLOT_BLOG_POST_AFTER_HEADER, SLOT_BLOG_POST_BEFORE_CTA
 
 # st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
 
@@ -207,7 +208,13 @@ if _post_slug:
             st.query_params.clear()
             st.rerun()
 
+        # Ad below post header — loads lazily when scrolled into view
+        lazy_ad_slot(SLOT_BLOG_POST_AFTER_HEADER, height=280)
+
         st.markdown(post["content"])
+
+        # Ad between content and CTA — loads lazily when scrolled into view
+        lazy_ad_slot(SLOT_BLOG_POST_BEFORE_CTA, height=280)
 
         st.markdown("""
 <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0 20px 0;">
@@ -241,7 +248,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-    for post in get_all_posts():
+    for _idx, post in enumerate(get_all_posts()):
         tags_html = "".join(f'<span class="blog-tag">{t}</span>' for t in post["tags"])
 
         st.markdown(f"""
@@ -257,6 +264,10 @@ else:
         if st.button(f"Read article →", key=f"read_{post['slug']}"):
             st.query_params["post"] = post["slug"]
             st.rerun()
+
+        # Ad after every 2nd post card (0-indexed: after index 1, 3, 5, …)
+        if _idx % 2 == 1:
+            lazy_ad_slot(SLOT_BLOG_INDEX_MID, ad_format="auto", height=120)
 
         st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
 

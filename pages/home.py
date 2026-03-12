@@ -7,6 +7,7 @@ st.set_page_config and auth init are handled by app.py (the entrypoint shell).
 
 import streamlit as st
 from auth.propelauth import login_url, signup_url
+from ui.ads import lazy_ad_slot, SLOT_HOME_BETWEEN_STEPS_CTA
 
 # Critical hide CSS — injected first to prevent FOUC of Streamlit's default nav.
 # Mirrors the rule in app.py; redundant injection here ensures it's applied
@@ -591,7 +592,12 @@ st.markdown(f"""
         </div>
     </div>
 </div>
+""", unsafe_allow_html=True)
 
+# ── Homepage ad — lazy, between "How it works" and CTA band ──────────────────
+lazy_ad_slot(SLOT_HOME_BETWEEN_STEPS_CTA, ad_format="auto", height=100, full_width_responsive=True)
+
+st.markdown(f"""
 <!-- CTA Band -->
 <div class="lp-cta-band">
     <h2>{"Your edge is ready." if _is_logged_in else "Stop guessing. Start analyzing."}</h2>

@@ -19,6 +19,7 @@ from indicators.calculator import (
 )
 from forecast.engine import score_symbol, analyze_ride_the_nine
 from ui.charts import build_stock_chart, build_score_gauge, build_ride_the_nine_chart, build_sentiment_chart
+from ui.ads import lazy_ad_slot, SLOT_ANALYZE_BELOW_RTN, SLOT_ANALYZE_BELOW_LR
 
 
 # ── Cached computation pipeline ───────────────────────────────────────────────
@@ -389,12 +390,14 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_forecast = st.empty()   # forecast gauge + card
     _s_rtn      = st.empty()   # ride the nine (auto-loaded)
     _s_d2       = st.empty()   # divider
+    _s_ad1      = st.empty()   # ad slot 1 (below ride-the-nine, lazy)
     _s_signals  = st.empty()   # signal breakdown
     _s_d3       = st.empty()   # divider
     _s_sr       = st.empty()   # support & resistance
     _s_d4       = st.empty()   # divider
     _s_lr       = st.empty()   # linear regression
     _s_d5       = st.empty()   # divider
+    _s_ad2      = st.empty()   # ad slot 2 (below linear regression, lazy)
     _s_voting   = st.empty()   # prediction market (last core section — has Supabase I/O)
 
     # ── Fill all sections with skeletons immediately ───────────────────────────
@@ -419,8 +422,8 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
 
     def _clear_all():
-        for s in [_s_header, _s_d1, _s_forecast, _s_rtn, _s_d2, _s_signals,
-                  _s_d3, _s_sr, _s_d4, _s_lr, _s_d5, _s_voting]:
+        for s in [_s_header, _s_d1, _s_forecast, _s_rtn, _s_d2, _s_ad1,
+                  _s_signals, _s_d3, _s_sr, _s_d4, _s_lr, _s_d5, _s_ad2, _s_voting]:
             s.empty()
 
     # ── Parallel I/O — _compute_analysis and fetch_info run concurrently.
@@ -636,6 +639,15 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
                 f"Projected price in ~10 trading days: **${proj_10d:.2f}** ({proj_chg:+.1f}%)"
                 " -- based on 30-day regression. *Not a prediction.*"
             )
+
+    # Ad slot 1 — rendered after ride-the-nine content is live.
+    # The IntersectionObserver in the iframe fires only when the user scrolls here.
+    with _s_ad1.container():
+        lazy_ad_slot(SLOT_ANALYZE_BELOW_RTN, height=280)
+
+    # Ad slot 2 — rendered after linear-regression content is live.
+    with _s_ad2.container():
+        lazy_ad_slot(SLOT_ANALYZE_BELOW_LR, height=280)
 
     # Prediction Market — rendered after core analysis so Supabase I/O
     # (parallelised internally) does not delay the forecast/signals sections.
