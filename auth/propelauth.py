@@ -86,16 +86,16 @@ def inject_auth_js(current_params: dict = None, base_url_override: str = None) -
     # ── Logout path ─────────────────────────────────────────────────────────
     if st.session_state.pop("_pa_just_logged_out", False):
         components.html(
-            # Use a plain <script> for the navigation so it fires even if the
-            # ESM import fails. The module script handles PropelAuth server-side
-            # session invalidation as a best-effort follow-up.
+            # Plain <script> only — no ESM import so nothing can block execution.
+            # 1. Clear localStorage immediately.
+            # 2. POST to PropelAuth's logout API (clears session cookie server-side).
+            # 3. Navigate to www.stocklio.ai when done, or after 2s timeout.
             f"""<script>
 try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
-window.parent.location.href='https://www.stocklio.ai';
-</script>
-<script type="module">
-import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/+esm';
-try{{createClient({{authUrl:{auth_url_js},enableBackgroundTokenRefresh:false}}).logout(false);}}catch(e){{}}
+var _ld=false;
+function _nav(){{if(!_ld){{_ld=true;window.parent.location.href='https://www.stocklio.ai';}}}}
+setTimeout(_nav,2000);
+try{{fetch({auth_url_js}+'/api/v1/logout',{{method:'POST',credentials:'include'}}).then(_nav).catch(_nav);}}catch(e){{_nav();}}
 </script>""",
             height=0,
         )
@@ -122,7 +122,18 @@ import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascr
       p.location.reload();
       return;
     }}catch(e){{}}
-    // Fallback: cross-origin navigate to Python-constructed URL (write-only, always allowed)
+    // Fallback: cross-origin navigate. Prefer reading the actual origin from the
+    // parent frame (same-origin write is always allowed). Use Python-embedded
+    // redirectBase only if the origin read somehow fails.
+    try{{
+      var _origin=window.parent.location.origin;
+      var _path=window.parent.location.pathname;
+      var _search=window.parent.location.search;
+      var _cur2=new URLSearchParams(_search);
+      _cur2.set('pa_token',token);
+      window.parent.location.href=_origin+_path+'?'+_cur2.toString();
+      return;
+    }}catch(e){{}}
     var sep=redirectBase.indexOf('?')>=0?'&':'?';
     window.parent.location.href=redirectBase+sep+'pa_token='+encodeURIComponent(token);
   }}
@@ -188,6 +199,12 @@ def handle_auth_callback() -> None:
     """
     import streamlit.components.v1 as components
 
+    # Skip token processing entirely during the logout flow so a stale or
+    # PropelAuth-issued pa_token in the URL cannot re-authenticate the user.
+    if st.session_state.pop("_pa_skip_auth", False):
+        st.query_params.pop("pa_token", None)
+        return
+
     token = st.query_params.get("pa_token")
     if not token:
         return
@@ -220,3 +237,4 @@ def logout() -> None:
         st.session_state.pop(key, None)
     st.query_params.clear()
     st.session_state["_pa_just_logged_out"] = True
+    st.session_state["_pa_skip_auth"] = True  # block handle_auth_callback on the next render
