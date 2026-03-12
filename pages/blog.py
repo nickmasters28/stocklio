@@ -9,7 +9,15 @@ import streamlit as st
 from datetime import date as _date
 from blog_posts import get_all_posts, get_post_by_slug
 from auth.propelauth import login_url, signup_url
-from ui.ads import lazy_ad_slot, SLOT_BLOG_INDEX_MID, SLOT_BLOG_POST_AFTER_HEADER, SLOT_BLOG_POST_BEFORE_CTA
+from ui.ads import (
+    lazy_ad_slot,
+    blog_sidebar_ads,
+    SLOT_BLOG_INDEX_MID,
+    SLOT_BLOG_POST_AFTER_HEADER,
+    SLOT_BLOG_POST_BEFORE_CTA,
+    SLOT_BLOG_LEFT_SIDEBAR,
+    SLOT_BLOG_RIGHT_SIDEBAR,
+)
 
 # st.set_page_config, inject_auth_js, handle_auth_callback are handled by app.py shell
 
@@ -177,6 +185,9 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+
+# ── Fixed left/right skyscraper ads (visible on viewports ≥ 1440px) ─────────
+blog_sidebar_ads(SLOT_BLOG_LEFT_SIDEBAR, SLOT_BLOG_RIGHT_SIDEBAR)
 
 # ── Router ───────────────────────────────────────────────────────────────────
 

@@ -19,7 +19,7 @@ from indicators.calculator import (
 )
 from forecast.engine import score_symbol, analyze_ride_the_nine
 from ui.charts import build_stock_chart, build_score_gauge, build_ride_the_nine_chart, build_sentiment_chart
-from ui.ads import lazy_ad_slot, SLOT_ANALYZE_BELOW_RTN, SLOT_ANALYZE_BELOW_LR
+from ui.ads import lazy_ad_slot, SLOT_ANALYZE_BELOW_RTN, SLOT_ANALYZE_BELOW_LR, SLOT_BOTTOM_LEADERBOARD
 
 
 # ── Cached computation pipeline ───────────────────────────────────────────────
@@ -694,3 +694,6 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
                 df[show_cols].tail(50).round(4).sort_index(ascending=False),
                 use_container_width=True,
             )
+
+    # Bottom leaderboard — always rendered, loads lazily when scrolled into view
+    lazy_ad_slot(SLOT_BOTTOM_LEADERBOARD, ad_format="auto", height=120)

@@ -29,6 +29,9 @@ SLOT_HOME_BETWEEN_STEPS_CTA = "6047770968"   # /home    — between How It Works
 SLOT_BLOG_INDEX_MID         = "6047770968"   # /blog index — after every 2nd post card
 SLOT_BLOG_POST_AFTER_HEADER = "6047770968"   # /blog post  — below post header, above content
 SLOT_BLOG_POST_BEFORE_CTA   = "6047770968"   # /blog post  — after content, before CTA button
+SLOT_BLOG_LEFT_SIDEBAR      = "7728188723"   # /blog — fixed left skyscraper (160×600)
+SLOT_BLOG_RIGHT_SIDEBAR     = "7728188723"   # /blog — fixed right skyscraper (160×600)
+SLOT_BOTTOM_LEADERBOARD     = "6047770968"   # /home + /analyze — bottom horizontal banner
 
 
 # ── Ad component ──────────────────────────────────────────────────────────────
@@ -180,3 +183,128 @@ def lazy_ad_slot(
 </html>"""
 
     components.html(html, height=height, scrolling=False)
+
+
+def blog_sidebar_ads(
+    slot_left: str,
+    slot_right: str,
+    min_viewport_width: int = 1440,
+) -> None:
+    """
+    Inject fixed left/right skyscraper ads (160×600) into the parent document.
+
+    The ads are injected as fixed-position elements directly in the parent
+    window's DOM, so they appear outside Streamlit's content column and don't
+    consume any vertical space in the page flow.
+
+    They are only shown when the viewport is at least `min_viewport_width` px
+    wide (default 1440px), so they never overlap the 1100px blog content on
+    smaller screens.
+
+    Both ads load immediately (no scroll trigger needed — they're always visible
+    once rendered) after the AdSense async script is ready.
+    """
+    pub_js   = json.dumps(PUBLISHER_ID)
+    slot_l   = json.dumps(slot_left)
+    slot_r   = json.dumps(slot_right)
+    min_w    = json.dumps(min_viewport_width)
+
+    components.html(f"""<script>
+(function() {{
+  var p = window.parent;
+  if (!p || p === window) return;
+  if (p.document.getElementById('stkl-blog-sidebar-ads')) return; // idempotent
+
+  var MIN_W = {min_w};
+
+  function buildAd(slot, side) {{
+    var wrap = p.document.createElement('div');
+    wrap.style.cssText = [
+      'position:fixed',
+      'top:50%',
+      'transform:translateY(-50%)',
+      side === 'left' ? 'left:8px' : 'right:8px',
+      'width:160px',
+      'z-index:50',
+      'display:flex',
+      'flex-direction:column',
+      'align-items:center',
+      'gap:5px',
+      'pointer-events:auto',
+    ].join(';') + ';';
+
+    var lbl = p.document.createElement('div');
+    lbl.textContent = 'Advertisement';
+    lbl.style.cssText = [
+      'font-family:Inter,-apple-system,sans-serif',
+      'font-size:0.65rem',
+      'color:#a0aec0',
+      'letter-spacing:.06em',
+      'text-transform:uppercase',
+      'user-select:none',
+    ].join(';') + ';';
+    wrap.appendChild(lbl);
+
+    var ins = p.document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.cssText = 'display:inline-block;width:160px;height:600px;';
+    ins.setAttribute('data-ad-client', {pub_js});
+    ins.setAttribute('data-ad-slot', slot);
+    wrap.appendChild(ins);
+
+    return wrap;
+  }}
+
+  function ensureAdSenseScript() {{
+    if (p.document.getElementById('stkl-adsense-parent')) return;
+    var s = p.document.createElement('script');
+    s.id = 'stkl-adsense-parent';
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + {pub_js};
+    p.document.head.appendChild(s);
+  }}
+
+  function pushAds() {{
+    try {{ (p.adsbygoogle = p.adsbygoogle || []).push({{}}); }} catch(e) {{}}
+    try {{ (p.adsbygoogle = p.adsbygoogle || []).push({{}}); }} catch(e) {{}}
+  }}
+
+  function mount() {{
+    if (p.innerWidth < MIN_W) return;
+
+    var container = p.document.createElement('div');
+    container.id = 'stkl-blog-sidebar-ads';
+    container.appendChild(buildAd({slot_l}, 'left'));
+    container.appendChild(buildAd({slot_r}, 'right'));
+    p.document.body.appendChild(container);
+
+    ensureAdSenseScript();
+
+    // Push after a short delay so the async script has time to initialise
+    var delay = (p.adsbygoogle && p.adsbygoogle.loaded) ? 0 : 800;
+    p.setTimeout(pushAds, delay);
+  }}
+
+  function unmount() {{
+    var el = p.document.getElementById('stkl-blog-sidebar-ads');
+    if (el) el.remove();
+  }}
+
+  // Mount on load / already loaded
+  if (p.document.readyState === 'complete' || p.document.readyState === 'interactive') {{
+    mount();
+  }} else {{
+    p.addEventListener('DOMContentLoaded', mount);
+  }}
+
+  // Respond to viewport resize
+  p.addEventListener('resize', function() {{
+    if (p.innerWidth < MIN_W) {{
+      unmount();
+    }} else if (!p.document.getElementById('stkl-blog-sidebar-ads')) {{
+      mount();
+    }}
+  }});
+}})();
+</script>""", height=0)

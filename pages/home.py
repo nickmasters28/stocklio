@@ -7,7 +7,7 @@ st.set_page_config and auth init are handled by app.py (the entrypoint shell).
 
 import streamlit as st
 from auth.propelauth import login_url, signup_url
-from ui.ads import lazy_ad_slot, SLOT_HOME_BETWEEN_STEPS_CTA
+from ui.ads import lazy_ad_slot, SLOT_HOME_BETWEEN_STEPS_CTA, SLOT_BOTTOM_LEADERBOARD
 
 # Critical hide CSS — injected first to prevent FOUC of Streamlit's default nav.
 # Mirrors the rule in app.py; redundant injection here ensures it's applied
@@ -642,6 +642,9 @@ with _cta_col:
         f'<div style="text-align:center;margin-top:8px;">{_cta_secondary_html}</div>',
         unsafe_allow_html=True,
     )
+
+# Bottom leaderboard — above footer, loads lazily when scrolled into view
+lazy_ad_slot(SLOT_BOTTOM_LEADERBOARD, ad_format="auto", height=120)
 
 st.markdown(f"""
 <!-- Footer -->
