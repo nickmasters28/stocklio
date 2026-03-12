@@ -110,7 +110,7 @@ if st.session_state.get("current_ticker"):
             if st.button("Log out", use_container_width=True):
                 logout(); st.rerun()
         else:
-            st.markdown(f'<div class="sidebar-auth-bar"><a href="{_lu}" class="auth-btn auth-btn-primary" style="text-decoration:none;">Log in</a><a href="{_su}" class="auth-btn" style="text-decoration:none;">Sign up</a></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="sidebar-auth-bar"><a href="{_lu}" target="_self" class="auth-btn auth-btn-primary" style="text-decoration:none;">Log in</a><a href="{_su}" target="_self" class="auth-btn" style="text-decoration:none;">Sign up</a></div>', unsafe_allow_html=True)
 
     render_stock_analysis(ticker_input, period)
     st.stop()
@@ -144,8 +144,8 @@ else:
     _welcome_banner = ""
     _nav_links = (
         f'<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
-        f'<a href="{_login_url}" class="lp-btn lp-btn-outline">Log in</a>'
-        f'<a href="{_signup_url}" class="lp-btn lp-btn-primary">Sign up free</a>'
+        f'<a href="{_login_url}" target="_self" class="lp-btn lp-btn-outline">Log in</a>'
+        f'<a href="{_signup_url}" target="_self" class="lp-btn lp-btn-primary">Sign up free</a>'
     )
 
 st.markdown(f"""
@@ -628,7 +628,7 @@ with _cta_col:
         )
     else:
         _cta_secondary_html = (
-            f'<a href="{_signup_url}" class="lp-btn lp-btn-outline lp-btn-lg" '
+            f'<a href="{_signup_url}" target="_self" class="lp-btn lp-btn-outline lp-btn-lg" '
             f'style="font-family:\'Inter\',sans-serif;font-size:0.95rem;padding:13px 32px;border-radius:10px;border:1px solid #4a5568;color:#1a202c;background:#ffffff;">'
             f'Create an account</a>'
         )
@@ -644,7 +644,7 @@ st.markdown(f"""
         <div class="lp-footer-section">
             <div class="lp-footer-section-title">Resources</div>
             <a href="/blog" class="lp-footer-link">Blog</a>
-            {"<a href='/analyze?ticker=AAPL' class='lp-footer-link'>Open Dashboard</a><a href='https://auth.stocklio.ai/account' class='lp-footer-link'>My Account</a>" if _is_logged_in else f"<a href='{_signup_url}' class='lp-footer-link'>Create an account</a><a href='{_login_url}' class='lp-footer-link'>Log in</a>"}
+            {"<a href='/analyze?ticker=AAPL' class='lp-footer-link'>Open Dashboard</a><a href='https://auth.stocklio.ai/account' target='_self' class='lp-footer-link'>My Account</a>" if _is_logged_in else f"<a href='{_signup_url}' target='_self' class='lp-footer-link'>Create an account</a><a href='{_login_url}' target='_self' class='lp-footer-link'>Log in</a>"}
             <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
         </div>
     </div>

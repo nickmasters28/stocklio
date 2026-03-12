@@ -148,12 +148,12 @@ if not st.session_state.get("logged_in"):
             Sign in to access AI-powered stock analysis.
           </p>
           <div style="display:flex;gap:12px;justify-content:center;">
-            <a href="{_gate_login}"
+            <a href="{_gate_login}" target="_self"
                style="background:#00c896;color:#fff;padding:10px 28px;border-radius:8px;
                       text-decoration:none;font-weight:600;font-size:0.95rem;">
               Log in
             </a>
-            <a href="{_gate_signup}"
+            <a href="{_gate_signup}" target="_self"
                style="background:#f5f7fa;color:#4a5568;padding:10px 28px;border-radius:8px;
                       text-decoration:none;font-weight:600;font-size:0.95rem;
                       border:1px solid #e2e8f0;">
@@ -248,9 +248,9 @@ with st.sidebar:
         _signup_url = signup_url()
         st.markdown(
             f'<div class="sidebar-auth-bar">'
-            f'<a href="{_login_url}" class="auth-btn auth-btn-primary" '
+            f'<a href="{_login_url}" target="_self" class="auth-btn auth-btn-primary" '
             f'style="text-decoration:none;cursor:pointer;">Log in</a>'
-            f'<a href="{_signup_url}" class="auth-btn" '
+            f'<a href="{_signup_url}" target="_self" class="auth-btn" '
             f'style="text-decoration:none;cursor:pointer;">Sign up</a>'
             f'</div>',
             unsafe_allow_html=True,
@@ -283,8 +283,8 @@ st.markdown(f"""
         <div>
             <div class="lp-footer-section-title">Resources</div>
             <a href="/blog" class="lp-footer-link">Blog</a>
-            <a href="{_footer_signup_url}" class="lp-footer-link">Create an account</a>
-            <a href="{_footer_login_url}" class="lp-footer-link">Log in</a>
+            <a href="{_footer_signup_url}" target="_self" class="lp-footer-link">Create an account</a>
+            <a href="{_footer_login_url}" target="_self" class="lp-footer-link">Log in</a>
             <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
         </div>
     </div>

@@ -53,125 +53,102 @@ def signup_url() -> str:
 
 # ---------------------------------------------------------------------------
 
-def inject_auth_js() -> None:
+def inject_auth_js(current_params: dict = None) -> None:
     """
     Detect the PropelAuth session and inject ?pa_token= into the main page URL.
 
-    Uses window.parent.document.createElement('script') — the same pattern as the
-    GA injection in app.py — so PropelAuth runs in the MAIN PAGE context, not inside
-    the iframe. This means:
-      - CORS requests to auth.stocklio.ai originate from app.stocklio.ai (correct origin)
-      - window.location / history / localStorage all refer to the main page directly
-      - No cross-origin URL-reading issues
+    Loads the PropelAuth SDK in the components.html() iframe (same-origin in
+    production per the GA injection comment in app.py).  After getting the
+    access token, navigates via window.parent.location.href — a write-only
+    navigation that is always allowed even cross-origin — using a URL built
+    entirely from Python-side values so we never need to read window.parent.location.
 
-    Two-path approach:
-    1. Fast path (iframe): check main-page localStorage for a cached unexpired token;
-       if found, inject into URL immediately without a network round-trip.
-    2. Slow path (main page): inject PropelAuth SDK into parent document, call
-       getAuthenticationInfoOrNull(), cache token in localStorage, inject into URL.
-
-    Logout: clear localStorage in both contexts, remove injected script element so it
-    can be re-injected on next login, call PropelAuth.logout() to clear the session.
+    current_params should be dict(st.query_params) from the caller (app.py).
+    This lets JS reconstruct the current page URL without cross-origin reads.
     """
     import streamlit.components.v1 as components
-    auth_url = _auth_url()
+    import urllib.parse
+
+    auth_url    = _auth_url()
     auth_url_js = json.dumps(auth_url)
-    sdk_url_js  = json.dumps(
-        "https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/dist/propelauth.js"
-    )
+
+    # Build the redirect base URL from Python so JS needs no location reads.
+    # Strip any stale pa_token; detect page path from params heuristic.
+    safe = {k: v for k, v in (current_params or {}).items() if k != "pa_token"}
+    page_path   = "/analyze" if "ticker" in safe else "/"
+    redirect_base = _base_url() + page_path
+    if safe:
+        redirect_base += "?" + urllib.parse.urlencode(safe)
+    redirect_base_js = json.dumps(redirect_base)
 
     # ── Logout path ─────────────────────────────────────────────────────────
-    # Render different JS content to force Streamlit to recreate the iframe.
     if st.session_state.pop("_pa_just_logged_out", False):
         components.html(
-            f"""<script src="https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/dist/propelauth.js"></script>
-<script>
-(function(){{
-  // Clear iframe localStorage
-  try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
-  // Clear parent localStorage and remove injected SDK script so it re-runs on next login
-  try{{
-    var p=window.parent;
-    p.localStorage.removeItem('pa_token');
-    p.localStorage.removeItem('pa_expiry');
-    var el=p.document.getElementById('_pa_sdk');
-    if(el)el.parentNode.removeChild(el);
-  }}catch(e){{}}
-  // Invalidate the PropelAuth session server-side
-  try{{
-    PropelAuth.createClient({{authUrl:{auth_url_js},enableBackgroundTokenRefresh:false}}).logout(false);
-  }}catch(e){{}}
-}})();
+            f"""<script type="module">
+import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/+esm';
+try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
+try{{
+  createClient({{authUrl:{auth_url_js},enableBackgroundTokenRefresh:false}}).logout(false);
+}}catch(e){{}}
 </script>""",
             height=0,
         )
         return
 
-    # ── Build the script that runs in the MAIN PAGE context ─────────────────
-    # Plain string concatenation (no f-string) keeps JS braces literal.
-    parent_js = (
-        "(function(){"
-        "var s=document.createElement('script');"
-        "s.id='_pa_sdk';"
-        "s.src=" + sdk_url_js + ";"
-        "s.onload=function(){"
-          "PropelAuth.createClient({authUrl:" + auth_url_js + ",enableBackgroundTokenRefresh:true})"
-          ".getAuthenticationInfoOrNull().then(function(info){"
-            "var cur=new URLSearchParams(window.location.search);"
-            "if(info&&info.accessToken){"
-              "try{"
-                "localStorage.setItem('pa_token',info.accessToken);"
-                "if(info.expiresAtSeconds){"
-                  "localStorage.setItem('pa_expiry',String(info.expiresAtSeconds));"
-                "}"
-              "}catch(e){}"
-              "if(!cur.has('pa_token')){"
-                "cur.set('pa_token',info.accessToken);"
-                "window.history.replaceState(null,'',window.location.pathname+'?'+cur.toString());"
-                "window.location.reload();"
-              "}"
-            "}else{"
-              "try{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}catch(e){}"
-              "if(cur.has('pa_token')){"
-                "cur.delete('pa_token');"
-                "window.history.replaceState(null,'',window.location.pathname+'?'+cur.toString());"
-              "}"
-            "}"
-          "});"
-        "};"
-        "document.head.appendChild(s);"
-        "})()"
-    )
-
     components.html(
-        f"""<script>
+        f"""<script type="module">
+import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascript@2/+esm';
 (function(){{
-  var p=(window.parent&&window.parent!==window)?window.parent:window;
+  if(window.__paInit)return;
+  window.__paInit=true;
+
+  var redirectBase={redirect_base_js};
+
+  function applyToken(token){{
+    try{{localStorage.setItem('pa_token',token);}}catch(e){{}}
+    // Primary: same-origin URL manipulation (preserves exact current URL)
+    try{{
+      var p=window.parent;
+      var cur=new URLSearchParams(p.location.search);
+      if(!cur.has('pa_token')){{
+        cur.set('pa_token',token);
+        p.history.replaceState(null,'',p.location.pathname+'?'+cur.toString());
+        p.location.reload();
+        return;
+      }}
+    }}catch(e){{}}
+    // Fallback: cross-origin navigate to Python-constructed URL (write-only, always allowed)
+    var sep=redirectBase.indexOf('?')>=0?'&':'?';
+    window.parent.location.href=redirectBase+sep+'pa_token='+encodeURIComponent(token);
+  }}
+
+  // Fast path: valid token cached in localStorage
   try{{
-    // Avoid double-init if the SDK script is already in the parent document
-    if(p.document.getElementById('_pa_sdk'))return;
+    var stored=localStorage.getItem('pa_token');
+    var expiry=parseInt(localStorage.getItem('pa_expiry')||'0');
+    if(stored&&expiry>Math.floor(Date.now()/1000)){{applyToken(stored);return;}}
+  }}catch(e){{}}
 
-    var cur=new URLSearchParams(p.location.search);
+  // pa_token already in parent URL — handle_auth_callback() will process it
+  try{{if(new URLSearchParams(window.parent.location.search).has('pa_token'))return;}}catch(e){{}}
 
-    // Fast path A: pa_token already in URL — handle_auth_callback() will process it
-    if(cur.has('pa_token'))return;
-
-    // Fast path B: valid token cached in main-page localStorage
-    var stored=p.localStorage.getItem('pa_token');
-    var expiry=parseInt(p.localStorage.getItem('pa_expiry')||'0');
-    if(stored&&expiry>Math.floor(Date.now()/1000)){{
-      cur.set('pa_token',stored);
-      p.history.replaceState(null,'',p.location.pathname+'?'+cur.toString());
-      p.location.reload();
-      return;
+  // Slow path: ask PropelAuth whether this user has an active session
+  createClient({{
+    authUrl:{auth_url_js},
+    enableBackgroundTokenRefresh:true
+  }}).getAuthenticationInfoOrNull().then(function(info){{
+    if(info&&info.accessToken){{
+      try{{
+        localStorage.setItem('pa_token',info.accessToken);
+        if(info.expiresAtSeconds){{localStorage.setItem('pa_expiry',String(info.expiresAtSeconds));}}
+      }}catch(e){{}}
+      applyToken(info.accessToken);
+    }}else{{
+      try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
     }}
-
-    // Slow path: inject PropelAuth SDK into main page document
-    var el=p.document.createElement('script');
-    el.id='_pa_sdk_init';
-    el.textContent={json.dumps(parent_js)};
-    p.document.head.appendChild(el);
-  }}catch(e){{/* window.parent.document access blocked */}}
+  }}).catch(function(e){{
+    console.error('[Stocklio] PropelAuth session check failed:',e);
+  }});
 }})();
 </script>""",
         height=0,

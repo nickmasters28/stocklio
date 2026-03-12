@@ -33,7 +33,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-inject_auth_js()
+inject_auth_js(current_params=dict(st.query_params))
 handle_auth_callback()
 
 # ── Google Analytics ─────────────────────────────────────────────────────────
