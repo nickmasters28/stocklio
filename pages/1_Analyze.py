@@ -129,10 +129,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -- Auth gate -----------------------------------------------------------------
+# Only enforce on app.stocklio.ai. On www.stocklio.ai the analyze page is public.
 # inject_auth_js() already ran in app.py — its iframe JS will detect an active
 # PropelAuth session and reload with ?pa_token= if the user is logged in.
-# Until that happens, show a login screen and halt rendering.
-if not st.session_state.get("logged_in"):
+_is_app_host = st.session_state.get("_is_app_host", True)
+if _is_app_host and not st.session_state.get("logged_in"):
     _gate_login  = login_url()
     _gate_signup = signup_url()
     st.markdown(
@@ -174,7 +175,7 @@ with st.sidebar:
         'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>',
         unsafe_allow_html=True,
     )
-    st.page_link("pages/home.py", label="← Home", use_container_width=False)
+    st.markdown('<a href="https://www.stocklio.ai" target="_self" style="text-decoration:none;font-size:0.9rem;color:#4a5568;">← Home</a>', unsafe_allow_html=True)
     st.markdown("---")
 
     st.subheader("🔍 Stock Lookup")

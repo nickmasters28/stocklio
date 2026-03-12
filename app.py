@@ -36,6 +36,15 @@ st.markdown(
 inject_auth_js(current_params=dict(st.query_params))
 handle_auth_callback()
 
+# ── Subdomain detection ───────────────────────────────────────────────────────
+# Detect whether we're on app.stocklio.ai (gated) or www.stocklio.ai (public).
+# st.context.headers available in Streamlit 1.37+; fall back to gated (safer).
+try:
+    _host = st.context.headers.get("host", "")
+except AttributeError:
+    _host = ""
+st.session_state["_is_app_host"] = not _host.startswith("www.")
+
 # ── Google Analytics ─────────────────────────────────────────────────────────
 # Problem: st.markdown() strips <script> tags (React dangerouslySetInnerHTML).
 #          components.html() runs scripts but inside a sandboxed iframe — so
@@ -145,9 +154,10 @@ pg = st.navigation(
         st.Page("pages/home.py",      title="Home",             url_path="",        default=True),
         st.Page("pages/blog.py",      title="Blog",             url_path="blog"),
         st.Page("pages/1_Analyze.py", title="Analyze",          url_path="analyze"),
-        st.Page("pages/privacy.py",   title="Privacy Policy",   url_path="privacy"),
-        st.Page("pages/terms.py",     title="Terms of Service", url_path="terms"),
-        st.Page("pages/cookies.py",   title="Cookie Policy",    url_path="cookies"),
+        st.Page("pages/privacy.py",    title="Privacy Policy",   url_path="privacy"),
+        st.Page("pages/terms.py",      title="Terms of Service", url_path="terms"),
+        st.Page("pages/cookies.py",    title="Cookie Policy",    url_path="cookies"),
+        st.Page("pages/logged_out.py", title="Logged Out",       url_path="logged-out"),
     ],
     position="hidden",  # suppress Streamlit's default sidebar nav
 )
