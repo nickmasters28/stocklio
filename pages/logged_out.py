@@ -18,10 +18,19 @@ for _k in ("logged_in", "user_email", "user_id", "pa_token"):
 if st.query_params.get("pa_token"):
     st.query_params.clear()
 
+# Minimal content so the page isn't blank while the JS redirect fires.
+st.markdown(
+    "<p style='font-family:sans-serif;color:#6b7280;margin-top:40px;text-align:center;'>"
+    "Signing out…</p>",
+    unsafe_allow_html=True,
+)
+
 components.html(
     "<script>"
-    "try{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}catch(e){}"
-    "window.location.replace('https://www.stocklio.ai');"
+    "try{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');"
+    "localStorage.setItem('pa_logged_out','1');}catch(e){}"
+    "try{window.parent.location.replace('https://www.stocklio.ai');}catch(e){"
+    "window.location.replace('https://www.stocklio.ai');}"
     "</script>",
     height=0,
 )
