@@ -93,7 +93,18 @@ def inject_auth_js(current_params: dict = None, base_url_override: str = None) -
             f"""<script>
 try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');localStorage.setItem('pa_logged_out','1');}}catch(e){{}}
 var _ld=false;
-function _nav(){{if(!_ld){{_ld=true;window.parent.location.href='https://www.stocklio.ai';}}}}
+function _nav(){{
+  if(_ld)return;_ld=true;
+  // Inject a script into the parent document so it executes in the parent's
+  // own context — this bypasses iframe sandbox cross-origin nav restrictions.
+  try{{
+    var _s=window.parent.document.createElement('script');
+    _s.textContent='window.location.href="https://www.stocklio.ai";';
+    window.parent.document.head.appendChild(_s);
+  }}catch(e){{
+    try{{window.parent.location.href='https://www.stocklio.ai';}}catch(e2){{}}
+  }}
+}}
 setTimeout(_nav,2000);
 try{{fetch({auth_url_js}+'/api/v1/logout',{{method:'POST',credentials:'include'}}).then(_nav).catch(_nav);}}catch(e){{_nav();}}
 </script>""",
