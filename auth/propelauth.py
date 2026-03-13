@@ -91,7 +91,7 @@ def inject_auth_js(current_params: dict = None, base_url_override: str = None) -
             # 2. POST to PropelAuth's logout API (clears session cookie server-side).
             # 3. Navigate to www.stocklio.ai when done, or after 2s timeout.
             f"""<script>
-try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');localStorage.setItem('pa_logged_out','1');}}catch(e){{}}
+try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
 var _ld=false;
 function _nav(){{
   if(_ld)return;_ld=true;
@@ -125,17 +125,7 @@ import {{ createClient }} from 'https://cdn.jsdelivr.net/npm/@propelauth/javascr
   // immediately — never re-inject a token on /logged-out.
   try{{
     if(window.parent.location.pathname==='/logged-out'){{
-      try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');localStorage.setItem('pa_logged_out','1');}}catch(e){{}}
-      return;
-    }}
-  }}catch(e){{}}
-
-  // If the user just logged out (in-app or external), skip ALL token injection
-  // for this load. The logout JS sets this flag before navigating; we clear it
-  // immediately so subsequent page loads proceed normally.
-  try{{
-    if(localStorage.getItem('pa_logged_out')==='1'){{
-      localStorage.removeItem('pa_logged_out');
+      try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
       return;
     }}
   }}catch(e){{}}
