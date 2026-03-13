@@ -13,6 +13,8 @@ import numpy as np
 from typing import Optional
 
 from data.fetcher import fetch_ohlcv, fetch_info
+from data.analyst import fetch_recommendations, fetch_price_target, fetch_upgrades_downgrades
+from auth.propelauth import is_paid_user
 from data.votes import cast_vote, resolve_outcomes, sentiment_summary, sentiment_over_time, accuracy_stats
 from indicators.calculator import (
     calculate_indicators, find_support_resistance, linear_regression_projection,
@@ -365,6 +367,267 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
         )
 
 
+# -- Analyst Intelligence (Pro) ------------------------------------------------
+
+def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
+    """
+    Pro-gated section: analyst recommendations, price targets, upgrades/downgrades.
+
+    Gate logic:
+      - Logged-out users cannot reach /analyze (auth gate in 1_Analyze.py).
+      - Logged-in free users see the upgrade teaser.
+      - Logged-in paid users (is_paid_user() == True) see full content.
+
+    To unlock during development, see the docstring in auth/propelauth.is_paid_user().
+    """
+    import datetime
+
+    st.markdown("---")
+
+    # ── Pro gate ──────────────────────────────────────────────────────────────
+    if not is_paid_user():
+        st.markdown(
+            """
+            <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;
+                        padding:28px 28px 24px 28px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <span style="font-family:'Darker Grotesque',sans-serif;font-size:1.35rem;
+                             font-weight:800;color:#1a202c;">Pro Intelligence</span>
+                <span style="background:#1a202c;color:#ffffff;font-family:'Inter',sans-serif;
+                             font-size:0.68rem;font-weight:700;letter-spacing:0.06em;
+                             padding:3px 9px;border-radius:20px;text-transform:uppercase;">PRO</span>
+              </div>
+              <p style="font-family:'Inter',sans-serif;font-size:0.9rem;color:#4a5568;
+                        line-height:1.65;margin:0 0 18px 0;">
+                Unlock the Wall Street view on this stock — what analysts are rating it,
+                where they think the price is going, and who just upgraded or downgraded.
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                            border:1px solid #e2e8f0;">
+                  <div style="font-size:1.1rem;margin-bottom:6px;">📊</div>
+                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
+                              font-weight:800;color:#1a202c;margin-bottom:4px;">Analyst Ratings</div>
+                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
+                    Buy / Hold / Sell consensus from all covering analysts.
+                  </div>
+                </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                            border:1px solid #e2e8f0;">
+                  <div style="font-size:1.1rem;margin-bottom:6px;">🎯</div>
+                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
+                              font-weight:800;color:#1a202c;margin-bottom:4px;">Price Target</div>
+                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
+                    Analyst consensus target with high / low range vs current price.
+                  </div>
+                </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                            border:1px solid #e2e8f0;">
+                  <div style="font-size:1.1rem;margin-bottom:6px;">⬆️</div>
+                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
+                              font-weight:800;color:#1a202c;margin-bottom:4px;">Upgrades & Downgrades</div>
+                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
+                    Latest rating changes from Goldman, Morgan Stanley, and more.
+                  </div>
+                </div>
+              </div>
+              <a href="https://www.stocklio.ai" target="_self"
+                 style="display:inline-block;background:#00c896;color:#ffffff;
+                        font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:600;
+                        padding:9px 22px;border-radius:8px;text-decoration:none;">
+                Upgrade to Pro →
+              </a>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
+
+    # ── Fetch analyst data in parallel ────────────────────────────────────────
+    with ThreadPoolExecutor(max_workers=3) as _apool:
+        _f_recs = _apool.submit(fetch_recommendations, ticker)
+        _f_pt   = _apool.submit(fetch_price_target, ticker)
+        _f_ud   = _apool.submit(fetch_upgrades_downgrades, ticker)
+        recs = _f_recs.result()
+        pt   = _f_pt.result()
+        ud   = _f_ud.result()
+
+    st.subheader("Pro Intelligence")
+
+    col_rec, col_pt = st.columns([1, 1])
+
+    # ── Analyst Ratings ───────────────────────────────────────────────────────
+    with col_rec:
+        st.markdown(
+            "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+            "text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;'>"
+            "Analyst Ratings</p>",
+            unsafe_allow_html=True,
+        )
+        if recs:
+            r       = recs[0]
+            sb      = r.get("strongBuy", 0)
+            b       = r.get("buy", 0)
+            h       = r.get("hold", 0)
+            s       = r.get("sell", 0)
+            ss      = r.get("strongSell", 0)
+            total   = sb + b + h + s + ss
+            bullish = sb + b
+            period_label = r.get("period", "")[:7]  # "2024-01"
+
+            if total > 0:
+                def _pct(n): return n / total * 100
+
+                bar_html = (
+                    f'<div style="border-radius:6px;overflow:hidden;height:16px;'
+                    f'display:flex;margin:8px 0 6px 0;">'
+                    f'<div style="width:{_pct(sb):.1f}%;background:#00a878;" title="Strong Buy: {sb}"></div>'
+                    f'<div style="width:{_pct(b):.1f}%;background:#68d391;" title="Buy: {b}"></div>'
+                    f'<div style="width:{_pct(h):.1f}%;background:#ecc94b;" title="Hold: {h}"></div>'
+                    f'<div style="width:{_pct(s):.1f}%;background:#fc8181;" title="Sell: {s}"></div>'
+                    f'<div style="width:{_pct(ss):.1f}%;background:#e53e3e;" title="Strong Sell: {ss}"></div>'
+                    f'</div>'
+                )
+                legend_html = (
+                    f'<div style="display:flex;gap:12px;flex-wrap:wrap;font-family:Inter,sans-serif;'
+                    f'font-size:0.76rem;color:#4a5568;">'
+                    f'<span><span style="color:#00a878;font-weight:700;">■</span> Strong Buy {sb}</span>'
+                    f'<span><span style="color:#68d391;font-weight:700;">■</span> Buy {b}</span>'
+                    f'<span><span style="color:#ecc94b;font-weight:700;">■</span> Hold {h}</span>'
+                    f'<span><span style="color:#fc8181;font-weight:700;">■</span> Sell {s}</span>'
+                    f'<span><span style="color:#e53e3e;font-weight:700;">■</span> Strong Sell {ss}</span>'
+                    f'</div>'
+                )
+                bull_pct  = bullish / total * 100
+                bull_col  = "#00a878" if bull_pct >= 60 else "#dd6b20" if bull_pct >= 40 else "#e53e3e"
+                summary   = (
+                    f'<div style="font-family:Inter,sans-serif;font-size:0.82rem;'
+                    f'color:#4a5568;margin-top:8px;">'
+                    f'{total} analysts &nbsp;·&nbsp; '
+                    f'<b style="color:{bull_col}">{bull_pct:.0f}% bullish</b>'
+                    f'<span style="color:#a0aec0;font-size:0.76rem;"> ({period_label})</span>'
+                    f'</div>'
+                )
+                st.markdown(bar_html + legend_html + summary, unsafe_allow_html=True)
+            else:
+                st.caption("No analyst rating data available.")
+        else:
+            st.caption("Analyst rating data unavailable.")
+
+    # ── Price Target ──────────────────────────────────────────────────────────
+    with col_pt:
+        st.markdown(
+            "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+            "text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;'>"
+            "Price Target</p>",
+            unsafe_allow_html=True,
+        )
+        if pt and pt.get("targetMean"):
+            t_low    = pt.get("targetLow", 0)
+            t_high   = pt.get("targetHigh", 0)
+            t_mean   = pt.get("targetMean", 0)
+            updated  = pt.get("lastUpdated", "")[:10]
+            upside   = (t_mean - current_price) / current_price * 100 if current_price else 0
+            up_col   = "#00a878" if upside >= 0 else "#e53e3e"
+            up_arrow = "▲" if upside >= 0 else "▼"
+
+            # Position of current price and mean target on the range bar
+            rng = t_high - t_low if t_high > t_low else 1
+            cur_pos  = max(0, min(100, (current_price - t_low) / rng * 100))
+            mean_pos = max(0, min(100, (t_mean - t_low) / rng * 100))
+
+            bar_html = (
+                f'<div style="position:relative;height:8px;background:#e2e8f0;'
+                f'border-radius:4px;margin:16px 0 22px 0;">'
+                f'<div style="position:absolute;left:{mean_pos:.1f}%;top:-4px;'
+                f'width:3px;height:16px;background:#1a202c;border-radius:2px;" '
+                f'title="Mean target: ${t_mean:.2f}"></div>'
+                f'<div style="position:absolute;left:{cur_pos:.1f}%;top:-5px;'
+                f'width:0;height:0;border-left:6px solid transparent;'
+                f'border-right:6px solid transparent;border-bottom:10px solid #00c896;" '
+                f'title="Current price: ${current_price:.2f}"></div>'
+                f'</div>'
+                f'<div style="display:flex;justify-content:space-between;'
+                f'font-family:Inter,sans-serif;font-size:0.76rem;color:#6b7280;margin-top:-16px;">'
+                f'<span>Low ${t_low:.0f}</span><span>High ${t_high:.0f}</span>'
+                f'</div>'
+            )
+            summary_html = (
+                f'<div style="font-family:Inter,sans-serif;font-size:0.82rem;'
+                f'color:#4a5568;margin-top:10px;">'
+                f'Mean target <b style="color:#1a202c;">${t_mean:.2f}</b>'
+                f' &nbsp;<b style="color:{up_col}">{up_arrow} {abs(upside):.1f}%</b>'
+                f' vs current'
+                f'<span style="color:#a0aec0;font-size:0.76rem;"> · {updated}</span>'
+                f'</div>'
+            )
+            st.markdown(bar_html + summary_html, unsafe_allow_html=True)
+        else:
+            st.caption("Price target data unavailable.")
+
+    # ── Upgrades / Downgrades ─────────────────────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+        "text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 6px 0;'>"
+        "Recent Upgrades &amp; Downgrades</p>",
+        unsafe_allow_html=True,
+    )
+    if ud:
+        rows_html = ""
+        for entry in ud:
+            action    = entry.get("action", "").lower()
+            from_g    = entry.get("fromGrade") or "—"
+            to_g      = entry.get("toGrade") or "—"
+            firm      = entry.get("company", "—")
+            ts        = entry.get("gradeTime", 0)
+            date_str  = datetime.datetime.utcfromtimestamp(ts).strftime("%b %d, %Y") if ts else "—"
+
+            if action == "up":
+                badge_bg, badge_col, badge_txt = "#e6faf5", "#00a878", "⬆ Upgrade"
+            elif action == "down":
+                badge_bg, badge_col, badge_txt = "#fff5f5", "#e53e3e", "⬇ Downgrade"
+            else:
+                badge_bg, badge_col, badge_txt = "#f0f4ff", "#4a5568", "● Initiation"
+
+            rows_html += (
+                f'<tr style="border-bottom:1px solid #f0f4f8;">'
+                f'<td style="padding:7px 12px 7px 0;font-family:Inter,sans-serif;'
+                f'font-size:0.82rem;color:#1a202c;font-weight:600;">{firm}</td>'
+                f'<td style="padding:7px 8px;">'
+                f'<span style="background:{badge_bg};color:{badge_col};font-family:Inter,sans-serif;'
+                f'font-size:0.74rem;font-weight:600;padding:2px 8px;border-radius:12px;">'
+                f'{badge_txt}</span></td>'
+                f'<td style="padding:7px 8px;font-family:Inter,sans-serif;font-size:0.8rem;'
+                f'color:#6b7280;">{from_g} → {to_g}</td>'
+                f'<td style="padding:7px 0 7px 8px;font-family:Inter,sans-serif;font-size:0.78rem;'
+                f'color:#a0aec0;text-align:right;">{date_str}</td>'
+                f'</tr>'
+            )
+
+        st.markdown(
+            f'<table style="width:100%;border-collapse:collapse;">'
+            f'<thead><tr style="border-bottom:2px solid #e2e8f0;">'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 12px 6px 0;">Firm</th>'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 8px 6px;">Action</th>'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 8px 6px;">Rating</th>'
+            f'<th style="text-align:right;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 0 6px 8px;">Date</th>'
+            f'</tr></thead>'
+            f'<tbody>{rows_html}</tbody>'
+            f'</table>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.caption("Upgrade/downgrade data unavailable.")
+
+
 # -- Individual Stock Analysis -------------------------------------------------
 
 def render_stock_analysis(ticker: str, period: str = "1y"):
@@ -398,6 +661,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_lr       = st.empty()   # linear regression
     _s_d5       = st.empty()   # divider
     _s_ad2      = st.empty()   # ad slot 2 (below linear regression, lazy)
+    _s_analyst  = st.empty()   # Pro Intelligence (analyst recs, price target, upgrades)
     _s_voting   = st.empty()   # prediction market (last core section — has Supabase I/O)
 
     # ── Fill all sections with skeletons immediately ───────────────────────────
@@ -419,11 +683,12 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_d4.markdown("---")
     _s_lr.markdown(_skel_section("220px", 1), unsafe_allow_html=True)
     _s_d5.markdown("---")
+    _s_analyst.markdown(_skel_section("200px", 3), unsafe_allow_html=True)
     _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
 
     def _clear_all():
         for s in [_s_header, _s_d1, _s_forecast, _s_rtn, _s_d2, _s_ad1,
-                  _s_signals, _s_d3, _s_sr, _s_d4, _s_lr, _s_d5, _s_ad2, _s_voting]:
+                  _s_signals, _s_d3, _s_sr, _s_d4, _s_lr, _s_d5, _s_ad2, _s_analyst, _s_voting]:
             s.empty()
 
     # ── Parallel I/O — _compute_analysis and fetch_info run concurrently.
@@ -648,6 +913,11 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     # Ad slot 2 — rendered after linear-regression content is live.
     with _s_ad2.container():
         lazy_ad_slot(SLOT_ANALYZE_BELOW_LR, height=280)
+
+    # Analyst Intelligence (Pro) — fetches Finnhub analyst data in parallel.
+    _s_analyst.empty()
+    with _s_analyst.container():
+        _render_analyst_intelligence(ticker, last_close)
 
     # Prediction Market — rendered after core analysis so Supabase I/O
     # (parallelised internally) does not delay the forecast/signals sections.
