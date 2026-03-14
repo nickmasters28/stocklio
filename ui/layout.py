@@ -416,19 +416,22 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
                     </div>
                   </div>
                 </div>
-                <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;border:1px solid #bbf7d0;">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                    <div style="font-size:1.2rem;">🤖</div>
-                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
-                                font-weight:800;color:#1a202c;">Stocklio Copilot</div>
-                    <span style="background:#dcfce7;color:#16a34a;font-family:'Inter',sans-serif;
-                                 font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;
-                                 letter-spacing:0.04em;text-transform:uppercase;">Coming Soon</span>
+                <a href="/copilot" target="_self" style="text-decoration:none;display:block;">
+                  <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;
+                              border:1px solid #bbf7d0;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                      <div style="font-size:1.2rem;">🤖</div>
+                      <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                  font-weight:800;color:#1a202c;">Stocklio Copilot</div>
+                      <span style="background:#00c896;color:#fff;font-family:'Inter',sans-serif;
+                                   font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;
+                                   letter-spacing:0.04em;text-transform:uppercase;">New</span>
+                    </div>
+                    <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                      Ask any question about this stock and get an AI-powered answer — upgrade to Pro to unlock.
+                    </div>
                   </div>
-                  <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
-                    Ask any question about this stock and get an AI-powered answer grounded in real fundamentals, filings, and technicals.
-                  </div>
-                </div>
+                </a>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
                   <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
                               border:1px solid #e2e8f0;">
@@ -494,7 +497,20 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
         congress = _f_congress.result()
         sec      = _f_sec.result()
 
-    st.subheader("Pro Intelligence")
+    _copilot_url = f"/copilot?ticker={ticker}" if ticker else "/copilot"
+    st.markdown(
+        f'<div style="display:flex;align-items:center;justify-content:space-between;'
+        f'margin-bottom:4px;">'
+        f'<span style="font-family:\'Darker Grotesque\',sans-serif;font-size:1.4rem;'
+        f'font-weight:800;color:#1a202c;">Pro Intelligence</span>'
+        f'<a href="{_copilot_url}" target="_self"'
+        f' style="display:inline-flex;align-items:center;gap:6px;background:#1a202c;'
+        f'color:#fff;font-family:\'Inter\',sans-serif;font-size:0.8rem;font-weight:600;'
+        f'padding:6px 16px;border-radius:20px;text-decoration:none;">'
+        f'🤖 Ask Copilot</a>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
     col_rec, col_pt = st.columns([1, 1])
 
@@ -945,8 +961,10 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             pass
 
     _sector_html = f'&nbsp;&bull;&nbsp;{sector}' if sector else ''
+    _copilot_href = f"/copilot?ticker={ticker}" if is_paid_user() else "/pricing"
     _header_html = (
-        f'<div style="display:flex;align-items:center;margin-bottom:6px;">'
+        f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+        f'<div style="display:flex;align-items:center;">'
         f'{logo_html}<div>'
         f'<div style="font-size:1.8rem;font-weight:700;color:#1a202c;line-height:1.1;">{company_name}</div>'
         f'<div style="font-size:1rem;color:#4a5568;margin-top:2px;">'
@@ -955,6 +973,17 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         f'${last_close:,.2f}&nbsp;{chg_arrow}&nbsp;{abs(day_chg_pct):.2f}%'
         f'</span>{_sector_html}&nbsp;&bull;&nbsp;{market_cap}'
         f'</div></div></div>'
+        f'<a href="{_copilot_href}" target="_self" style="'
+        f'display:inline-flex;align-items:center;gap:6px;'
+        f'background:#00c896;color:#ffffff;'
+        f'padding:9px 18px;border-radius:24px;'
+        f'font-family:Inter,sans-serif;font-size:0.85rem;font-weight:600;'
+        f'text-decoration:none;white-space:nowrap;'
+        f'box-shadow:0 2px 8px rgba(0,200,150,0.35);'
+        f'transition:background 0.15s;">'
+        f'🤖 Ask Copilot'
+        f'</a>'
+        f'</div>'
     )
 
     # ── Reveal ─────────────────────────────────────────────────────────────────

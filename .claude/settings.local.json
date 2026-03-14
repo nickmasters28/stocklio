@@ -16,7 +16,9 @@
       "Bash(python3 -c \"import streamlit, yfinance, pandas, numpy, plotly, ta, supabase, jwt, cryptography\")",
       "Bash(python3 -m streamlit --version)",
       "WebFetch(domain:finnhub.io)",
-      "Bash(streamlit --version)"
+      "Bash(streamlit --version)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)"
     ]
   }
 }

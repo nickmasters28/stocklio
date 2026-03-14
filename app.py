@@ -162,6 +162,7 @@ pg = st.navigation(
         st.Page("pages/blog.py",      title="Blog",             url_path="blog"),
         st.Page("pages/1_Analyze.py", title="Analyze",          url_path="analyze"),
         st.Page("pages/pricing.py",   title="Pricing",          url_path="pricing"),
+        st.Page("pages/copilot.py",   title="Copilot",          url_path="copilot"),
         st.Page("pages/privacy.py",    title="Privacy Policy",   url_path="privacy"),
         st.Page("pages/terms.py",      title="Terms of Service", url_path="terms"),
         st.Page("pages/cookies.py",    title="Cookie Policy",    url_path="cookies"),
