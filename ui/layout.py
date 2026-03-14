@@ -14,6 +14,8 @@ from typing import Optional
 
 from data.fetcher import fetch_ohlcv, fetch_info
 from data.analyst import fetch_recommendations, fetch_price_target, fetch_upgrades_downgrades
+from data.congress import fetch_congress_trades
+from data.sec_sentiment import fetch_sec_sentiment
 from auth.propelauth import is_paid_user
 from data.votes import cast_vote, resolve_outcomes, sentiment_summary, sentiment_over_time, accuracy_stats
 from indicators.calculator import (
@@ -401,7 +403,7 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
                 Unlock the Wall Street view on this stock — what analysts are rating it,
                 where they think the price is going, and who just upgraded or downgraded.
               </p>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;">
                 <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
                             border:1px solid #e2e8f0;">
                   <div style="font-size:1.1rem;margin-bottom:6px;">📊</div>
@@ -429,6 +431,25 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
                     Latest rating changes from Goldman, Morgan Stanley, and more.
                   </div>
                 </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                            border:1px solid #e2e8f0;">
+                  <div style="font-size:1.1rem;margin-bottom:6px;">🏛️</div>
+                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
+                              font-weight:800;color:#1a202c;margin-bottom:4px;">Congressional Trading</div>
+                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
+                    Recent House &amp; Senate stock trades filed under the STOCK Act.
+                  </div>
+                </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                            border:1px solid #e2e8f0;grid-column:span 2;">
+                  <div style="font-size:1.1rem;margin-bottom:6px;">📄</div>
+                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
+                              font-weight:800;color:#1a202c;margin-bottom:4px;">SEC Filing Sentiment</div>
+                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
+                    Sentiment analysis of recent 10-K, 10-Q, and 8-K filings using the
+                    Loughran-McDonald financial word list — the same method used in academic finance research.
+                  </div>
+                </div>
               </div>
               <a href="/pricing" target="_self"
                  style="display:inline-block;background:#00c896;color:#ffffff;
@@ -443,13 +464,17 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
         return
 
     # ── Fetch analyst data in parallel ────────────────────────────────────────
-    with ThreadPoolExecutor(max_workers=3) as _apool:
-        _f_recs = _apool.submit(fetch_recommendations, ticker)
-        _f_pt   = _apool.submit(fetch_price_target, ticker)
-        _f_ud   = _apool.submit(fetch_upgrades_downgrades, ticker)
-        recs = _f_recs.result()
-        pt   = _f_pt.result()
-        ud   = _f_ud.result()
+    with ThreadPoolExecutor(max_workers=5) as _apool:
+        _f_recs     = _apool.submit(fetch_recommendations, ticker)
+        _f_pt       = _apool.submit(fetch_price_target, ticker)
+        _f_ud       = _apool.submit(fetch_upgrades_downgrades, ticker)
+        _f_congress = _apool.submit(fetch_congress_trades, ticker)
+        _f_sec      = _apool.submit(fetch_sec_sentiment, ticker)
+        recs     = _f_recs.result()
+        pt       = _f_pt.result()
+        ud       = _f_ud.result()
+        congress = _f_congress.result()
+        sec      = _f_sec.result()
 
     st.subheader("Pro Intelligence")
 
@@ -521,7 +546,7 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
             "Price Target</p>",
             unsafe_allow_html=True,
         )
-        if pt and pt.get("targetMean"):
+        if pt and pt.get("targetMean") and pt.get("targetMean") != 0:
             t_low    = pt.get("targetLow", 0)
             t_high   = pt.get("targetHigh", 0)
             t_mean   = pt.get("targetMean", 0)
@@ -567,7 +592,7 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
     # ── Upgrades / Downgrades ─────────────────────────────────────────────────
     st.markdown(
         "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
-        "text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 6px 0;'>"
+        "text-transform:uppercase;letter-spacing:0.05em;margin:28px 0 6px 0;'>"
         "Recent Upgrades &amp; Downgrades</p>",
         unsafe_allow_html=True,
     )
@@ -625,6 +650,168 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
         )
     else:
         st.caption("Upgrade/downgrade data unavailable.")
+
+    st.markdown("<hr style='border:none;border-top:1px solid #e2e8f0;margin:28px 0 0 0;'>", unsafe_allow_html=True)
+
+    # ── Congressional Trading ─────────────────────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+        "text-transform:uppercase;letter-spacing:0.05em;margin:24px 0 6px 0;'>"
+        "🏛️ Congressional Trading Alerts</p>",
+        unsafe_allow_html=True,
+    )
+    if congress:
+        rows_html = ""
+        for trade in congress:
+            ttype     = trade["trade_type"].lower()
+            if "purchase" in ttype or "buy" in ttype:
+                badge_bg, badge_col, badge_txt = "#e6faf5", "#00a878", "🟢 Purchase"
+            elif "sale" in ttype or "sell" in ttype:
+                badge_bg, badge_col, badge_txt = "#fff5f5", "#e53e3e", "🔴 Sale"
+            else:
+                badge_bg, badge_col, badge_txt = "#f0f4ff", "#4a5568", trade["trade_type"]
+
+            chamber_badge = (
+                '<span style="background:#eef2ff;color:#4f46e5;font-size:0.7rem;'
+                'font-weight:600;padding:1px 7px;border-radius:10px;margin-left:6px;">'
+                f'{trade["chamber"]}</span>'
+            )
+            rows_html += (
+                f'<tr style="border-bottom:1px solid #f0f4f8;">'
+                f'<td style="padding:7px 12px 7px 0;font-family:Inter,sans-serif;'
+                f'font-size:0.82rem;color:#1a202c;font-weight:600;">'
+                f'{trade["name"]}{chamber_badge}</td>'
+                f'<td style="padding:7px 8px;">'
+                f'<span style="background:{badge_bg};color:{badge_col};font-family:Inter,sans-serif;'
+                f'font-size:0.74rem;font-weight:600;padding:2px 8px;border-radius:12px;">'
+                f'{badge_txt}</span></td>'
+                f'<td style="padding:7px 8px;font-family:Inter,sans-serif;font-size:0.8rem;'
+                f'color:#6b7280;">{trade["amount"]}</td>'
+                f'<td style="padding:7px 0 7px 8px;font-family:Inter,sans-serif;font-size:0.78rem;'
+                f'color:#a0aec0;text-align:right;">{trade["date"]}</td>'
+                f'</tr>'
+            )
+        st.markdown(
+            f'<table style="width:100%;border-collapse:collapse;">'
+            f'<thead><tr style="border-bottom:2px solid #e2e8f0;">'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 12px 6px 0;">Member</th>'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 8px 6px;">Type</th>'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 8px 6px;">Amount</th>'
+            f'<th style="text-align:right;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 0 6px 8px;">Date</th>'
+            f'</tr></thead>'
+            f'<tbody>{rows_html}</tbody>'
+            f'</table>',
+            unsafe_allow_html=True,
+        )
+        st.caption(f"Source: STOCK Act disclosures · House & Senate filings · {len(congress)} recent trades shown")
+    else:
+        st.caption("No recent congressional trades found for this ticker.")
+
+    st.markdown("<hr style='border:none;border-top:1px solid #e2e8f0;margin:28px 0 0 0;'>", unsafe_allow_html=True)
+
+    # ── SEC Filing Sentiment ──────────────────────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+        "text-transform:uppercase;letter-spacing:0.05em;margin:24px 0 6px 0;'>"
+        "📄 SEC Filing Sentiment</p>",
+        unsafe_allow_html=True,
+    )
+    if sec and sec.get("filings"):
+        # Overall sentiment badge
+        sentiment_label = sec["sentiment"]
+        sentiment_color = sec["color"]
+        pos_hits = sec["pos_hits"]
+        neg_hits = sec["neg_hits"]
+        total    = pos_hits + neg_hits
+
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:16px;'
+            f'background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;'
+            f'padding:12px 16px;margin-bottom:14px;">'
+            f'<div>'
+            f'  <div style="font-family:Inter,sans-serif;font-size:0.75rem;color:#6b7280;'
+            f'  font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">'
+            f'  Overall Sentiment</div>'
+            f'  <div style="font-family:\'Darker Grotesque\',sans-serif;font-size:1.4rem;'
+            f'  font-weight:800;color:{sentiment_color};">{sentiment_label}</div>'
+            f'</div>'
+            f'<div style="height:36px;width:1px;background:#e2e8f0;"></div>'
+            f'<div style="font-family:Inter,sans-serif;font-size:0.82rem;color:#6b7280;">'
+            f'  <span style="color:#00a878;font-weight:600;">{pos_hits} positive</span>'
+            f'  &nbsp;·&nbsp;'
+            f'  <span style="color:#e53e3e;font-weight:600;">{neg_hits} negative</span>'
+            f'  &nbsp;keyword hits across recent 8-K filings'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+        # Filing list
+        rows_html = ""
+        form_colors = {"10-K": ("#eef2ff", "#4f46e5"), "10-Q": ("#f0fdf4", "#16a34a"), "8-K": ("#fff7ed", "#ea580c")}
+        for filing in sec["filings"]:
+            form = filing["form"]
+            bg, col = form_colors.get(form, ("#f8fafc", "#4a5568"))
+            items_str = " &nbsp;·&nbsp; ".join(filing["items"][:2]) if filing["items"] else ""
+            sentiment_cell = ""
+            if filing["pos"] or filing["neg"]:
+                f_total = filing["pos"] + filing["neg"]
+                f_ratio = filing["pos"] / f_total if f_total else 0.5
+                f_label, f_color = (
+                    ("Bullish", "#00a878") if f_ratio >= 0.6
+                    else ("Bearish", "#e53e3e") if f_ratio < 0.4
+                    else ("Neutral", "#a0aec0")
+                )
+                sentiment_cell = (
+                    f'<span style="color:{f_color};font-family:Inter,sans-serif;'
+                    f'font-size:0.74rem;font-weight:600;">{f_label}</span>'
+                )
+
+            rows_html += (
+                f'<tr style="border-bottom:1px solid #f0f4f8;">'
+                f'<td style="padding:7px 12px 7px 0;">'
+                f'  <span style="background:{bg};color:{col};font-family:Inter,sans-serif;'
+                f'  font-size:0.74rem;font-weight:700;padding:2px 8px;border-radius:10px;">'
+                f'  {form}</span></td>'
+                f'<td style="padding:7px 8px;font-family:Inter,sans-serif;font-size:0.8rem;'
+                f'color:#4a5568;">{items_str or filing.get("desc","—")[:60]}</td>'
+                f'<td style="padding:7px 8px;text-align:center;">{sentiment_cell}</td>'
+                f'<td style="padding:7px 0 7px 8px;font-family:Inter,sans-serif;font-size:0.78rem;'
+                f'color:#a0aec0;text-align:right;">{filing["date"]}</td>'
+                f'</tr>'
+            )
+
+        st.markdown(
+            f'<table style="width:100%;border-collapse:collapse;">'
+            f'<thead><tr style="border-bottom:2px solid #e2e8f0;">'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 12px 6px 0;">Form</th>'
+            f'<th style="text-align:left;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 8px 6px;">Description</th>'
+            f'<th style="text-align:center;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 8px 6px;">Tone</th>'
+            f'<th style="text-align:right;font-family:Inter,sans-serif;font-size:0.72rem;'
+            f'color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;'
+            f'padding:0 0 6px 8px;">Filed</th>'
+            f'</tr></thead>'
+            f'<tbody>{rows_html}</tbody>'
+            f'</table>',
+            unsafe_allow_html=True,
+        )
+        st.caption("Source: SEC EDGAR · Sentiment scored using Loughran-McDonald financial word list · 8-K filings only")
+    else:
+        st.caption("SEC filing data unavailable for this ticker.")
 
 
 # -- Individual Stock Analysis -------------------------------------------------
@@ -790,6 +977,62 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             for setup in forecast.setups:
                 st.success(setup)
 
+        # ── Historical Returns ─────────────────────────────────────────────
+        hr = getattr(forecast, "historical_returns", {})
+        if hr:
+            st.markdown('<div style="margin-top:18px"></div>', unsafe_allow_html=True)
+            st.markdown(
+                "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+                "text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;'>"
+                "Historical Returns</p>",
+                unsafe_allow_html=True,
+            )
+            ret_cols = st.columns(len(hr))
+            for i, (label, val) in enumerate(hr.items()):
+                col_c = "#00a878" if val >= 0 else "#e53e3e"
+                ret_cols[i].markdown(
+                    f'<div style="text-align:center;background:#f8fafc;border:1px solid #e2e8f0;'
+                    f'border-radius:8px;padding:10px 6px;">'
+                    f'<div style="font-family:Inter,sans-serif;font-size:0.72rem;color:#6b7280;'
+                    f'font-weight:600;text-transform:uppercase;letter-spacing:.04em;">{label}</div>'
+                    f'<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:1.3rem;'
+                    f'font-weight:800;color:{col_c};">{val:+.1f}%</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+        # ── Historical Pattern Context ─────────────────────────────────────
+        patterns = getattr(forecast, "historical_patterns", [])
+        if patterns:
+            st.markdown('<div style="margin-top:18px"></div>', unsafe_allow_html=True)
+            st.markdown(
+                "<p style='font-size:0.78rem;font-weight:600;color:#6b7280;"
+                "text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;'>"
+                "Historical Pattern Context — 10-Day Forward Return</p>",
+                unsafe_allow_html=True,
+            )
+            for p in patterns:
+                fwd_col = "#00a878" if p.median_fwd >= 0 else "#e53e3e"
+                fwd_arrow = "▲" if p.median_fwd >= 0 else "▼"
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;justify-content:space-between;'
+                    f'background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;'
+                    f'padding:10px 16px;margin-bottom:6px;">'
+                    f'<div>'
+                    f'  <div style="font-family:Inter,sans-serif;font-size:0.85rem;'
+                    f'  font-weight:600;color:#1a202c;">{p.label}</div>'
+                    f'  <div style="font-family:Inter,sans-serif;font-size:0.75rem;color:#6b7280;">'
+                    f'  {p.occurrences} occurrences in past year &nbsp;·&nbsp; '
+                    f'  {p.win_rate:.0f}% win rate</div>'
+                    f'</div>'
+                    f'<div style="font-family:\'Darker Grotesque\',sans-serif;font-size:1.4rem;'
+                    f'font-weight:800;color:{fwd_col};">'
+                    f'{fwd_arrow} {abs(p.median_fwd):.1f}%</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+            st.caption("Median 10-day forward return when this condition was active in the past 252 sessions. Historical patterns are not predictive of future results.")
+
     # Ride the Nine
     _s_rtn.empty()
     with _s_rtn.container():
@@ -849,7 +1092,10 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             </div>
         </div>
             """, unsafe_allow_html=True)
-        lazy_ad_slot(SLOT_ANALYZE_BELOW_RTN, height=280)
+        if not is_paid_user():
+            lazy_ad_slot(SLOT_ANALYZE_BELOW_RTN, height=280)
+        else:
+            st.markdown('<div style="margin-top:32px"></div>', unsafe_allow_html=True)
         st.plotly_chart(build_ride_the_nine_chart(df, ticker, rtn), use_container_width=True)
 
     # ── Technical tab ─────────────────────────────────────────────────────────
@@ -871,8 +1117,12 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         st.dataframe(pd.DataFrame(sig_data), hide_index=True, use_container_width=True)
 
     # Ad slot 2 — Technical tab, below signal breakdown
-    with _s_ad2.container():
-        lazy_ad_slot(SLOT_ANALYZE_BELOW_LR, height=280)
+    if not is_paid_user():
+        with _s_ad2.container():
+            lazy_ad_slot(SLOT_ANALYZE_BELOW_LR, height=280)
+    else:
+        with _s_ad2.container():
+            st.markdown('<div style="margin-top:32px"></div>', unsafe_allow_html=True)
 
     # Support & Resistance
     _s_sr.empty()
@@ -955,4 +1205,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         _render_voting(ticker, last_close, forecast.rating)
 
     # ── Bottom leaderboard — below all tabs, loads lazily on scroll ───────────
-    lazy_ad_slot(SLOT_BOTTOM_LEADERBOARD, ad_format="auto", height=120)
+    if not is_paid_user():
+        lazy_ad_slot(SLOT_BOTTOM_LEADERBOARD, ad_format="auto", height=120)
+    else:
+        st.markdown('<div style="margin-bottom:48px"></div>', unsafe_allow_html=True)

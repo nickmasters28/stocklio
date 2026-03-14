@@ -42,8 +42,12 @@ st.markdown("""
     h1, h2, h3 { color: #1a202c !important; }
     .stTabs { margin-top: 24px; }
     .sec-gap { margin-top: 36px; }
-    .stTabs [data-baseweb="tab"] { color: #4a5568; font-size: 1.6rem; font-weight: 1000; }
+    .stTabs [data-baseweb="tab"] { color: #4a5568; font-size: 1rem !important; font-weight: 900 !important; padding-left: 18px !important; padding-right: 18px !important; }
+    .stTabs [data-baseweb="tab"] p { font-size: 1rem !important; font-weight: 900 !important; line-height: 1.2 !important; }
+    .stTabs [data-baseweb="tab"] span { font-size: 1rem !important; font-weight: 900 !important; }
     .stTabs [aria-selected="true"] { color: #00c896 !important; }
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span { color: #00c896 !important; }
     [data-testid="stSidebar"] * { font-family: 'Inter', sans-serif !important; }
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] .stTextInput input,

@@ -263,20 +263,14 @@ def handle_auth_callback() -> None:
 def is_paid_user() -> bool:
     """
     Returns True if the current session has an active paid subscription.
-
-    Currently checks st.session_state["subscription_tier"], which is populated
-    by handle_auth_callback() once PropelAuth custom JWT claims are configured.
-
-    To enable paid gating when subscriptions are ready:
-      1. In PropelAuth dashboard → JWT customisation, add a claim e.g. {"tier": "pro"}
-      2. In handle_auth_callback() below, after validating the payload add:
-             st.session_state["subscription_tier"] = payload.get("tier", "free")
-      3. This function will then return True for "pro" / "premium" users automatically.
-
-    For local testing without a paid account, temporarily set:
-        st.session_state["subscription_tier"] = "pro"
-    in app.py (remove before deploying).
+    On localhost, always returns True for easier local development.
     """
+    try:
+        _host = st.context.headers.get("host", "")
+        if _host.startswith("localhost") or _host.startswith("127.0.0.1"):
+            return True
+    except Exception:
+        pass
     tier = st.session_state.get("subscription_tier", "free")
     return tier in ("pro", "premium", "enterprise")
 

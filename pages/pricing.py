@@ -358,6 +358,7 @@ st.markdown(f"""
             <li><div class="pricing-section-label" style="padding-top:0;">Technical Analysis</div></li>
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Everything in Free</span></li>
             <li><div class="pricing-section-label">Pro Intel</div></li>
+            <li><span class="feat-icon">&#10003;</span><span class="feat-label">No Ads</span></li>
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Analyst Recommendations</span></li>
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Price Target</span></li>
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Insider Sentiment Score</span></li>
