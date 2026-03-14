@@ -43,8 +43,10 @@ else:
 
 if _is_pro:
     _pro_cta = "<span class='pricing-cta pricing-cta-current'>&#10003; You're on Pro</span>"
-else:
+elif _is_logged_in:
     _pro_cta = "<a href='https://buy.stripe.com/bJe00j3tg8ug65kaIBenS00' target='_blank' class='pricing-cta pricing-cta-pro'>Upgrade to Pro &rarr;</a>"
+else:
+    _pro_cta = f"<a href='{_signup_url}' target='_self' class='pricing-cta pricing-cta-pro'>Sign up to upgrade &rarr;</a>"
 
 st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -364,6 +366,9 @@ st.markdown(f"""
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Stocklio Copilot <span class="feat-soon">Coming Soon</span></span></li>
         </ul>
         {_pro_cta}
+        <p style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#a0aec0;text-align:center;margin:10px 0 0 0;">
+            To cancel, email <a href="mailto:hello@stocklio.ai" style="color:#a0aec0;">hello@stocklio.ai</a>
+        </p>
     </div>
 </div>
 
