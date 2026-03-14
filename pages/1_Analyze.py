@@ -40,7 +40,9 @@ st.markdown("""
     .badge-bear { background: #fff5f5; color: #e53e3e; border: 1px solid #e53e3e; }
     .badge-neut { background: #fffaf0; color: #dd6b20; border: 1px solid #dd6b20; }
     h1, h2, h3 { color: #1a202c !important; }
-    .stTabs [data-baseweb="tab"] { color: #4a5568; }
+    .stTabs { margin-top: 24px; }
+    .sec-gap { margin-top: 36px; }
+    .stTabs [data-baseweb="tab"] { color: #4a5568; font-size: 1.3rem; font-weight: 700; }
     .stTabs [aria-selected="true"] { color: #00c896 !important; }
     [data-testid="stSidebar"] * { font-family: 'Inter', sans-serif !important; }
     [data-testid="stSidebar"] label,
@@ -132,8 +134,10 @@ st.markdown("""
 # Only enforce on app.stocklio.ai. On www.stocklio.ai the analyze page is public.
 # inject_auth_js() already ran in app.py — its iframe JS will detect an active
 # PropelAuth session and reload with ?pa_token= if the user is logged in.
+# Localhost is always bypassed so local development works without a PropelAuth session.
 _is_app_host = st.session_state.get("_is_app_host", True)
-if _is_app_host and not st.session_state.get("logged_in"):
+_is_localhost = st.session_state.get("_is_localhost", False)
+if _is_app_host and not _is_localhost and not st.session_state.get("logged_in"):
     _gate_login  = login_url()
     _gate_signup = signup_url()
     st.markdown(

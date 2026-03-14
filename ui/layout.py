@@ -382,8 +382,6 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
     """
     import datetime
 
-    st.markdown("---")
-
     # ── Pro gate ──────────────────────────────────────────────────────────────
     if not is_paid_user():
         st.markdown(
@@ -633,10 +631,16 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
 def render_stock_analysis(ticker: str, period: str = "1y"):
     """Render the full stock analysis report with staged skeleton loading.
 
-    Render order (core analysis first, community/chart last):
-      Header → Forecast → Ride the Nine → Signal Breakdown →
-      Support & Resistance → Linear Regression → Prediction Market →
-      Technical Chart (deferred — user must click to load)
+    Layout:
+      Header (above tabs)
+      ┌─ Trends ──────────┬─ Technical ────────┬─ Pro Intel ─────┬─ Prediction ─┐
+      │ Forecast gauge    │ Signal Breakdown   │ Analyst Recs    │ Prediction   │
+      │ Ride the Nine     │ Support/Resistance │ Price Target    │ Market       │
+      │ [Ad slot 1]       │ Linear Regression  │ Upgrades        │              │
+      │                   │ Technical Chart    │ Copilot (soon)  │              │
+      │                   │ [Ad slot 2]        │                 │              │
+      └───────────────────┴────────────────────┴─────────────────┴──────────────┘
+      Bottom leaderboard ad
     """
 
     if not ticker:
@@ -645,29 +649,36 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
 
     st.markdown(_LOADING_CSS, unsafe_allow_html=True)
 
-    # ── Create placeholders in display order — core analysis first, voting last.
-    # Chart has no placeholder: it is deferred behind a button.
-    # _s_load   = st.empty()   # loading card — disabled; re-enable to restore step animation
-    _s_header   = st.empty()   # company header
-    _s_d1       = st.empty()   # divider
-    _s_forecast = st.empty()   # forecast gauge + card
-    _s_rtn      = st.empty()   # ride the nine (auto-loaded)
-    _s_d2       = st.empty()   # divider
-    _s_ad1      = st.empty()   # ad slot 1 (below ride-the-nine, lazy)
-    _s_signals  = st.empty()   # signal breakdown
-    _s_d3       = st.empty()   # divider
-    _s_sr       = st.empty()   # support & resistance
-    _s_d4       = st.empty()   # divider
-    _s_lr       = st.empty()   # linear regression
-    _s_d5       = st.empty()   # divider
-    _s_ad2      = st.empty()   # ad slot 2 (below linear regression, lazy)
-    _s_analyst  = st.empty()   # Pro Intelligence (analyst recs, price target, upgrades)
-    _s_voting   = st.empty()   # prediction market (last core section — has Supabase I/O)
+    # ── Header placeholder (above tabs) ───────────────────────────────────────
+    _s_header = st.empty()
 
-    # ── Fill all sections with skeletons immediately ───────────────────────────
-    # _s_load.markdown(_loading_html(ticker, 0), unsafe_allow_html=True)  # loading card disabled
+    # ── Tab containers — created now so placeholders bind to their positions ──
+    _tab_trends, _tab_tech, _tab_pro, _tab_pred = st.tabs(
+        ["📈 Trends", "🔬 Technical", "⭐ Pro Intel", "🗳️ Prediction"]
+    )
+
+    # Trends tab placeholders
+    with _tab_trends:
+        _s_forecast = st.empty()
+        _s_rtn      = st.empty()
+
+    # Technical tab placeholders
+    with _tab_tech:
+        _s_signals  = st.empty()
+        _s_ad2      = st.empty()   # ad slot 2 (below signal breakdown)
+        _s_sr       = st.empty()
+        _s_lr       = st.empty()
+
+    # Pro Intel tab placeholder
+    with _tab_pro:
+        _s_analyst  = st.empty()
+
+    # Prediction tab placeholder
+    with _tab_pred:
+        _s_voting   = st.empty()
+
+    # ── Fill all placeholders with skeletons immediately ──────────────────────
     _s_header.markdown(_skel_header(), unsafe_allow_html=True)
-    _s_d1.markdown("---")
     _s_forecast.markdown(
         _skel_section("140px", 1) + _skel_two_col("190px"),
         unsafe_allow_html=True,
@@ -676,19 +687,16 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         _skel_section("160px", 1) + _skel_two_col("220px"),
         unsafe_allow_html=True,
     )
-    _s_d2.markdown("---")
     _s_signals.markdown(_skel_section("150px", 5), unsafe_allow_html=True)
-    _s_d3.markdown("---")
     _s_sr.markdown(_skel_section("140px", 3), unsafe_allow_html=True)
-    _s_d4.markdown("---")
     _s_lr.markdown(_skel_section("220px", 1), unsafe_allow_html=True)
-    _s_d5.markdown("---")
     _s_analyst.markdown(_skel_section("200px", 3), unsafe_allow_html=True)
     _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
 
     def _clear_all():
-        for s in [_s_header, _s_d1, _s_forecast, _s_rtn, _s_d2, _s_ad1,
-                  _s_signals, _s_d3, _s_sr, _s_d4, _s_lr, _s_d5, _s_ad2, _s_analyst, _s_voting]:
+        for s in [_s_header, _s_forecast, _s_rtn,
+                  _s_signals, _s_sr, _s_lr, _s_ad2,
+                  _s_analyst, _s_voting]:
             s.empty()
 
     # ── Parallel I/O — _compute_analysis and fetch_info run concurrently.
@@ -697,8 +705,6 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         _f_compute = _pool.submit(_compute_analysis, ticker, period)
         _f_info    = _pool.submit(fetch_info, ticker)
 
-        # _s_load.markdown(_loading_html(ticker, 1), unsafe_allow_html=True)
-
         try:
             df, support, resistance, regression, forecast, rtn = _f_compute.result()
         except ValueError as e:
@@ -706,14 +712,9 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         except Exception as e:
             _clear_all(); st.error(f"Data fetch failed: {e}"); return
 
-        # _s_load.markdown(_loading_html(ticker, 2), unsafe_allow_html=True)
         info = _f_info.result()
 
-    # _s_load.markdown(_loading_html(ticker, 3), unsafe_allow_html=True)
-
     # ── Pre-build display values ───────────────────────────────────────────────
-    # _s_load.markdown(_loading_html(ticker, 4), unsafe_allow_html=True)
-
     company_name = _html.escape(info.get("longName") or info.get("shortName") or ticker)
     sector       = _html.escape(info.get("sector", ""))
     market_cap   = _fmt_large(info.get("marketCap") or info.get("totalAssets"))
@@ -754,15 +755,12 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         f'</div></div></div>'
     )
 
-    # Brief hold — re-enable if restoring loading card animation
-    # time.sleep(0.45)
+    # ── Reveal ─────────────────────────────────────────────────────────────────
 
-    # ── Reveal: fill each slot in order ───────────────────────────────────────
-
-    # _s_load.empty()  # clear loading card — disabled with animation
-
-    # Header
+    # Header (above tabs)
     _s_header.markdown(_header_html, unsafe_allow_html=True)
+
+    # ── Trends tab ────────────────────────────────────────────────────────────
 
     # Forecast
     _s_forecast.empty()
@@ -791,9 +789,10 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             for setup in forecast.setups:
                 st.success(setup)
 
-    # Ride the Nine — always visible, renders automatically
+    # Ride the Nine
     _s_rtn.empty()
     with _s_rtn.container():
+        st.markdown('<div class="sec-gap"></div>', unsafe_allow_html=True)
         st.subheader("Ride the Nine \u2014 9 EMA Strategy")
         signal      = rtn.get("signal", "Neutral")
         bias        = rtn.get("bias", "Neutral")
@@ -849,7 +848,10 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             </div>
         </div>
             """, unsafe_allow_html=True)
+        lazy_ad_slot(SLOT_ANALYZE_BELOW_RTN, height=280)
         st.plotly_chart(build_ride_the_nine_chart(df, ticker, rtn), use_container_width=True)
+
+    # ── Technical tab ─────────────────────────────────────────────────────────
 
     # Signal Breakdown
     _s_signals.empty()
@@ -867,9 +869,14 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             })
         st.dataframe(pd.DataFrame(sig_data), hide_index=True, use_container_width=True)
 
+    # Ad slot 2 — Technical tab, below signal breakdown
+    with _s_ad2.container():
+        lazy_ad_slot(SLOT_ANALYZE_BELOW_LR, height=280)
+
     # Support & Resistance
     _s_sr.empty()
     with _s_sr.container():
+        st.markdown('<div class="sec-gap"></div>', unsafe_allow_html=True)
         col_s, col_r = st.columns(2)
         with col_s:
             st.subheader("\U0001f7e2 Support Levels")
@@ -891,6 +898,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     # Linear Regression
     _s_lr.empty()
     with _s_lr.container():
+        st.markdown('<div class="sec-gap"></div>', unsafe_allow_html=True)
         st.subheader("Linear Regression Trend Projection (10 days)")
         col_lr1, col_lr2, col_lr3, col_lr4 = st.columns(4)
         col_lr1.metric("Trend",         regression["trend_label"])
@@ -905,42 +913,9 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
                 " -- based on 30-day regression. *Not a prediction.*"
             )
 
-    # Ad slot 1 — rendered after ride-the-nine content is live.
-    # The IntersectionObserver in the iframe fires only when the user scrolls here.
-    with _s_ad1.container():
-        lazy_ad_slot(SLOT_ANALYZE_BELOW_RTN, height=280)
-
-    # Ad slot 2 — rendered after linear-regression content is live.
-    with _s_ad2.container():
-        lazy_ad_slot(SLOT_ANALYZE_BELOW_LR, height=280)
-
-    # Analyst Intelligence (Pro) — fetches Finnhub analyst data in parallel.
-    _s_analyst.empty()
-    with _s_analyst.container():
-        _render_analyst_intelligence(ticker, last_close)
-
-    # Prediction Market — rendered after core analysis so Supabase I/O
-    # (parallelised internally) does not delay the forecast/signals sections.
-    _s_voting.empty()
-    with _s_voting.container():
-        _render_voting(ticker, last_close, forecast.rating)
-
-    # ── Technical Chart — deferred behind a button. ────────────────────────────
-    # The heavy Plotly render is skipped entirely until the user requests it.
-    # Session state key is per-ticker so the chart collapses when the ticker changes.
-    st.markdown("---")
-    _chart_key = f"_chart_{ticker}"
-    if not st.session_state.get(_chart_key):
-        st.markdown(
-            '<p style="font-family:\'Inter\',sans-serif;font-size:0.85rem;'
-            'color:#6b7280;margin:0 0 10px 0;">'
-            'Full technical chart with overlays (Bollinger Bands, volume, LR projection) '
-            'is available on demand.</p>',
-            unsafe_allow_html=True,
-        )
-        if st.button("📊 View Technical Chart", key=f"btn_chart_{ticker}"):
-            st.session_state[_chart_key] = True
-    if st.session_state.get(_chart_key):
+    # Technical Chart — rendered automatically in the Technical tab
+    with _tab_tech:
+        st.markdown('<div class="sec-gap"></div>', unsafe_allow_html=True)
         st.subheader("Chart")
         chart_opts = st.columns(3)
         show_bb  = chart_opts[0].checkbox("Bollinger Bands", value=True)
@@ -965,5 +940,18 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
                 use_container_width=True,
             )
 
-    # Bottom leaderboard — always rendered, loads lazily when scrolled into view
+
+    # ── Pro Intel tab ─────────────────────────────────────────────────────────
+
+    _s_analyst.empty()
+    with _s_analyst.container():
+        _render_analyst_intelligence(ticker, last_close)
+
+    # ── Prediction tab ────────────────────────────────────────────────────────
+
+    _s_voting.empty()
+    with _s_voting.container():
+        _render_voting(ticker, last_close, forecast.rating)
+
+    # ── Bottom leaderboard — below all tabs, loads lazily on scroll ───────────
     lazy_ad_slot(SLOT_BOTTOM_LEADERBOARD, ad_format="auto", height=120)

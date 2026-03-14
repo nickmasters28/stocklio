@@ -41,6 +41,7 @@ try:
 except AttributeError:
     _host = ""
 st.session_state["_is_app_host"] = not _host.startswith("www.")
+st.session_state["_is_localhost"] = _host.startswith("localhost") or _host.startswith("127.0.0.1")
 _actual_base = f"https://{_host}" if _host else None
 
 inject_auth_js(current_params=dict(st.query_params), base_url_override=_actual_base)
