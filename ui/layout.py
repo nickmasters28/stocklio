@@ -372,6 +372,7 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
 
 # -- Analyst Intelligence (Pro) ------------------------------------------------
 
+@st.fragment
 def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
     """
     Pro-gated section: analyst recommendations, price targets, upgrades/downgrades.
@@ -857,10 +858,6 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
         _s_sr       = st.empty()
         _s_lr       = st.empty()
 
-    # Pro Intel tab placeholder
-    with _tab_pro:
-        _s_analyst  = st.empty()
-
     # Prediction tab placeholder
     with _tab_pred:
         _s_voting   = st.empty()
@@ -878,13 +875,12 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_signals.markdown(_skel_section("150px", 5), unsafe_allow_html=True)
     _s_sr.markdown(_skel_section("140px", 3), unsafe_allow_html=True)
     _s_lr.markdown(_skel_section("220px", 1), unsafe_allow_html=True)
-    _s_analyst.markdown(_skel_section("200px", 3), unsafe_allow_html=True)
     _s_voting.markdown(_skel_section("160px", 2), unsafe_allow_html=True)
 
     def _clear_all():
         for s in [_s_header, _s_forecast, _s_rtn,
                   _s_signals, _s_sr, _s_lr, _s_ad2,
-                  _s_analyst, _s_voting]:
+                  _s_voting]:
             s.empty()
 
     # ── Parallel I/O — _compute_analysis and fetch_info run concurrently.
@@ -1192,10 +1188,9 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
             )
 
 
-    # ── Pro Intel tab ─────────────────────────────────────────────────────────
+    # ── Pro Intel tab — rendered as a fragment (independent of main page) ──────
 
-    _s_analyst.empty()
-    with _s_analyst.container():
+    with _tab_pro:
         _render_analyst_intelligence(ticker, last_close)
 
     # ── Prediction tab ────────────────────────────────────────────────────────

@@ -34,6 +34,7 @@ Signals (10 total):
 
 import pandas as pd
 import numpy as np
+import streamlit as st
 from dataclasses import dataclass, field
 from typing import Optional, List
 
@@ -634,6 +635,7 @@ def _normalise_weights(weights: dict) -> dict:
     return {k: v / total for k, v in weights.items()}
 
 
+@st.cache_data(ttl=1800, show_spinner=False)
 def score_symbol(df: pd.DataFrame, symbol: str, support: list, resistance: list) -> ForecastResult:
     """Run all signal scorers and aggregate into a ForecastResult."""
     if df.empty or len(df) < 20:
