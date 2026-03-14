@@ -357,6 +357,7 @@ def _render_voting(ticker: str, current_price: float, tech_rating: str):
             st.caption("No votes yet — be the first to predict!")
 
     if len(history) > 1:
+        st.markdown('<div class="sec-gap"></div>', unsafe_allow_html=True)
         st.plotly_chart(build_sentiment_chart(history), use_container_width=True)
     else:
         st.markdown(

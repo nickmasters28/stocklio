@@ -138,6 +138,7 @@ if _is_logged_in:
     )
     _nav_links = (
         '<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
+        '<a href="/pricing" target="_self" class="lp-btn lp-btn-outline">Pricing</a>'
         '<a href="https://auth.stocklio.ai/account" class="lp-btn lp-btn-outline">My Account</a>'
         '<a href="/analyze?ticker=AAPL" class="lp-btn lp-btn-primary">Open Dashboard</a>'
     )
@@ -145,6 +146,7 @@ else:
     _welcome_banner = ""
     _nav_links = (
         f'<a href="/blog" class="lp-btn lp-btn-outline">Blog</a>'
+        f'<a href="/pricing" target="_self" class="lp-btn lp-btn-outline">Pricing</a>'
         f'<a href="{_login_url}" target="_self" class="lp-btn lp-btn-outline">Log in</a>'
         f'<a href="{_signup_url}" target="_self" class="lp-btn lp-btn-primary">Sign up free</a>'
     )
@@ -653,6 +655,7 @@ st.markdown(f"""
         <div class="lp-footer-section">
             <div class="lp-footer-section-title">Resources</div>
             <a href="/blog" class="lp-footer-link">Blog</a>
+            <a href="/pricing" class="lp-footer-link">Pricing</a>
             {"<a href='/analyze?ticker=AAPL' class='lp-footer-link'>Open Dashboard</a><a href='https://auth.stocklio.ai/account' target='_self' class='lp-footer-link'>My Account</a>" if _is_logged_in else f"<a href='{_signup_url}' target='_self' class='lp-footer-link'>Create an account</a><a href='{_login_url}' target='_self' class='lp-footer-link'>Log in</a>"}
             <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
         </div>
