@@ -235,10 +235,19 @@ def handle_auth_callback() -> None:
 
     payload = _validate_token(token)
     if payload:
-        st.session_state["logged_in"]  = True
-        st.session_state["user_email"] = payload.get("email", "")
-        st.session_state["user_id"]    = payload.get("user_id", "")
-        st.session_state["pa_token"]   = token
+        user_id = payload.get("user_id", "")
+        st.session_state["logged_in"]   = True
+        st.session_state["user_email"]  = payload.get("email", "")
+        st.session_state["user_id"]     = user_id
+        st.session_state["pa_token"]    = token
+
+        # Fetch subscription tier from Supabase. Falls back to "free" on any error.
+        try:
+            from data.stripe_billing import get_subscription_tier
+            tier = get_subscription_tier(user_id)
+        except Exception:
+            tier = "free"
+        st.session_state["subscription_tier"] = tier
         # Cache in localStorage for instant cross-session recovery
         exp = payload.get("exp", 0)
         components.html(

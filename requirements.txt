@@ -6,5 +6,6 @@ numpy
 plotly
 ta
 supabase
+stripe
 PyJWT
 cryptography

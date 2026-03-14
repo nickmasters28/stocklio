@@ -44,7 +44,7 @@ else:
 if _is_pro:
     _pro_cta = "<span class='pricing-cta pricing-cta-current'>&#10003; You're on Pro</span>"
 else:
-    _pro_cta = "<a href='https://auth.stocklio.ai/org/upgrade' target='_self' class='pricing-cta pricing-cta-pro'>Upgrade to Pro &rarr;</a>"
+    _pro_cta = "<a href='https://buy.stripe.com/bJe00j3tg8ug65kaIBenS00' target='_blank' class='pricing-cta pricing-cta-pro'>Upgrade to Pro &rarr;</a>"
 
 st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
