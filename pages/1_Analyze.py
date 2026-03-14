@@ -256,11 +256,19 @@ with st.sidebar:
     except Exception:
         pass
 
+    _feedback_link = (
+        '<a href="mailto:hello@stocklio.ai?subject=Feedback" '
+        'style="display:block;font-family:\'Inter\',sans-serif;font-size:0.72rem;'
+        'color:#6b7280;text-decoration:none;text-align:center;margin-top:8px;">'
+        '💬 Feedback or bug report</a>'
+    )
+
     if st.session_state.get("logged_in"):
         st.markdown(
             f'<div class="sidebar-auth-bar">'
             f'<a href="https://auth.stocklio.ai/account" class="auth-btn auth-btn-primary" '
             f'style="text-decoration:none;cursor:pointer;color:#fff;">My Account</a>'
+            f'{_feedback_link}'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -273,6 +281,7 @@ with st.sidebar:
             f'style="text-decoration:none;cursor:pointer;">Log in</a>'
             f'<a href="{_signup_url}" target="_self" class="auth-btn" '
             f'style="text-decoration:none;cursor:pointer;">Sign up</a>'
+            f'{_feedback_link}'
             f'</div>',
             unsafe_allow_html=True,
         )
