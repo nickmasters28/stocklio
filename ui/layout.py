@@ -430,7 +430,7 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
                   </div>
                 </div>
               </div>
-              <a href="https://www.stocklio.ai" target="_self"
+              <a href="/pricing" target="_self"
                  style="display:inline-block;background:#00c896;color:#ffffff;
                         font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:600;
                         padding:9px 22px;border-radius:8px;text-decoration:none;">
