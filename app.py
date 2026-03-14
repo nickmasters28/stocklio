@@ -47,19 +47,24 @@ _actual_base = f"https://{_host}" if _host else None
 inject_auth_js(current_params=dict(st.query_params), base_url_override=_actual_base)
 handle_auth_callback()
 
-# ── Google Analytics ─────────────────────────────────────────────────────────
-# Problem: st.markdown() strips <script> tags (React dangerouslySetInnerHTML).
-#          components.html() runs scripts but inside a sandboxed iframe — so
-#          window.dataLayer stays in the iframe context and GA Tag Assistant
-#          (which inspects the parent window) never detects it.
-# Fix:     Inject the gtag.js script tag *into the parent document* from inside
-#          the iframe using window.parent. Same-origin iframe, so this is allowed.
+# ── Head injection: hide CSS + Google Analytics ───────────────────────────────
+# Inject both the nav-hide CSS and GA script directly into the parent document
+# <head> so they apply before React renders the sidebar nav, preventing the
+# flash of the default Streamlit page-list sidebar.
 components.html(
     '<script>'
     '(function(){'
     '  var p=window.parent;'
     '  if(!p||p===window)return;'
-    '  if(p.document.getElementById("_ga_stkl"))return;'  # idempotent guard
+    # Inject hide CSS into <head> immediately — faster than st.markdown() body injection
+    '  if(!p.document.getElementById("_stkl_hide")){'
+    '    var st=p.document.createElement("style");'
+    '    st.id="_stkl_hide";'
+    '    st.textContent="[data-testid=\'stSidebarNav\'],[data-testid=\'stSidebarNavItems\'],[data-testid=\'stSidebarNavSeparator\'],[data-testid=\'stMainMenu\'],[data-testid=\'stHeader\'],#MainMenu{display:none!important;}";'
+    '    p.document.head.appendChild(st);'
+    '  }'
+    # GA injection
+    '  if(p.document.getElementById("_ga_stkl"))return;'
     '  var s=p.document.createElement("script");'
     '  s.id="_ga_stkl";s.async=true;'
     '  s.src="https://www.googletagmanager.com/gtag/js?id=G-P4BE4NHFLX";'
