@@ -244,6 +244,18 @@ with st.sidebar:
 
     st.markdown("---")
 
+    # Dev-only toggle: simulate free user on localhost
+    try:
+        _host = st.context.headers.get("host", "")
+        if _host.startswith("localhost") or _host.startswith("127.0.0.1"):
+            _force_free = st.session_state.get("dev_force_free", False)
+            if st.checkbox("🧪 Simulate free user", value=_force_free, key="dev_force_free_toggle"):
+                st.session_state["dev_force_free"] = True
+            else:
+                st.session_state["dev_force_free"] = False
+    except Exception:
+        pass
+
     if st.session_state.get("logged_in"):
         st.markdown(
             f'<div class="sidebar-auth-bar">'

@@ -404,53 +404,70 @@ def _render_analyst_intelligence(ticker: str, current_price: float) -> None:
                 Unlock the Wall Street view on this stock — what analysts are rating it,
                 where they think the price is going, and who just upgraded or downgraded.
               </p>
-              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;">
-                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
-                            border:1px solid #e2e8f0;">
-                  <div style="font-size:1.1rem;margin-bottom:6px;">📊</div>
-                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
-                              font-weight:800;color:#1a202c;margin-bottom:4px;">Analyst Ratings</div>
-                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
-                    Buy / Hold / Sell consensus from all covering analysts.
+              <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px;">
+                <div style="background:#f8fafc;border-radius:10px;padding:16px 20px;
+                            border:1px solid #e2e8f0;display:flex;align-items:center;gap:16px;">
+                  <div style="font-size:1.5rem;flex-shrink:0;">🏛️</div>
+                  <div>
+                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                font-weight:800;color:#1a202c;margin-bottom:3px;">Congressional Trading</div>
+                    <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                      See exactly what House &amp; Senate members are buying and selling &mdash; STOCK Act disclosures updated continuously.
+                    </div>
                   </div>
                 </div>
-                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
-                            border:1px solid #e2e8f0;">
-                  <div style="font-size:1.1rem;margin-bottom:6px;">🎯</div>
-                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
-                              font-weight:800;color:#1a202c;margin-bottom:4px;">Price Target</div>
-                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
-                    Analyst consensus target with high / low range vs current price.
+                <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;border:1px solid #bbf7d0;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <div style="font-size:1.2rem;">🤖</div>
+                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                font-weight:800;color:#1a202c;">Stocklio Copilot</div>
+                    <span style="background:#dcfce7;color:#16a34a;font-family:'Inter',sans-serif;
+                                 font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;
+                                 letter-spacing:0.04em;text-transform:uppercase;">Coming Soon</span>
+                  </div>
+                  <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                    Ask any question about this stock and get an AI-powered answer grounded in real fundamentals, filings, and technicals.
                   </div>
                 </div>
-                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
-                            border:1px solid #e2e8f0;">
-                  <div style="font-size:1.1rem;margin-bottom:6px;">⬆️</div>
-                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
-                              font-weight:800;color:#1a202c;margin-bottom:4px;">Upgrades & Downgrades</div>
-                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
-                    Latest rating changes from Goldman, Morgan Stanley, and more.
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+                  <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                              border:1px solid #e2e8f0;">
+                    <div style="font-size:1.2rem;margin-bottom:6px;">📊</div>
+                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                font-weight:800;color:#1a202c;margin-bottom:4px;">Analyst Ratings</div>
+                    <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                      Buy / Hold / Sell consensus from all covering analysts.
+                    </div>
+                  </div>
+                  <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                              border:1px solid #e2e8f0;">
+                    <div style="font-size:1.2rem;margin-bottom:6px;">🎯</div>
+                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                font-weight:800;color:#1a202c;margin-bottom:4px;">Price Target</div>
+                    <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                      Analyst consensus target with high / low range vs current price.
+                    </div>
+                  </div>
+                  <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                              border:1px solid #e2e8f0;">
+                    <div style="font-size:1.2rem;margin-bottom:6px;">⬆️</div>
+                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                font-weight:800;color:#1a202c;margin-bottom:4px;">Upgrades &amp; Downgrades</div>
+                    <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                      Latest rating changes from Goldman, Morgan Stanley, and more.
+                    </div>
+                  </div>
+                  <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
+                              border:1px solid #e2e8f0;">
+                    <div style="font-size:1.2rem;margin-bottom:6px;">📄</div>
+                    <div style="font-family:'Darker Grotesque',sans-serif;font-size:1.15rem;
+                                font-weight:800;color:#1a202c;margin-bottom:4px;">SEC Filing Sentiment</div>
+                    <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#6b7280;">
+                      Sentiment analysis of recent 10-K, 10-Q, and 8-K filings using the Loughran-McDonald financial word list.
+                    </div>
                   </div>
                 </div>
-                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
-                            border:1px solid #e2e8f0;">
-                  <div style="font-size:1.1rem;margin-bottom:6px;">🏛️</div>
-                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
-                              font-weight:800;color:#1a202c;margin-bottom:4px;">Congressional Trading</div>
-                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
-                    Recent House &amp; Senate stock trades filed under the STOCK Act.
-                  </div>
-                </div>
-                <div style="background:#f8fafc;border-radius:10px;padding:14px 16px;
-                            border:1px solid #e2e8f0;grid-column:span 2;">
-                  <div style="font-size:1.1rem;margin-bottom:6px;">📄</div>
-                  <div style="font-family:'Darker Grotesque',sans-serif;font-size:1rem;
-                              font-weight:800;color:#1a202c;margin-bottom:4px;">SEC Filing Sentiment</div>
-                  <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#6b7280;">
-                    Sentiment analysis of recent 10-K, 10-Q, and 8-K filings using the
-                    Loughran-McDonald financial word list — the same method used in academic finance research.
-                  </div>
-                </div>
+
               </div>
               <a href="/pricing" target="_self"
                  style="display:inline-block;background:#00c896;color:#ffffff;
@@ -842,8 +859,9 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _s_header = st.empty()
 
     # ── Tab containers — created now so placeholders bind to their positions ──
+    _pro_tab_label = "⭐ Pro Intel" if is_paid_user() else "🔒 Pro Intel"
     _tab_trends, _tab_tech, _tab_pro, _tab_pred = st.tabs(
-        ["📈 Trends", "🔬 Technical", "⭐ Pro Intel", "🗳️ Prediction"]
+        ["📈 Trends", "🔬 Technical", _pro_tab_label, "🗳️ Prediction"]
     )
 
     # Trends tab placeholders

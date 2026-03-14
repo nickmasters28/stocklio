@@ -263,8 +263,12 @@ def handle_auth_callback() -> None:
 def is_paid_user() -> bool:
     """
     Returns True if the current session has an active paid subscription.
-    On localhost, always returns True for easier local development.
+    On localhost, defaults to True for easier local development unless
+    session state has 'dev_force_free' set to True.
     """
+    # Allow overriding paid status on localhost for testing free UX
+    if st.session_state.get("dev_force_free", False):
+        return False
     try:
         _host = st.context.headers.get("host", "")
         if _host.startswith("localhost") or _host.startswith("127.0.0.1"):
