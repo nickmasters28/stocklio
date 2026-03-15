@@ -41,7 +41,8 @@ def _client():
 # ---------------------------------------------------------------------------
 
 def _stripe_key() -> str:
-    return st.secrets["stripe"]["secret_key"]
+    s = st.secrets["stripe"]
+    return s.get("STRIPE_SECRET_KEY") or s.get("secret_key") or s.get("STRIPE_SECRET")
 
 
 def verify_checkout_session(session_id: str) -> dict | None:

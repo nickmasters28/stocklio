@@ -92,21 +92,16 @@ def inject_auth_js(current_params: dict = None, base_url_override: str = None) -
             # 3. Navigate to www.stocklio.ai when done, or after 2s timeout.
             f"""<script>
 try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
-var _ld=false;
-function _nav(){{
-  if(_ld)return;_ld=true;
-  // Inject a script into the parent document so it executes in the parent's
-  // own context — this bypasses iframe sandbox cross-origin nav restrictions.
-  try{{
-    var _s=window.parent.document.createElement('script');
-    _s.textContent='window.location.href="https://www.stocklio.ai";';
-    window.parent.document.head.appendChild(_s);
-  }}catch(e){{
-    try{{window.parent.location.href='https://www.stocklio.ai';}}catch(e2){{}}
-  }}
+// Redirect through PropelAuth's logout page — this invalidates the session cookie
+// so that visiting /analyze after logout requires re-authentication.
+var _logoutUrl={auth_url_js}+'/en/logout?redirect_to='+encodeURIComponent('https://www.stocklio.ai');
+try{{
+  var _s=window.parent.document.createElement('script');
+  _s.textContent='window.location.href='+JSON.stringify(_logoutUrl)+';';
+  window.parent.document.head.appendChild(_s);
+}}catch(e){{
+  try{{window.parent.location.href=_logoutUrl;}}catch(e2){{}}
 }}
-setTimeout(_nav,2000);
-try{{fetch({auth_url_js}+'/api/v1/logout',{{method:'POST',credentials:'include'}}).then(_nav).catch(_nav);}}catch(e){{_nav();}}
 </script>""",
             height=0,
         )
