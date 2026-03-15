@@ -656,6 +656,7 @@ st.markdown(f"""
             <div class="lp-footer-section-title">Resources</div>
             <a href="/blog" class="lp-footer-link">Blog</a>
             <a href="/pricing" class="lp-footer-link">Pricing</a>
+            <a href="/faq" class="lp-footer-link">FAQ</a>
             {"<a href='/analyze?ticker=AAPL' class='lp-footer-link'>Open Dashboard</a><a href='https://auth.stocklio.ai/account' target='_self' class='lp-footer-link'>My Account</a>" if _is_logged_in else f"<a href='{_signup_url}' target='_self' class='lp-footer-link'>Create an account</a><a href='{_login_url}' target='_self' class='lp-footer-link'>Log in</a>"}
             <a href="mailto:hello@stocklio.ai" class="lp-footer-link">hello@stocklio.ai</a>
         </div>

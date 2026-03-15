@@ -166,6 +166,7 @@ pg = st.navigation(
         st.Page("pages/privacy.py",    title="Privacy Policy",   url_path="privacy"),
         st.Page("pages/terms.py",      title="Terms of Service", url_path="terms"),
         st.Page("pages/cookies.py",    title="Cookie Policy",    url_path="cookies"),
+        st.Page("pages/faq.py",             title="FAQ",              url_path="faq"),
         st.Page("pages/logged_out.py",     title="Logged Out",       url_path="logged-out"),
         st.Page("pages/payment_success.py", title="Payment Success",  url_path="payment-success"),
     ],
