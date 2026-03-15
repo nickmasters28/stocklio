@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — Stocklio | Stock Analysis Insights</title>
+  <meta name="description" content="Strategy breakdowns, indicator guides, and market psychology for individual investors who want a real edge. Technical analysis, RSI, MACD, trend following, and more.">
+  <link rel="canonical" href="https://www.stocklio.ai/blog/">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://www.stocklio.ai/blog/">
+  <meta property="og:title"       content="Stocklio Blog — Stock Analysis Insights">
+  <meta property="og:description" content="Strategy breakdowns, indicator guides, and market psychology for individual investors.">
+  <meta property="og:site_name"   content="Stocklio">
+
+  <!-- JSON-LD: Blog -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Stocklio Blog",
+    "url": "https://www.stocklio.ai/blog/",
+    "description": "Strategy breakdowns, technical indicator guides, and market psychology for individual investors who want a real edge.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Stocklio",
+      "url": "https://www.stocklio.ai"
+    },
+    "blogPost": [
+      {
+        "@type": "BlogPosting",
+        "headline": "Why Most Traders Fight the Trend — and Pay for It",
+        "url": "https://www.stocklio.ai/blog/why-traders-fight-the-trend.html",
+        "datePublished": "2026-03-15",
+        "author": { "@type": "Organization", "name": "Stocklio Team" }
+      },
+      {
+        "@type": "BlogPosting",
+        "headline": "How to Read Technical Indicators Like a Professional Trader",
+        "url": "https://www.stocklio.ai/blog/how-to-read-technical-indicators.html",
+        "datePublished": "2026-03-12",
+        "author": { "@type": "Organization", "name": "Stocklio Team" }
+      },
+      {
+        "@type": "BlogPosting",
+        "headline": "Ride the Nine: The 9 EMA Strategy Professional Traders Swear By",
+        "url": "https://www.stocklio.ai/blog/ride-the-nine-strategy.html",
+        "datePublished": "2025-03-05",
+        "author": { "@type": "Organization", "name": "Stocklio Team" }
+      },
+      {
+        "@type": "BlogPosting",
+        "headline": "How to Read RSI Like a Pro (And Stop Making the Most Common Mistakes)",
+        "url": "https://www.stocklio.ai/blog/how-to-read-rsi.html",
+        "datePublished": "2025-02-20",
+        "author": { "@type": "Organization", "name": "Stocklio Team" }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .blog-hero {
+      padding: 40px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+    }
+    .blog-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 780px;
+      margin: 0 auto;
+      padding-bottom: 64px;
+    }
+    .blog-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      text-decoration: none;
+      display: block;
+      color: inherit;
+      transition: box-shadow 0.15s;
+    }
+    .blog-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .blog-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .blog-tag {
+      display: inline-block;
+      background: #e6faf5;
+      color: var(--green-dark);
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .blog-card-title {
+      font-family: 'Darker Grotesque', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .blog-card-meta {
+      font-size: 0.78rem;
+      color: var(--gray-light);
+      margin-bottom: 10px;
+    }
+    .blog-card-excerpt {
+      font-size: 0.92rem;
+      color: var(--gray);
+      line-height: 1.65;
+    }
+    .blog-card-link {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="/" class="logo">stocklio<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="/blog/" class="btn btn-outline">Blog</a>
+      <a href="/pricing.html" class="btn btn-outline">Pricing</a>
+      <a href="/faq.html" class="btn btn-outline">FAQ</a>
+      <a href="https://auth.stocklio.ai/en/login?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-outline">Log in</a>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-primary">Sign up free</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="blog-hero">
+    <div class="section-label" style="text-align:left;">Stocklio Blog</div>
+    <h1 style="font-family:'Darker Grotesque',sans-serif;font-size:2.8rem;font-weight:900;color:var(--dark);letter-spacing:-0.02em;margin:0 0 10px;line-height:1.1;">
+      Insights for smarter trading.
+    </h1>
+    <p style="font-size:1rem;color:var(--gray-light);max-width:540px;line-height:1.6;margin:0;">
+      Strategy breakdowns, indicator guides, and market psychology — written for individual investors who want a real edge.
+    </p>
+  </div>
+
+  <!-- Posts -->
+  <div class="blog-grid">
+
+    <a class="blog-card" href="/blog/why-traders-fight-the-trend.html">
+      <div class="blog-card-tags">
+        <span class="blog-tag">Technical Analysis</span>
+        <span class="blog-tag">Trend Following</span>
+        <span class="blog-tag">Strategy</span>
+      </div>
+      <div class="blog-card-title">Why Most Traders Fight the Trend — and Pay for It</div>
+      <div class="blog-card-meta">March 15, 2026 &nbsp;&middot;&nbsp; Stocklio Team</div>
+      <div class="blog-card-excerpt">Fighting the trend is one of the most expensive habits in trading. Here's why retail investors consistently trade against momentum, what a confirmed trend actually looks like, and how systematic analysis changes the math.</div>
+      <span class="blog-card-link">Read article &rarr;</span>
+    </a>
+
+    <a class="blog-card" href="/blog/how-to-read-technical-indicators.html">
+      <div class="blog-card-tags">
+        <span class="blog-tag">Technical Analysis</span>
+        <span class="blog-tag">Indicators</span>
+        <span class="blog-tag">Strategy</span>
+      </div>
+      <div class="blog-card-title">How to Read Technical Indicators Like a Professional Trader</div>
+      <div class="blog-card-meta">March 12, 2026 &nbsp;&middot;&nbsp; Stocklio Team</div>
+      <div class="blog-card-excerpt">Most retail investors glance at a chart, see a few colored lines, and hope for the best. Professional traders see something entirely different. Here's how to close that gap.</div>
+      <span class="blog-card-link">Read article &rarr;</span>
+    </a>
+
+    <a class="blog-card" href="/blog/ride-the-nine-strategy.html">
+      <div class="blog-card-tags">
+        <span class="blog-tag">EMA</span>
+        <span class="blog-tag">Strategy</span>
+        <span class="blog-tag">Technical Analysis</span>
+      </div>
+      <div class="blog-card-title">Ride the Nine: The 9 EMA Strategy Professional Traders Swear By</div>
+      <div class="blog-card-meta">March 5, 2025 &nbsp;&middot;&nbsp; Stocklio Team</div>
+      <div class="blog-card-excerpt">The 9 EMA is one of the most powerful — and most misunderstood — tools in a trader's toolkit. Here's how professional traders use it to find low-risk entries and early exit signals.</div>
+      <span class="blog-card-link">Read article &rarr;</span>
+    </a>
+
+    <a class="blog-card" href="/blog/how-to-read-rsi.html">
+      <div class="blog-card-tags">
+        <span class="blog-tag">RSI</span>
+        <span class="blog-tag">Indicators</span>
+        <span class="blog-tag">Technical Analysis</span>
+      </div>
+      <div class="blog-card-title">How to Read RSI Like a Pro (And Stop Making the Most Common Mistakes)</div>
+      <div class="blog-card-meta">February 20, 2025 &nbsp;&middot;&nbsp; Stocklio Team</div>
+      <div class="blog-card-excerpt">RSI above 70 means sell, right? Not exactly. Most traders misuse the Relative Strength Index. Here's how to read it correctly — and how to use it alongside other signals.</div>
+      <span class="blog-card-link">Read article &rarr;</span>
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <div class="logo" style="font-size:2rem;">stocklio<span class="logo-dot">.</span></div>
+      <div style="font-size:0.8rem;color:#a0aec0;margin-top:6px;">Built for investors who want an edge.</div>
+    </div>
+    <div style="display:flex;gap:48px;flex-wrap:wrap;">
+      <div>
+        <div class="footer-col-title">Product</div>
+        <a href="https://app.stocklio.ai/analyze?ticker=AAPL" class="footer-link">Open Dashboard</a>
+        <a href="/pricing.html" class="footer-link">Pricing</a>
+        <a href="/faq.html" class="footer-link">FAQ</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <a href="/blog/" class="footer-link">Blog</a>
+        <a href="mailto:hello@stocklio.ai" class="footer-link">hello@stocklio.ai</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <a href="https://app.stocklio.ai/privacy" class="footer-link">Privacy Policy</a>
+        <a href="https://app.stocklio.ai/terms" class="footer-link">Terms of Service</a>
+        <a href="https://app.stocklio.ai/cookies" class="footer-link">Cookie Policy</a>
+      </div>
+    </div>
+    <div style="width:100%;border-top:1px solid var(--border);padding-top:20px;" class="footer-copy">
+      &copy; 2025 Stocklio &nbsp;&middot;&nbsp;
+      <a href="https://app.stocklio.ai/privacy">Privacy Policy</a> &nbsp;&middot;&nbsp;
+      <a href="https://app.stocklio.ai/terms">Terms of Service</a>
+    </div>
+  </footer>
+
+</div><!-- /container -->
+</body>
+</html>

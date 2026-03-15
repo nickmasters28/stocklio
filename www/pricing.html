@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — Stocklio AI Stock Analysis</title>
+  <meta name="description" content="Stocklio is free to start. Upgrade to Pro for $9/mo to unlock analyst ratings, congressional trade alerts, SEC filing sentiment, and Stocklio Copilot.">
+  <link rel="canonical" href="https://www.stocklio.ai/pricing.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://www.stocklio.ai/pricing.html">
+  <meta property="og:title"       content="Pricing — Stocklio AI Stock Analysis">
+  <meta property="og:description" content="Free forever with core technical analysis. Upgrade to Pro for $9/mo for institutional-grade intelligence.">
+  <meta property="og:site_name"   content="Stocklio">
+
+  <!-- JSON-LD: Product -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Stocklio Pro",
+    "url": "https://www.stocklio.ai/pricing.html",
+    "brand": { "@type": "Brand", "name": "Stocklio" },
+    "description": "Stocklio Pro gives individual investors Wall Street-grade intelligence: analyst recommendations, price targets, insider sentiment, congressional trading alerts, SEC filing sentiment, and Stocklio Copilot AI chat assistant.",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Full access to core technical analysis: AI Forecast Score, Ride the Nine 9 EMA strategy, signal breakdown, support and resistance levels, linear regression trend projection, and community prediction market."
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro",
+        "price": "9.00",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2027-01-01",
+        "billingIncrement": "P1M",
+        "description": "Everything in Free plus analyst recommendations, price target, insider sentiment score, congressional trading alerts, SEC filing sentiment, no ads, and Stocklio Copilot."
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .pricing-hero {
+      text-align: center;
+      padding: 64px 0 48px;
+    }
+    .pricing-h1 {
+      font-family: 'Darker Grotesque', sans-serif;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 900;
+      color: var(--dark);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 0 0 16px;
+    }
+    .pricing-sub {
+      font-size: 1.05rem;
+      color: var(--gray);
+      margin: 0 auto;
+      max-width: 480px;
+      line-height: 1.7;
+    }
+
+    /* Grid */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 860px;
+      margin: 0 auto 64px;
+    }
+    @media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+    .pricing-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .pricing-card-pro {
+      border: 2px solid var(--green);
+      box-shadow: 0 4px 24px rgba(0,200,150,.12);
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: var(--white);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+      margin-bottom: 8px;
+    }
+    .pricing-tier-pro { color: var(--green-dark); }
+    .pricing-price {
+      font-family: 'Darker Grotesque', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 900;
+      color: var(--dark);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .pricing-price span { font-size: 1.4rem; font-weight: 600; color: var(--gray-light); }
+    .pricing-period {
+      font-size: 0.85rem;
+      color: #a0aec0;
+      margin-bottom: 20px;
+    }
+    .pricing-desc {
+      font-size: 0.88rem;
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 32px;
+      flex: 1;
+    }
+    .pricing-features li {
+      font-size: 0.88rem;
+      color: var(--dark);
+      padding: 7px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .pricing-features li:last-child { border-bottom: none; }
+    .feat-icon { flex-shrink: 0; margin-top: 1px; font-size: 0.95rem; }
+    .feat-label { flex: 1; }
+    .feat-muted { color: #a0aec0; }
+    .feat-section {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #a0aec0;
+      padding: 12px 0 4px;
+      border-bottom: none !important;
+    }
+    .feat-soon {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 10px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .pricing-cta {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 12px 0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+    .pricing-cta-free {
+      background: var(--bg);
+      color: var(--dark);
+      border: 1px solid var(--border);
+    }
+    .pricing-cta-free:hover { background: #edf2f7; }
+    .pricing-cta-pro {
+      background: var(--green);
+      color: var(--white);
+      border: 1px solid var(--green);
+    }
+    .pricing-cta-pro:hover { background: var(--green-dark); border-color: var(--green-dark); }
+    .pricing-cancel {
+      font-size: 0.75rem;
+      color: #a0aec0;
+      text-align: center;
+      margin: 10px 0 0;
+    }
+    .pricing-cancel a { color: #a0aec0; text-decoration: none; }
+    .pricing-cancel a:hover { color: var(--gray); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="/" class="logo">stocklio<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="/blog/" class="btn btn-outline">Blog</a>
+      <a href="/pricing.html" class="btn btn-outline">Pricing</a>
+      <a href="/faq.html" class="btn btn-outline">FAQ</a>
+      <a href="https://auth.stocklio.ai/en/login?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-outline">Log in</a>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-primary">Sign up free</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="pricing-hero">
+    <div class="eyebrow">Pricing</div>
+    <h1 class="pricing-h1">Simple, transparent pricing</h1>
+    <p class="pricing-sub">Start free with powerful technical analysis. Upgrade to Pro for institutional-grade intelligence.</p>
+  </div>
+
+  <!-- Cards -->
+  <div class="pricing-grid">
+
+    <!-- Free -->
+    <div class="pricing-card">
+      <div class="pricing-tier">Free</div>
+      <div class="pricing-price">$0</div>
+      <div class="pricing-period">forever</div>
+      <div class="pricing-desc">Full access to core technical analysis tools. No credit card required.</div>
+      <ul class="pricing-features">
+        <li><div class="feat-section" style="padding-top:0;">Technical Analysis</div></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Stocklio Forecast Score</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Ride the Nine &mdash; 9 EMA Strategy</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Signal Breakdown Table</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Support &amp; Resistance Levels</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Linear Regression Trend Projection</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Interactive Technical Chart</span></li>
+        <li><div class="feat-section">Community</div></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Community Prediction Market</span></li>
+        <li><div class="feat-section">Pro Intel</div></li>
+        <li><span class="feat-icon feat-muted">&mdash;</span><span class="feat-label feat-muted">Analyst Recommendations</span></li>
+        <li><span class="feat-icon feat-muted">&mdash;</span><span class="feat-label feat-muted">Price Target</span></li>
+        <li><span class="feat-icon feat-muted">&mdash;</span><span class="feat-label feat-muted">Insider Sentiment Score</span></li>
+        <li><span class="feat-icon feat-muted">&mdash;</span><span class="feat-label feat-muted">Congressional Trading Alerts</span></li>
+        <li><span class="feat-icon feat-muted">&mdash;</span><span class="feat-label feat-muted">SEC Filing Sentiment</span></li>
+        <li><span class="feat-icon feat-muted">&mdash;</span><span class="feat-label feat-muted">Stocklio Copilot</span></li>
+      </ul>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="pricing-cta pricing-cta-free">Get started free</a>
+    </div>
+
+    <!-- Pro -->
+    <div class="pricing-card pricing-card-pro">
+      <div class="pricing-badge">Most Popular</div>
+      <div class="pricing-tier pricing-tier-pro">Pro</div>
+      <div class="pricing-price">$9<span>/mo</span></div>
+      <div class="pricing-period">billed monthly</div>
+      <div class="pricing-desc">Everything in Free, plus Wall Street-grade intelligence to stay ahead of the market.</div>
+      <ul class="pricing-features">
+        <li><div class="feat-section" style="padding-top:0;">Technical Analysis</div></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Everything in Free</span></li>
+        <li><div class="feat-section">Pro Intel</div></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">No Ads</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Analyst Recommendations</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Price Target</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Insider Sentiment Score</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Congressional Trading Alerts</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">SEC Filing Sentiment</span></li>
+        <li><span class="feat-icon">&#10003;</span><span class="feat-label">Stocklio Copilot <span class="feat-soon">New</span></span></li>
+      </ul>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="pricing-cta pricing-cta-pro">Sign up to upgrade &rarr;</a>
+      <p class="pricing-cancel">To cancel, email <a href="mailto:hello@stocklio.ai">hello@stocklio.ai</a></p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <div class="logo" style="font-size:2rem;">stocklio<span class="logo-dot">.</span></div>
+      <div style="font-size:0.8rem;color:#a0aec0;margin-top:6px;">Built for investors who want an edge.</div>
+    </div>
+    <div style="display:flex;gap:48px;flex-wrap:wrap;">
+      <div>
+        <div class="footer-col-title">Product</div>
+        <a href="https://app.stocklio.ai/analyze?ticker=AAPL" class="footer-link">Open Dashboard</a>
+        <a href="/pricing.html" class="footer-link">Pricing</a>
+        <a href="/faq.html" class="footer-link">FAQ</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <a href="/blog/" class="footer-link">Blog</a>
+        <a href="mailto:hello@stocklio.ai" class="footer-link">hello@stocklio.ai</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <a href="https://app.stocklio.ai/privacy" class="footer-link">Privacy Policy</a>
+        <a href="https://app.stocklio.ai/terms" class="footer-link">Terms of Service</a>
+        <a href="https://app.stocklio.ai/cookies" class="footer-link">Cookie Policy</a>
+      </div>
+    </div>
+    <div style="width:100%;border-top:1px solid var(--border);padding-top:20px;" class="footer-copy">
+      &copy; 2025 Stocklio &nbsp;&middot;&nbsp;
+      <a href="https://app.stocklio.ai/privacy">Privacy Policy</a> &nbsp;&middot;&nbsp;
+      <a href="https://app.stocklio.ai/terms">Terms of Service</a>
+    </div>
+  </footer>
+
+</div><!-- /container -->
+</body>
+</html>

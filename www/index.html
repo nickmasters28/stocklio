@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stocklio — AI-Powered Stock Analysis for Investors</title>
+  <meta name="description" content="Stocklio combines AI composite scoring, technical indicator analysis, community prediction markets, and Stocklio Copilot to help individual investors make smarter trading decisions. Free to start.">
+  <meta name="keywords" content="stock analysis, AI stock analysis, technical indicators, RSI, MACD, stock forecast, retail investor tools, stock screener">
+  <link rel="canonical" href="https://www.stocklio.ai/">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://www.stocklio.ai/">
+  <meta property="og:title"       content="Stocklio — AI-Powered Stock Analysis for Investors">
+  <meta property="og:description" content="AI composite scoring, technical signals, and community sentiment in one dashboard. Free to start, no credit card required.">
+  <meta property="og:site_name"   content="Stocklio">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Stocklio — AI-Powered Stock Analysis">
+  <meta name="twitter:description" content="Know where the market is headed before it moves. AI analysis + technical signals + community sentiment.">
+
+  <!-- JSON-LD: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Stocklio",
+    "url": "https://www.stocklio.ai",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": [
+      { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+      { "@type": "Offer", "name": "Pro", "price": "9.99", "priceCurrency": "USD", "billingIncrement": "P1M" }
+    ],
+    "description": "Stocklio is an AI-powered stock analysis platform for individual investors. It combines technical indicator analysis, AI composite scoring, community prediction markets, and an AI chat assistant (Stocklio Copilot) into a single dashboard.",
+    "featureList": [
+      "AI composite score for any stock",
+      "10+ technical indicators including RSI, MACD, Bollinger Bands, EMA, SMA",
+      "Ride the Nine 9 EMA strategy",
+      "Community prediction market with accuracy tracking",
+      "Stocklio Copilot AI chat assistant",
+      "Analyst ratings and price targets",
+      "Congress stock trade disclosures",
+      "SEC filing alerts",
+      "Recent stock news"
+    ],
+    "author": { "@type": "Organization", "name": "Stocklio", "url": "https://www.stocklio.ai" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Hero */
+    .hero { text-align: center; padding: 52px 20px 36px; }
+    .hero-h1 {
+      font-family: 'Darker Grotesque', sans-serif;
+      font-size: clamp(2.6rem, 6vw, 4.5rem);
+      font-weight: 900;
+      color: var(--dark);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .hero-h1 span { color: var(--green); }
+    .hero-sub { font-size: 1.1rem; color: var(--gray); max-width: 600px; margin: 0 auto 32px; line-height: 1.7; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* Stats strip */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 40px 0;
+    }
+    .stat-item { flex: 1; text-align: center; padding: 28px 16px; border-right: 1px solid var(--border); }
+    .stat-item:last-child { border-right: none; }
+    .stat-num { font-family: 'Darker Grotesque', sans-serif; font-size: 2rem; font-weight: 800; color: var(--dark); line-height: 1; }
+    .stat-label { font-size: 0.8rem; color: var(--gray-light); margin-top: 4px; }
+
+    /* How it works */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 16px 0 0; }
+    .step { text-align: center; padding: 20px 16px; }
+    .step-num {
+      width: 40px; height: 40px;
+      background: var(--green); color: var(--white);
+      border-radius: 50%;
+      font-family: 'Darker Grotesque', sans-serif;
+      font-size: 1.2rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .step-title { font-family: 'Darker Grotesque', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
+    .step-body  { font-size: 0.85rem; color: var(--gray-light); line-height: 1.6; }
+
+    /* Section padding */
+    .section { padding: 64px 0 0; }
+
+    @media (max-width: 640px) {
+      .steps { grid-template-columns: 1fr; }
+      .stats { flex-wrap: wrap; }
+      .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="/" class="logo">stocklio<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="/blog/" class="btn btn-outline">Blog</a>
+      <a href="/pricing.html" class="btn btn-outline">Pricing</a>
+      <a href="/faq.html" class="btn btn-outline">FAQ</a>
+      <a href="https://auth.stocklio.ai/en/login?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-outline">Log in</a>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-primary">Sign up free</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="eyebrow">AI Forecast · Prediction Market · Technical Analysis</div>
+    <h1 class="hero-h1">
+      Know where the market is headed<br>
+      <span>before it moves.</span>
+    </h1>
+    <p class="hero-sub">
+      Stocklio combines AI analysis, technical signals, and market sentiment to help individual investors spot opportunities and make smarter trades.
+    </p>
+    <div class="hero-actions">
+      <a href="https://app.stocklio.ai/analyze?ticker=AAPL" class="btn btn-primary btn-lg">Get a free stock forecast →</a>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-outline btn-lg">Create a free account</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label">Technical indicators</div></div>
+    <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">Intelligence layers</div></div>
+    <div class="stat-item"><div class="stat-num">Real-time</div><div class="stat-label">Market data</div></div>
+    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-label">To get started</div></div>
+  </div>
+
+  <!-- Features -->
+  <div class="section">
+    <div class="section-label">What Stocklio does</div>
+    <h2 class="section-title">Three layers of intelligence, one dashboard.</h2>
+    <p class="section-sub">Most tools give you one signal. Stocklio layers AI forecasting, community wisdom, and proven chart strategies so no angle goes unanalyzed.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <div class="card-title">AI-Powered Analytics</div>
+        <div class="card-body">Stocklio's composite scoring engine reads RSI, MACD, Bollinger Bands, momentum, and more — then synthesizes them into a single directional forecast. See the stock's likely trajectory before you commit a dollar.</div>
+        <span class="card-tag">Composite Score</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">Community Sentiment</div>
+        <div class="card-body">Markets move on psychology as much as fundamentals. Stocklio's prediction market captures where real investors think a stock is headed — and tracks how accurate the crowd has been over the last 90 days.</div>
+        <span class="card-tag">Prediction Market</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Technical Chart Analysis</div>
+        <div class="card-body">Built on time-tested strategies including <strong>Ride the Nine</strong> — a 9 EMA strategy used by professional traders to identify low-risk entries, trend confirmation, and early exit signals.</div>
+        <span class="card-tag">Ride the Nine · EMA · SMA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="section">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Analysis in seconds. Not hours.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Enter any ticker</div>
+        <div class="step-body">Type in any stock symbol — AAPL, NVDA, TSLA, anything publicly traded — and choose your time window.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Stocklio runs the analysis</div>
+        <div class="step-body">AI scores the stock, flags notable setups, maps support and resistance, and projects a 10-day price trajectory.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Make a confident decision</div>
+        <div class="step-body">See the community vote, compare it to the AI forecast, and use the Ride the Nine chart to time your entry or exit.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-band" style="margin-top:56px;">
+    <h2>Stop guessing. Start analyzing.</h2>
+    <p>Free to use. No credit card required.</p>
+    <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-primary btn-lg">Get started free →</a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <div class="logo" style="font-size:2rem;">stocklio<span class="logo-dot">.</span></div>
+      <div style="font-size:0.8rem;color:#a0aec0;margin-top:6px;">Built for investors who want an edge.</div>
+    </div>
+    <div style="display:flex;gap:48px;flex-wrap:wrap;">
+      <div>
+        <div class="footer-col-title">Product</div>
+        <a href="https://app.stocklio.ai/analyze?ticker=AAPL" class="footer-link">Open Dashboard</a>
+        <a href="/pricing.html" class="footer-link">Pricing</a>
+        <a href="/faq.html" class="footer-link">FAQ</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <a href="/blog/" class="footer-link">Blog</a>
+        <a href="mailto:hello@stocklio.ai" class="footer-link">hello@stocklio.ai</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <a href="https://app.stocklio.ai/privacy" class="footer-link">Privacy Policy</a>
+        <a href="https://app.stocklio.ai/terms" class="footer-link">Terms of Service</a>
+        <a href="https://app.stocklio.ai/cookies" class="footer-link">Cookie Policy</a>
+      </div>
+    </div>
+    <div style="width:100%;border-top:1px solid var(--border);padding-top:20px;" class="footer-copy">
+      © 2025 Stocklio &nbsp;·&nbsp;
+      <a href="https://app.stocklio.ai/privacy">Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="https://app.stocklio.ai/terms">Terms of Service</a>
+    </div>
+  </footer>
+
+</div><!-- /container -->
+</body>
+</html>
