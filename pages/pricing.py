@@ -364,7 +364,7 @@ st.markdown(f"""
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Insider Sentiment Score</span></li>
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">Congressional Trading Alerts</span></li>
             <li><span class="feat-icon">&#10003;</span><span class="feat-label">SEC Filing Sentiment</span></li>
-            <li><span class="feat-icon">&#10003;</span><span class="feat-label">Stocklio Copilot <span class="feat-soon">Coming Soon</span></span></li>
+            <li><span class="feat-icon">&#10003;</span><span class="feat-label">Stocklio Copilot <span class="feat-soon">New</span></span></li>
         </ul>
         {_pro_cta}
         <p style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#a0aec0;text-align:center;margin:10px 0 0 0;">

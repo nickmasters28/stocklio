@@ -173,6 +173,112 @@ st.markdown(f"""
         margin-bottom: 4px;
     }}
     .lp-footer-link:hover {{ color: #4a5568; }}
+
+    /* ── Article components ─────────────────────────────────────── */
+    .bl-callout {{
+        background: #f5f0e8;
+        border-left: 3px solid #00a878;
+        border-radius: 0 8px 8px 0;
+        padding: 18px 22px;
+        margin: 28px 0;
+        font-style: italic;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #1a202c;
+        font-family: 'Georgia', serif;
+    }}
+    .bl-concept {{
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: 3px solid #00a878;
+        border-radius: 0 0 8px 8px;
+        padding: 20px 24px;
+        margin: 28px 0;
+    }}
+    .bl-concept-label {{
+        font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: #00a878;
+        margin-bottom: 8px; font-family: 'Inter', sans-serif;
+    }}
+    .bl-concept h3 {{ font-size: 1rem; font-weight: 600; margin: 0 0 8px; color: #1a202c; }}
+    .bl-concept p {{ font-size: 0.92rem; color: #4a5568; margin: 0; line-height: 1.6; }}
+    .bl-stats {{
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 14px; margin: 28px 0;
+    }}
+    .bl-stat {{
+        background: #ffffff; border: 1px solid #e2e8f0;
+        border-radius: 8px; padding: 18px 14px; text-align: center;
+    }}
+    .bl-stat-num {{
+        display: block; font-family: 'Georgia', serif;
+        font-size: 2rem; font-weight: 700; color: #00a878;
+        line-height: 1.1; margin-bottom: 6px;
+    }}
+    .bl-stat-lbl {{ font-size: 0.78rem; color: #6b7280; line-height: 1.4; font-family: 'Inter', sans-serif; }}
+    .bl-ind-list {{ list-style: none; padding: 0; margin: 14px 0 22px; }}
+    .bl-ind-item {{
+        display: flex; gap: 14px; padding: 14px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }}
+    .bl-ind-item:last-child {{ border-bottom: none; }}
+    .bl-ind-icon {{
+        width: 30px; height: 30px; background: #e6faf5; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; font-size: 0.68rem; font-weight: 700;
+        color: #00a878; font-family: 'Inter', sans-serif; margin-top: 2px;
+        min-width: 30px;
+    }}
+    .bl-ind-name {{ font-weight: 600; display: block; margin-bottom: 4px; font-family: 'Inter', sans-serif; font-size: 0.95rem; color: #1a202c; }}
+    .bl-ind-desc {{ font-size: 0.87rem; color: #4a5568; line-height: 1.55; font-family: 'Inter', sans-serif; }}
+    .bl-cta {{
+        background: #1a6b3a; border-radius: 12px;
+        padding: 32px 28px; margin: 40px 0 0;
+    }}
+    .bl-cta h3 {{
+        font-family: 'Georgia', serif; font-size: 1.4rem;
+        font-weight: 700; color: #ffffff; margin: 0 0 10px;
+    }}
+    .bl-cta p {{ font-size: 0.93rem; color: rgba(255,255,255,0.82); margin: 0 0 20px; line-height: 1.6; }}
+    .bl-cta-btn {{
+        display: inline-block; background: #ffffff; color: #1a6b3a;
+        font-size: 0.88rem; font-weight: 600; padding: 9px 22px;
+        border-radius: 6px; text-decoration: none; font-family: 'Inter', sans-serif;
+    }}
+    .bl-faq {{ margin-top: 48px; border-top: 2px solid #e2e8f0; padding-top: 36px; }}
+    .bl-faq h2 {{
+        font-family: 'Georgia', serif; font-size: 1.6rem;
+        font-weight: 700; margin-bottom: 24px; color: #1a202c;
+    }}
+    .bl-faq-item {{ border-bottom: 1px solid #e2e8f0; padding: 18px 0; }}
+    .bl-faq-q {{ font-weight: 600; font-size: 0.97rem; color: #1a202c; margin-bottom: 8px; font-family: 'Inter', sans-serif; }}
+    .bl-faq-a {{ font-size: 0.92rem; color: #4a5568; line-height: 1.65; margin: 0; font-family: 'Inter', sans-serif; }}
+    .bl-sidebar-card {{
+        background: #ffffff; border: 1px solid #e2e8f0;
+        border-radius: 10px; padding: 20px 18px; margin-bottom: 20px;
+    }}
+    .bl-sidebar-card h4 {{
+        font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: #6b7280;
+        margin-bottom: 14px; font-family: 'Inter', sans-serif;
+    }}
+    .bl-toc-link {{
+        display: block; font-size: 0.85rem; color: #4a5568;
+        text-decoration: none; padding: 5px 0 5px 10px;
+        border-left: 2px solid transparent; line-height: 1.4;
+        font-family: 'Inter', sans-serif;
+    }}
+    .bl-toc-link:hover {{ color: #00a878; border-left-color: #00a878; }}
+    .bl-related-item {{ padding: 6px 0; border-bottom: 1px solid #e2e8f0; }}
+    .bl-related-item:last-child {{ border-bottom: none; }}
+    .bl-related-link {{ font-size: 0.85rem; color: #00a878; text-decoration: none; font-family: 'Inter', sans-serif; line-height: 1.4; display: block; }}
+    .bl-about-card {{
+        background: #e6faf5; border: 1px solid #00a878;
+        border-radius: 10px; padding: 20px 18px; margin-bottom: 20px;
+    }}
+    .bl-about-card h4 {{ color: #00a878 !important; }}
+    .bl-about-card p {{ font-size: 0.85rem; color: #4a5568; line-height: 1.55; margin-bottom: 12px; font-family: 'Inter', sans-serif; }}
+    .bl-about-link {{ font-size: 0.85rem; font-weight: 600; color: #00a878; text-decoration: none; font-family: 'Inter', sans-serif; }}
 </style>
 
 <!-- Nav -->
@@ -222,22 +328,43 @@ if _post_slug:
         # Ad below post header — loads lazily when scrolled into view
         lazy_ad_slot(SLOT_BLOG_POST_AFTER_HEADER, height=280)
 
-        st.markdown(post["content"])
+        # 2-column layout: article + sidebar
+        _col_art, _col_side = st.columns([2.2, 1], gap="large")
 
-        # Ad between content and CTA — loads lazily when scrolled into view
-        lazy_ad_slot(SLOT_BLOG_POST_BEFORE_CTA, height=280)
+        with _col_art:
+            st.markdown(post["content"], unsafe_allow_html=True)
+            lazy_ad_slot(SLOT_BLOG_POST_BEFORE_CTA, height=280)
 
-        st.markdown("""
-<hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0 20px 0;">
-<p style='font-family:Inter,sans-serif;font-size:0.9rem;color:#4a5568;margin-bottom:14px;'>
-    Ready to apply these insights? Analyze any stock on Stocklio.
-</p>
-<a href="/analyze?ticker=NVDA" target="_self"
-   style="display:inline-block;background:#00c896;color:#ffffff;text-decoration:none;
-          font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;
-          padding:10px 22px;border-radius:8px;">
-    Open Stock Analyzer →
-</a>
+        with _col_side:
+            _toc = post.get("toc", [])
+            _related = post.get("related", [])
+
+            if _toc:
+                _toc_links = "".join(
+                    f'<a class="bl-toc-link" href="#">{item["text"]}</a>'
+                    for item in _toc
+                )
+                st.markdown(
+                    f'<div class="bl-sidebar-card"><h4>In This Article</h4>{_toc_links}</div>',
+                    unsafe_allow_html=True,
+                )
+
+            if _related:
+                _rel_items = "".join(
+                    f'<div class="bl-related-item"><a class="bl-related-link" href="{item["url"]}" target="_self">{item["text"]}</a></div>'
+                    for item in _related
+                )
+                st.markdown(
+                    f'<div class="bl-sidebar-card"><h4>Related Reading</h4>{_rel_items}</div>',
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("""
+<div class="bl-about-card">
+  <h4 class="bl-sidebar-card" style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#00a878;margin-bottom:10px;font-family:Inter,sans-serif;">About Stocklio.ai</h4>
+  <p>AI-powered pattern recognition for self-directed traders. Surface trend setups. Remove the bias. Act on data, not instinct.</p>
+  <a class="bl-about-link" href="https://www.stocklio.ai" target="_self">Visit Stocklio.ai &rarr;</a>
+</div>
 """, unsafe_allow_html=True)
 
 else:
