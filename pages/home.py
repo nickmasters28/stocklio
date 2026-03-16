@@ -75,9 +75,14 @@ if st.session_state.get("current_ticker"):
             'stocklio<span class="logo-dot" style="color:#00c896;font-size:3rem;">.</span></div>',
             unsafe_allow_html=True,
         )
-        if st.button("← Back to home", use_container_width=False):
-            del st.session_state["current_ticker"]
-            st.rerun()
+        st.markdown(
+            '<a href="https://www.stocklio.ai" target="_self" style="'
+            'display:inline-block;font-family:\'Inter\',sans-serif;font-size:0.85rem;'
+            'font-weight:600;color:#4a5568;text-decoration:none;padding:6px 12px;'
+            'border:1px solid #e2e8f0;border-radius:8px;background:#ffffff;'
+            'cursor:pointer;">← Back to home</a>',
+            unsafe_allow_html=True,
+        )
         st.markdown("---")
         st.subheader("🔍 Stock Lookup")
         ticker_input = st.text_input("Enter Ticker Symbol", value=_ticker, placeholder="e.g. NVDA, MSFT, TSLA").upper().strip()
