@@ -278,12 +278,40 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 
+@media (max-width: 768px) {
+  .footer { flex-direction: column; gap: 28px; }
+}
+
 @media (max-width: 640px) {
+  /* Layout */
+  .container, .container-blog, .container-wide { padding: 0 1.25rem; }
+
+  /* Logo */
   .logo { font-size: 2.4rem; }
-  .nav-links .btn-outline:not(.btn-primary) { display: none; }
+
+  /* Nav — shrink links to icon-sized, keep all visible */
+  .nav { padding: 14px 0 12px; }
+  .nav-links { gap: 8px; }
+  .nav-links .btn { padding: 7px 13px; font-size: 0.78rem; }
+
+  /* Touch targets — min 44px height */
+  .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  .btn-lg { min-height: 52px; padding: 13px 28px; }
+
+  /* Cards */
   .cards { grid-template-columns: 1fr; }
+
+  /* Blog stats */
   .bl-stats { flex-direction: column; }
   .bl-stat { border-right: none; border-bottom: 1px solid var(--border); }
   .bl-stat:last-child { border-bottom: none; }
-  .cta-band { padding: 36px 24px 28px; }
+
+  /* CTA band */
+  .cta-band { padding: 36px 20px 28px; }
+
+  /* Pricing grid */
+  .pricing-grid { grid-template-columns: 1fr !important; }
+
+  /* FAQ */
+  details summary { font-size: 0.95rem; }
 }
