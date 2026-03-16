@@ -94,7 +94,7 @@ def inject_auth_js(current_params: dict = None, base_url_override: str = None) -
 try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
 // Redirect through PropelAuth's logout page — this invalidates the session cookie
 // so that visiting /analyze after logout requires re-authentication.
-var _logoutUrl={auth_url_js}+'/en/logout?redirect_to='+encodeURIComponent('https://www.stocklio.ai');
+var _logoutUrl={auth_url_js}+'/en/logout?redirect_to='+encodeURIComponent('https://app.stocklio.ai');
 try{{
   var _s=window.parent.document.createElement('script');
   _s.textContent='window.location.href='+JSON.stringify(_logoutUrl)+';';
