@@ -31,6 +31,56 @@
   }
   </script>
 
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does RSI measure in stock trading?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "RSI (Relative Strength Index) measures momentum — specifically, the speed and magnitude of recent price changes relative to each other. It does not predict direction on its own. A high RSI means the stock has been moving up quickly and consistently; a low RSI means the opposite. The common mistake is treating it as a directional signal when it is actually a momentum speedometer."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does RSI above 70 mean you should sell?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not necessarily. In a strong uptrend, RSI can stay above 70 for weeks while price continues higher. Selling just because RSI crossed 70 means selling into strength. The 70/30 overbought/oversold rule was designed for ranging markets, not trending ones. A more reliable approach is to use RSI above 50 as confirmation of bullish momentum and look for RSI divergence as a warning sign rather than relying on fixed thresholds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is RSI divergence?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "RSI divergence occurs when price and RSI move in opposite directions. Bearish divergence: price makes a higher high but RSI makes a lower high — momentum is weakening as price climbs, warning of a potential reversal. Bullish divergence: price makes a lower low but RSI makes a higher low — selling pressure is drying up, suggesting a potential bottom. Divergence is most reliable when it occurs at key support or resistance levels."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the RSI 50 level used for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The RSI 50 midline acts as a trend divider. RSI consistently above 50 suggests bullish momentum bias; consistently below 50 suggests bearish momentum bias. Traders use it as a filter — avoiding long trades when RSI is below 50 and short trades when RSI is above 50 — to align entries with the prevailing momentum direction."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best RSI setting for day trading vs swing trading?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The default 14-period RSI is the standard for swing trading. Day traders sometimes shorten it to 7 or 9 periods to make it more responsive to intraday price changes. A shorter period makes RSI more sensitive but also noisier. A longer period (21+) smooths out the signal but reacts more slowly to trend changes. The 14-period default is a reasonable starting point for most timeframes."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="stylesheet" href="/style.css">
   <style>
     .post-header {
