@@ -18,7 +18,8 @@
       "WebFetch(domain:finnhub.io)",
       "Bash(streamlit --version)",
       "Skill(claude-api)",
-      "Skill(claude-api:*)"
+      "Skill(claude-api:*)",
+      "Bash(python3 -c \"import secrets; print\\(secrets.token_hex\\(16\\)\\)\")"
     ]
   }
 }
