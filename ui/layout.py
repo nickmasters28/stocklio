@@ -102,25 +102,65 @@ _LOADING_CSS = """
   color: #6b7280; line-height: 1.6;
   border-top: 1px solid #f0f4f8; margin-top: 20px; padding-top: 16px;
 }
-/* overflow:clip clips content visually but does NOT create a scroll container,
-   so position:sticky can propagate past these elements to the real scroll root. */
-[data-testid="stMainBlockContainer"],
-[data-testid="stAppViewBlockContainer"],
-[data-testid="stVerticalBlockBorderWrapper"],
-[data-testid="stVerticalBlock"],
-.block-container {
-  overflow: clip !important;
+/* ── Fixed header group spacing tokens ────────────────────────────────────────
+   Adjust only these variables to control vertical rhythm.
+   --stkl-tkr-h   : height of the ticker tape bar
+   --stkl-gap     : breathing room between ticker tape and company header
+   --stkl-hdr-h   : height of the company header row (logo + price line)
+   --stkl-tab-h   : height of the tab bar
+   All other values derive from these four.                                    */
+:root {
+  --stkl-sidebar : 273px;
+  --stkl-tkr-h   : 34px;
+  --stkl-gap     : 64px;
+  --stkl-hdr-h   : 82px;
+  --stkl-tab-h   : 48px;
+
+  --stkl-content-nudge: 40px;   /* pull content up without moving headers */
+
+  --stkl-hdr-top : calc(var(--stkl-tkr-h) + var(--stkl-gap));
+  --stkl-tab-top : calc(var(--stkl-hdr-top) + var(--stkl-hdr-h));
+  --stkl-total   : calc(var(--stkl-tab-top) + var(--stkl-tab-h));
 }
-/* Sticky company header */
-div[data-testid="element-container"]:has(.stkl-sticky-header) {
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background: rgba(245, 247, 250, 0.97);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+
+/* Backdrop that fills the gap between ticker tape and company header,
+   preventing scrolling content from showing through */
+.stkl-sticky-header::before {
+  content: '';
+  position: fixed;
+  top: var(--stkl-tkr-h);
+  left: var(--stkl-sidebar);
+  right: 0;
+  height: var(--stkl-gap);
+  background: #f5f7fa;
+  z-index: 1001;
+}
+/* Company header row — fixed below ticker tape + gap */
+.stkl-sticky-header {
+  position: fixed !important;
+  top: var(--stkl-hdr-top);
+  left: var(--stkl-sidebar);
+  right: 0;
+  z-index: 1001;
+  background: #f5f7fa;
+  padding: 12px 2rem 10px;
+}
+/* Tab bar — fixed immediately below company header */
+div[data-testid="stTabs"] div[data-baseweb="tab-list"] {
+  position: fixed !important;
+  top: var(--stkl-tab-top);
+  left: var(--stkl-sidebar);
+  right: 0;
+  z-index: 1000;
+  background: #ffffff;
+  padding: 0 2rem;
   border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+/* Push stTabs down so scrolling content clears the entire fixed header group.
+   Subtract 1rem (block-container padding-top already applied by Streamlit). */
+div[data-testid="stTabs"] {
+  margin-top: calc(var(--stkl-total) - 1rem - var(--stkl-content-nudge)) !important;
 }
 </style>
 """

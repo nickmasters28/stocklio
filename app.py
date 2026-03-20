@@ -150,6 +150,15 @@ st.markdown(f"""
   .tkr-up  {{ color:#00a878; }}
   .tkr-dn  {{ color:#e53e3e; }}
   .tkr-msg {{ font-family:'Inter',sans-serif; font-size:.76rem; color:#a0aec0; padding:7px 24px; }}
+  /* Pin ticker tape to top of main content area */
+  .tkr-bar {{
+    position: fixed !important;
+    top: 0;
+    left: 273px;
+    right: 0;
+    z-index: 1002;
+    background: #f5f7fa;
+  }}
 </style>
 <div class="tkr-bar">
   <div class="tkr-track">{_track_html}</div>
