@@ -102,13 +102,22 @@ _LOADING_CSS = """
   color: #6b7280; line-height: 1.6;
   border-top: 1px solid #f0f4f8; margin-top: 20px; padding-top: 16px;
 }
+/* Allow sticky to propagate through Streamlit's block containers */
+div[data-testid="stMainBlockContainer"],
+div[data-testid="block-container"] {
+  overflow: visible !important;
+}
+section[data-testid="stMain"] {
+  overflow-y: auto !important;
+}
 /* Sticky company header */
 div[data-testid="element-container"]:has(.stkl-sticky-header) {
   position: sticky;
   top: 0;
   z-index: 999;
-  background: rgba(248, 250, 252, 0.97);
+  background: rgba(245, 247, 250, 0.97);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 8px;
   margin-bottom: 4px;
