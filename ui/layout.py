@@ -102,6 +102,17 @@ _LOADING_CSS = """
   color: #6b7280; line-height: 1.6;
   border-top: 1px solid #f0f4f8; margin-top: 20px; padding-top: 16px;
 }
+/* Sticky company header */
+div[data-testid="element-container"]:has(.stkl-sticky-header) {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(248, 250, 252, 0.97);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
 </style>
 """
 
@@ -963,7 +974,7 @@ def render_stock_analysis(ticker: str, period: str = "1y"):
     _sector_html = f'&nbsp;&bull;&nbsp;{sector}' if sector else ''
     _copilot_href = f"/copilot?ticker={ticker}" if is_paid_user() else "/pricing"
     _header_html = (
-        f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+        f'<div class="stkl-sticky-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
         f'<div style="display:flex;align-items:center;">'
         f'{logo_html}<div>'
         f'<div style="font-size:1.8rem;font-weight:700;color:#1a202c;line-height:1.1;">{company_name}</div>'
