@@ -86,22 +86,10 @@ def inject_auth_js(current_params: dict = None, base_url_override: str = None) -
     # ── Logout path ─────────────────────────────────────────────────────────
     if st.session_state.pop("_pa_just_logged_out", False):
         components.html(
-            # Plain <script> only — no ESM import so nothing can block execution.
-            # 1. Clear localStorage immediately.
-            # 2. POST to PropelAuth's logout API (clears session cookie server-side).
-            # 3. Navigate to www.stocklio.ai when done, or after 2s timeout.
-            f"""<script>
-try{{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}}catch(e){{}}
-// Redirect through PropelAuth's logout page — this invalidates the session cookie
-// so that visiting /analyze after logout requires re-authentication.
-var _logoutUrl={auth_url_js}+'/en/logout?redirect_to='+encodeURIComponent('https://app.stocklio.ai');
-try{{
-  var _s=window.parent.document.createElement('script');
-  _s.textContent='window.location.href='+JSON.stringify(_logoutUrl)+';';
-  window.parent.document.head.appendChild(_s);
-}}catch(e){{
-  try{{window.parent.location.href=_logoutUrl;}}catch(e2){{}}
-}}
+            # Clear localStorage only — no PropelAuth redirect to avoid 404.
+            # The JWT token is removed, so /analyze will require re-authentication.
+            """<script>
+try{localStorage.removeItem('pa_token');localStorage.removeItem('pa_expiry');}catch(e){}
 </script>""",
             height=0,
         )
