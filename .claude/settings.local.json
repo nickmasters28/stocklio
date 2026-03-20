@@ -23,7 +23,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)",
       "Bash(curl -s -o /tmp/indexnow_response.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)",
       "Bash(curl -s -o /tmp/indexnow_response2.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)",
-      "WebFetch(domain:www.bing.com)"
+      "WebFetch(domain:www.bing.com)",
+      "Bash(curl -s -o /tmp/indexnow_full.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)"
     ]
   }
 }
