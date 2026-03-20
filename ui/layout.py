@@ -102,13 +102,14 @@ _LOADING_CSS = """
   color: #6b7280; line-height: 1.6;
   border-top: 1px solid #f0f4f8; margin-top: 20px; padding-top: 16px;
 }
-/* Allow sticky to propagate through Streamlit's block containers */
-div[data-testid="stMainBlockContainer"],
-div[data-testid="block-container"] {
-  overflow: visible !important;
-}
-section[data-testid="stMain"] {
-  overflow-y: auto !important;
+/* overflow:clip clips content visually but does NOT create a scroll container,
+   so position:sticky can propagate past these elements to the real scroll root. */
+[data-testid="stMainBlockContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stVerticalBlock"],
+.block-container {
+  overflow: clip !important;
 }
 /* Sticky company header */
 div[data-testid="element-container"]:has(.stkl-sticky-header) {
@@ -120,7 +121,6 @@ div[data-testid="element-container"]:has(.stkl-sticky-header) {
   -webkit-backdrop-filter: blur(6px);
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 8px;
-  margin-bottom: 4px;
 }
 </style>
 """
