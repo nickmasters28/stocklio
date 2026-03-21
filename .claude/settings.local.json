@@ -24,7 +24,29 @@
       "Bash(curl -s -o /tmp/indexnow_response.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)",
       "Bash(curl -s -o /tmp/indexnow_response2.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)",
       "WebFetch(domain:www.bing.com)",
-      "Bash(curl -s -o /tmp/indexnow_full.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)"
+      "Bash(curl -s -o /tmp/indexnow_full.txt -w \"%{http_code}\" -X POST \"https://api.indexnow.org/indexnow\" -H \"Content-Type: application/json; charset=utf-8\" -d '{:*)",
+      "Bash(python3 -c \"from PIL import Image, ImageDraw, ImageFont; print\\(''pillow ok''\\)\")",
+      "Bash(python3 generate_og_images.py)",
+      "Bash(open /Users/nickmasters/Desktop/stock-ta/www/og/rsi.png)",
+      "Bash(open /Users/nickmasters/Desktop/stock-ta/www/og/)",
+      "Bash(open /Users/nickmasters/Desktop/stock-ta/www/og/rsi.png /Users/nickmasters/Desktop/stock-ta/www/og/default.png /Users/nickmasters/Desktop/stock-ta/www/og/pricing.png)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(jq -e '.hooks.PostToolUse[] | select\\(.matcher == \"\"Write\"\"\\) | .hooks[] | select\\(.type == \"\"command\"\"\\) | .command' /Users/nickmasters/Desktop/stock-ta/.claude/settings.local.json)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/nickmasters/Desktop/stock-ta/.claude/og_hook.sh",
+            "statusMessage": "Generating OG image..."
+          }
+        ]
+      }
     ]
   }
 }
