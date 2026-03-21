@@ -32,7 +32,10 @@
       "Bash(open /Users/nickmasters/Desktop/stock-ta/www/og/rsi.png /Users/nickmasters/Desktop/stock-ta/www/og/default.png /Users/nickmasters/Desktop/stock-ta/www/og/pricing.png)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(jq -e '.hooks.PostToolUse[] | select\\(.matcher == \"\"Write\"\"\\) | .hooks[] | select\\(.type == \"\"command\"\"\\) | .command' /Users/nickmasters/Desktop/stock-ta/.claude/settings.local.json)"
+      "Bash(jq -e '.hooks.PostToolUse[] | select\\(.matcher == \"\"Write\"\"\\) | .hooks[] | select\\(.type == \"\"command\"\"\\) | .command' /Users/nickmasters/Desktop/stock-ta/.claude/settings.local.json)",
+      "Bash(python3 generate_og_images.py --force)",
+      "Bash(open /Users/nickmasters/Desktop/stock-ta/www/og/default.png /Users/nickmasters/Desktop/stock-ta/www/og/how-to-read-rsi.png /Users/nickmasters/Desktop/stock-ta/www/og/blog.png)",
+      "Bash(open /Users/nickmasters/Desktop/stock-ta/www/og/default.png /Users/nickmasters/Desktop/stock-ta/www/og/how-to-read-rsi.png /Users/nickmasters/Desktop/stock-ta/www/og/pricing.png)"
     ]
   },
   "hooks": {
