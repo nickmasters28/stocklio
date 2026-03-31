@@ -6,4 +6,4 @@
 # The :splat captures everything after /stocks/ and forwards it.
 # The 200 status means this is a proxy (not a redirect — user URL stays the same).
 
-/stocks/*  https://stocklio-ticker-server.onrender.com/stocks/:splat  200
+/stocks/*  https://stocklio-ticker-server.onrender.com/stocks/:splat  301
