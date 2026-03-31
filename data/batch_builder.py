@@ -43,7 +43,7 @@ SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 
 FINNHUB_BASE = "https://finnhub.io/api/v1"
-RATE_DELAY   = 1.1   # seconds between tickers (≤60 req/min free tier)
+RATE_DELAY   = 3.5   # seconds between tickers (3 calls/ticker × 3.5s = ~51 calls/min, under 60 limit)
 CANDLE_BARS  = 250   # trading days of history for indicators
 TIMEOUT      = 10    # requests timeout
 
