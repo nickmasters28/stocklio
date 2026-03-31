@@ -168,7 +168,7 @@ async function fetchOnDemandSnapshot(ticker) {
 
   // Store so future requests hit Supabase instead of Finnhub
   if (supabase) {
-    await supabase.table("ticker_snapshots").upsert(row, { onConflict: "ticker" });
+    await supabase.from("ticker_snapshots").upsert(row, { onConflict: "ticker" });
   }
 
   return row;
