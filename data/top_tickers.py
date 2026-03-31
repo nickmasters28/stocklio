@@ -61,4 +61,4 @@ TOP_TICKERS = [
 
 # Deduplicate while preserving order
 _seen = set()
-TOP_TICKERS = [t for t in TOP_TICKERS if not (_seen.add(t) or t in _seen)]
+TOP_TICKERS = [t for t in TOP_TICKERS if t not in _seen and not _seen.add(t)]
