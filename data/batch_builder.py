@@ -61,24 +61,47 @@ def _get(path: str, params: dict) -> dict | None:
 
 
 def fetch_candles(ticker: str) -> pd.DataFrame | None:
-    """Return a DataFrame with OHLCV columns, or None on failure."""
+    """Return a DataFrame with OHLCV columns. Tries Finnhub first, falls back to yfinance."""
+    # ── Finnhub attempt ──
     now   = int(datetime.now(timezone.utc).timestamp())
-    start = now - CANDLE_BARS * 2 * 86400  # 2x to account for weekends/holidays
+    start = now - CANDLE_BARS * 2 * 86400
     data  = _get("/stock/candle", {"symbol": ticker, "resolution": "D",
                                    "from": start, "to": now})
-    if not data or data.get("s") != "ok":
+    if data and data.get("s") == "ok":
+        df = pd.DataFrame({
+            "open":   data["o"],
+            "high":   data["h"],
+            "low":    data["l"],
+            "close":  data["c"],
+            "volume": data["v"],
+            "ts":     data["t"],
+        })
+        df.sort_values("ts", inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        return df
+
+    # ── yfinance fallback ──
+    try:
+        import yfinance as yf
+        hist = yf.Ticker(ticker).history(period="2y")
+        if hist.empty:
+            return None
+        hist = hist.reset_index()
+        df = pd.DataFrame({
+            "open":   hist["Open"].values,
+            "high":   hist["High"].values,
+            "low":    hist["Low"].values,
+            "close":  hist["Close"].values,
+            "volume": hist["Volume"].values,
+            "ts":     hist["Date"].astype("int64") // 10**9,
+        })
+        df.sort_values("ts", inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        log.info("%-6s  using yfinance fallback for candles", ticker)
+        return df
+    except Exception as e:
+        log.warning("yfinance fallback failed for %s: %s", ticker, e)
         return None
-    df = pd.DataFrame({
-        "open":   data["o"],
-        "high":   data["h"],
-        "low":    data["l"],
-        "close":  data["c"],
-        "volume": data["v"],
-        "ts":     data["t"],
-    })
-    df.sort_values("ts", inplace=True)
-    df.reset_index(drop=True, inplace=True)
-    return df
 
 
 def fetch_quote(ticker: str) -> dict | None:
