@@ -1,0 +1,9 @@
+# Render static site redirect rules
+# Routes /stocks/* to the Node ticker server (deployed separately on Render)
+# Replace TICKER_SERVER_URL with your actual Render service URL, e.g.:
+#   https://stocklio-ticker-server.onrender.com
+#
+# The :splat captures everything after /stocks/ and forwards it.
+# The 200 status means this is a proxy (not a redirect — user URL stays the same).
+
+/stocks/*  https://stocklio-ticker-server.onrender.com/stocks/:splat  200
