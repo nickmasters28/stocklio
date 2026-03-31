@@ -22,6 +22,9 @@ import pandas as pd
 from datetime import datetime, timezone
 from supabase import create_client, Client
 
+# Ensure the script's own directory is on the path so top_tickers.py is found
+# regardless of the working directory Render uses.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from top_tickers import TOP_TICKERS
 
 # ── Logging ──────────────────────────────────────────────────────────────────
