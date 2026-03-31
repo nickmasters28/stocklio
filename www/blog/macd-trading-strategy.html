@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MACD Trading Strategy: How to Read MACD Correctly | Stocklio</title>
+  <meta name="description" content="The MACD crossover is not enough. Learn how to read the MACD histogram, spot divergence, and combine MACD with RSI for higher-conviction trade signals.">
+  <meta name="keywords" content="MACD trading strategy, MACD crossover signal, MACD histogram explained, MACD divergence, how to read MACD, MACD vs RSI, moving average convergence divergence, MACD settings swing trading">
+  <link rel="canonical" href="https://www.stocklio.ai/blog/macd-trading-strategy.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://www.stocklio.ai/blog/macd-trading-strategy.html">
+  <meta property="og:title"       content="MACD Trading Strategy: How to Read MACD Correctly">
+  <meta property="og:description" content="Most traders only use the MACD crossover. Here is how to read the histogram, spot divergence, and combine MACD with RSI for stronger trade signals.">
+  <meta property="og:site_name"   content="Stocklio">
+  <meta property="og:image"       content="https://www.stocklio.ai/og/Stocklio_General.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:image"      content="https://www.stocklio.ai/og/Stocklio_General.png">
+  <meta property="article:published_time" content="2026-03-30">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "MACD Trading Strategy: How to Read MACD Correctly",
+    "url": "https://www.stocklio.ai/blog/macd-trading-strategy.html",
+    "datePublished": "2026-03-30",
+    "dateModified": "2026-03-30",
+    "author": { "@type": "Organization", "name": "Stocklio", "url": "https://www.stocklio.ai" },
+    "publisher": { "@type": "Organization", "name": "Stocklio", "url": "https://www.stocklio.ai" },
+    "description": "How to read the MACD histogram, identify divergence, use MACD crossover signals correctly, and combine MACD with RSI for higher-conviction trade entries and exits.",
+    "keywords": ["MACD trading strategy", "MACD crossover signal", "MACD histogram explained", "MACD divergence", "how to read MACD", "MACD vs RSI", "moving average convergence divergence"]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does MACD stand for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MACD stands for Moving Average Convergence Divergence. It is a momentum indicator that measures the relationship between two exponential moving averages, typically the 12-period and 26-period EMAs, and plots the difference between them as the MACD line. A 9-period EMA of the MACD line is then plotted as the signal line. The histogram shows the gap between the two lines."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the MACD histogram and how do I read it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The MACD histogram is the difference between the MACD line and the signal line, plotted as vertical bars above or below a zero line. When the histogram bars are growing taller, momentum is increasing in the direction of the move. When bars are shrinking, momentum is fading even if price is still moving. Shrinking histogram bars are often the first warning of a coming reversal or consolidation, before price itself confirms the change."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a MACD crossover signal?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A MACD crossover occurs when the MACD line crosses above or below the signal line. A bullish crossover, where MACD crosses above the signal line, is a buy signal. A bearish crossover, where MACD crosses below, is a sell or short signal. Crossovers below the zero line are considered stronger bullish signals; crossovers above the zero line are considered stronger bearish signals. The limitation is that crossovers are lagging: they confirm a move that has already started, not one about to begin."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is MACD divergence?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MACD divergence occurs when price and the MACD histogram move in opposite directions. Bearish divergence: price makes a higher high but the MACD histogram makes a lower high, signaling fading momentum despite rising price. Bullish divergence: price makes a lower low but the MACD histogram makes a higher low, signaling that selling pressure is weakening. MACD divergence is one of the most reliable early warning signals in technical analysis, especially when confirmed by RSI divergence on the same timeframe."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the best MACD settings for swing trading?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The standard MACD settings are 12, 26, 9 — a 12-period fast EMA, a 26-period slow EMA, and a 9-period signal line. These defaults are appropriate for swing trading on daily charts. Shorter settings like 8, 17, 9 make MACD more responsive for shorter-term trades but increase noise. Longer settings like 19, 39, 9 smooth out the signal for position trading. The standard 12, 26, 9 is the best starting point for most retail swing traders."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is MACD a leading or lagging indicator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MACD is primarily a lagging indicator because it is based on moving averages, which smooth historical price data. The MACD crossover specifically lags price action because it confirms a trend shift after it has already begun. However, the MACD histogram and MACD divergence have leading characteristics: a shrinking histogram or divergence between price and histogram can warn of a coming reversal before price confirms it. Treating MACD divergence as a leading signal and crossovers as lagging confirmation gives you the most practical framework."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do you combine MACD with RSI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MACD and RSI measure different things and complement each other well. RSI measures momentum speed and consistency over a fixed lookback period. MACD measures the relationship between two moving averages and reflects trend direction and momentum together. A high-conviction long setup: RSI above 50 (bullish momentum bias) with the MACD histogram positive and expanding (momentum building). A strong warning: bearish MACD divergence with RSI also showing bearish divergence on the same timeframe. When both indicators agree on a signal, confidence in the trade direction is significantly higher than with either alone."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8558122539705900" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .post-header {
+      padding: 40px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+      max-width: var(--max-w-blog);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .post-title {
+      font-family: 'Darker Grotesque', sans-serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 900;
+      color: var(--dark);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 12px 0 14px;
+    }
+    .post-meta { font-size: 0.82rem; color: var(--gray-light); }
+    .post-body { max-width: var(--max-w-blog); margin: 0 auto; padding-bottom: 64px; }
+    .back-link {
+      display: inline-block;
+      font-size: 0.88rem;
+      color: var(--green-dark);
+      text-decoration: none;
+      margin-bottom: 32px;
+    }
+    .back-link:hover { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="/" class="logo">stocklio<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="/blog/" class="btn btn-outline">Blog</a>
+      <a href="/pricing.html" class="btn btn-outline">Pricing</a>
+      <a href="/faq.html" class="btn btn-outline">FAQ</a>
+      <a href="https://auth.stocklio.ai/en/login?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-outline">Log in</a>
+      <a href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL" class="btn btn-primary">Sign up free</a>
+    </div>
+  </nav>
+
+  <!-- Post header -->
+  <div class="post-header">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      <span class="card-tag">MACD</span>
+      <span class="card-tag">Indicators</span>
+      <span class="card-tag">Technical Analysis</span>
+    </div>
+    <h1 class="post-title">MACD Trading Strategy: How to Read MACD Correctly</h1>
+    <div class="post-meta">March 30, 2026 &nbsp;&middot;&nbsp; Stocklio Team</div>
+  </div>
+
+  <!-- Post body -->
+  <div class="post-body">
+    <a class="back-link" href="/blog/">&larr; Back to Blog</a>
+
+    <div class="article-body">
+
+      <p>The <strong>MACD trading strategy</strong> is taught in almost every trading course, yet most retail traders reduce it to a single signal: the crossover. When the MACD line crosses the signal line, buy. When it crosses back, sell. That mechanical interpretation captures only a fraction of what MACD actually offers. This guide covers how to read the <strong>MACD histogram</strong>, how to identify <strong>MACD divergence</strong>, the right way to use crossovers, and how to combine MACD with RSI for higher-conviction entries and exits.</p>
+
+      <h2>What MACD Actually Measures</h2>
+
+      <p><strong>Moving Average Convergence Divergence</strong> tracks the relationship between two exponential moving averages, typically the 12-period and 26-period EMAs. The MACD line is the difference between them. A 9-period EMA of the MACD line is then plotted as the signal line. The histogram shows the gap between the two lines at any given moment.</p>
+
+      <p>When the 12-period EMA is above the 26-period EMA, the MACD line is positive. When they cross, momentum has shifted. The key insight most traders miss: <strong>MACD is not just a crossover tool.</strong> The histogram tells you how fast momentum is building or fading, and divergence between price and the histogram often signals a reversal before price confirms it. For a broader overview of how MACD fits alongside other indicators, see the <a href="/blog/how-to-read-technical-indicators.html">technical indicators guide for beginners</a>.</p>
+
+      <div class="bl-concept">
+        <div class="bl-concept-label">Key Concept</div>
+        <h3>The Histogram Is the Most Underused Part of MACD</h3>
+        <p>Most traders watch the crossover and ignore everything else. The histogram tells you something far more useful: whether momentum is accelerating or decelerating right now, before the crossover happens. Shrinking bars on the histogram mean momentum is fading, even if price has not yet turned. That warning almost always comes first.</p>
+      </div>
+
+      <h2>The Three Components of MACD</h2>
+
+      <h3>1. The MACD Line</h3>
+      <p>The MACD line is the raw difference between the 12-period and 26-period EMAs. When it is above zero, short-term momentum is stronger than longer-term momentum. When it is below zero, the opposite is true. Traders often reference whether MACD is above or below the zero line to confirm trend direction before acting on a crossover signal.</p>
+
+      <h3>2. The Signal Line</h3>
+      <p>The signal line is a 9-period EMA of the MACD line itself, which smooths out short-term noise. When the MACD line crosses above the signal line, it generates a bullish crossover. When it crosses below, it generates a bearish crossover. The limitation is timing: these crossovers are lagging signals. They confirm that a move has started, not that one is about to.</p>
+
+      <h3>3. The MACD Histogram</h3>
+      <p>The histogram is the difference between the MACD line and the signal line, displayed as vertical bars. Growing bars mean the gap is widening and momentum is increasing. Shrinking bars mean the gap is narrowing and momentum is fading. <strong>The histogram reaches its peak before the crossover happens</strong> — which means a trader watching the histogram gets an earlier signal than one waiting for the lines to cross.</p>
+
+      <div class="bl-stats">
+        <div class="bl-stat"><span class="bl-stat-num">12</span><span class="bl-stat-lbl">fast EMA period — the shorter moving average that reacts quickly to price changes</span></div>
+        <div class="bl-stat"><span class="bl-stat-num">26</span><span class="bl-stat-lbl">slow EMA period — the longer moving average that reflects the broader trend</span></div>
+        <div class="bl-stat"><span class="bl-stat-num">9</span><span class="bl-stat-lbl">signal line period — EMA of the MACD line, used to generate crossover signals</span></div>
+      </div>
+
+      <h2>How to Read the MACD Histogram</h2>
+
+      <p>The histogram is where most of MACD's predictive value lives, and it is the part most retail traders ignore. Here is what to look for:</p>
+
+      <ul>
+        <li><strong>Expanding bars above zero:</strong> Bullish momentum is building. Price is more likely to continue higher.</li>
+        <li><strong>Shrinking bars above zero:</strong> Bullish momentum is fading. The uptrend may be losing steam even if price is still rising.</li>
+        <li><strong>Expanding bars below zero:</strong> Bearish momentum is building. Price is more likely to continue lower.</li>
+        <li><strong>Shrinking bars below zero:</strong> Bearish momentum is fading. The downtrend may be losing energy even if price is still falling.</li>
+      </ul>
+
+      <div class="bl-callout">The most reliable MACD entry is not at the crossover. It is when the histogram has been shrinking for several bars and then begins to expand again in the direction you want to trade. That expansion is the earliest confirmation that momentum has shifted.</div>
+
+      <h2>MACD Crossover Signals: What They Mean and What They Miss</h2>
+
+      <p>A <strong>MACD crossover signal</strong> occurs when the MACD line crosses the signal line. Bullish crossover: MACD crosses above the signal line. Bearish crossover: MACD crosses below the signal line.</p>
+
+      <p>The position relative to zero matters. A bullish crossover that happens below the zero line (meaning both lines are still negative) is considered a stronger signal than one that happens above zero. The logic: a bullish cross below zero means momentum is recovering from a bearish state, which tends to precede a more sustained move. A bullish cross above zero may simply reflect short-term noise in an already-trending market.</p>
+
+      <p>The primary limitation of crossovers is lag. Because both lines are moving averages of moving averages, they trail price action. By the time a crossover confirms a trend change, a portion of the move has already occurred. Traders who rely exclusively on crossovers often enter late and exit late. The histogram approach, combined with divergence analysis, solves much of this problem.</p>
+
+      <h2>MACD Divergence: The Early Warning Signal</h2>
+
+      <p><strong>MACD divergence</strong> is one of the most reliable signals in technical analysis. Like <a href="/blog/how-to-read-rsi.html">RSI divergence</a>, it occurs when price and the indicator move in opposite directions, but on MACD you are watching the histogram rather than the indicator line itself.</p>
+
+      <ul>
+        <li><strong>Bearish MACD divergence:</strong> Price makes a higher high, but the MACD histogram makes a lower high. Upside momentum is weakening even as price climbs. This is a warning to tighten stops or reduce long exposure.</li>
+        <li><strong>Bullish MACD divergence:</strong> Price makes a lower low, but the MACD histogram makes a higher low. Selling pressure is drying up even as price falls. This is a signal that a bottom may be forming.</li>
+      </ul>
+
+      <p>Divergence is most reliable when it occurs after an extended trend at a key support or resistance level. A divergence signal in the middle of a range or during low-volume conditions carries less weight. Context determines how much to act on it.</p>
+
+      <div class="bl-concept">
+        <div class="bl-concept-label">Key Concept</div>
+        <h3>When MACD Divergence and RSI Divergence Agree</h3>
+        <p>A bearish MACD divergence on its own is a warning. A bearish MACD divergence confirmed by bearish RSI divergence on the same timeframe is a significantly stronger signal. Two independent indicators measuring momentum from different angles reaching the same conclusion at the same price level is where conviction in a reversal call is highest.</p>
+      </div>
+
+      <h2>Common MACD Mistakes to Avoid</h2>
+
+      <ul class="bl-ind-list">
+        <li class="bl-ind-item">
+          <span class="bl-ind-icon">✗</span>
+          <span><span class="bl-ind-name">Acting on every crossover</span><span class="bl-ind-desc">In a trending market, MACD generates frequent crossovers that whipsaw traders in and out of positions. Filtering crossovers by requiring them to occur in the direction of the broader trend eliminates a large portion of false signals.</span></span>
+        </li>
+        <li class="bl-ind-item">
+          <span class="bl-ind-icon">✗</span>
+          <span><span class="bl-ind-name">Ignoring the histogram</span><span class="bl-ind-desc">The crossover is the last part of MACD to signal a change. Traders who only watch for the crossover miss the earliest evidence of momentum shifting, which shows up in the histogram first.</span></span>
+        </li>
+        <li class="bl-ind-item">
+          <span class="bl-ind-icon">✗</span>
+          <span><span class="bl-ind-name">Using MACD alone</span><span class="bl-ind-desc">MACD has no information about price levels, support, or resistance. Without knowing whether a signal is occurring at a meaningful price level, you cannot assess whether the risk/reward is favorable. Always pair MACD with price structure context.</span></span>
+        </li>
+        <li class="bl-ind-item">
+          <span class="bl-ind-icon">✗</span>
+          <span><span class="bl-ind-name">Treating MACD divergence as a guarantee</span><span class="bl-ind-desc">Divergence warns that momentum is weakening, not that a reversal is certain. A stock can continue trending for several sessions after divergence appears before reversing. Divergence should tighten your risk management, not automatically trigger a position.</span></span>
+        </li>
+      </ul>
+
+      <h2>MACD Settings for Swing Trading</h2>
+
+      <p>The standard <strong>MACD settings for swing trading</strong> are 12, 26, 9. These are the defaults in virtually every charting platform and the settings used by the majority of professional technicians. For daily chart swing trades, they produce a reliable balance of sensitivity and noise reduction.</p>
+
+      <p>Some traders use 8, 17, 9 for faster signals on shorter timeframes, or 19, 39, 9 for slower, smoother readings on weekly charts. Unless you have a specific reason to deviate, the 12, 26, 9 default is the right starting point. Changing settings to match past performance on a specific chart is curve-fitting, not strategy refinement.</p>
+
+      <h2>How to Combine MACD with RSI</h2>
+
+      <p>MACD and RSI are frequently used together because they measure momentum from different angles. RSI measures the speed and consistency of price changes over a fixed lookback period. MACD measures the relationship between two moving averages, reflecting both direction and the acceleration of that direction.</p>
+
+      <p>A high-conviction long setup using both: RSI above 50, confirming bullish momentum bias, with the MACD histogram positive and expanding, confirming that momentum is building rather than fading. When both signals align, the probability of continuation is higher than with either alone.</p>
+
+      <p>A strong exit or caution signal: RSI showing bearish divergence (price higher high, RSI lower high) while the MACD histogram is also showing bearish divergence. Two independent momentum indicators flagging the same deterioration on the same timeframe is a much stronger warning than either one in isolation. For a practical entry technique that layers naturally on top of this two-indicator framework, see the <a href="/blog/ride-the-nine-strategy.html">9 EMA pullback strategy</a>.</p>
+
+      <h2>How Stocklio Uses MACD in Its Analysis</h2>
+
+      <p>Stocklio calculates MACD on your chosen timeframe and incorporates it directly into the composite score. The signal breakdown shows you whether MACD is bullish or bearish, whether the histogram is expanding or contracting, and how much weight the MACD signal is contributing to the overall directional score relative to RSI, Bollinger Bands, and volume.</p>
+
+      <p>The goal is to eliminate the analytical work of reading multiple indicators in isolation and manually weighing them against each other. That process is where most retail traders make mistakes, not in understanding what each indicator means individually. Stocklio handles the synthesis so you can focus on the decision. For a deeper look at how all the indicators interact with each other and with AI composite scoring, see the post on <a href="/blog/stock-prediction-markets.html">crowd intelligence and prediction markets in stock analysis</a>.</p>
+
+      <div class="bl-faq">
+        <h2>Frequently Asked Questions</h2>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">What does MACD stand for?</p>
+          <p class="bl-faq-a">MACD stands for Moving Average Convergence Divergence. It measures the relationship between a 12-period and 26-period exponential moving average, with a 9-period signal line and histogram showing the gap between them.</p>
+        </div>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">What is the MACD histogram and how do I read it?</p>
+          <p class="bl-faq-a">The MACD histogram is the difference between the MACD line and the signal line. Growing bars mean momentum is increasing; shrinking bars mean momentum is fading. The histogram peaks and troughs before the crossover happens, making it an earlier signal than the lines themselves.</p>
+        </div>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">What is a MACD crossover signal?</p>
+          <p class="bl-faq-a">A MACD crossover occurs when the MACD line crosses the signal line. A bullish crossover (MACD crosses above) is a buy signal; a bearish crossover (MACD crosses below) is a sell signal. Crossovers below the zero line are stronger bullish signals; crossovers above are stronger bearish signals. The limitation is that crossovers are lagging: they confirm a move already in progress.</p>
+        </div>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">What is MACD divergence?</p>
+          <p class="bl-faq-a">MACD divergence occurs when price and the MACD histogram move in opposite directions. Bearish divergence: price makes a higher high but the histogram makes a lower high, signaling fading momentum. Bullish divergence: price makes a lower low but the histogram makes a higher low, signaling weakening selling pressure. It is one of the earliest warning signals before a reversal.</p>
+        </div>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">What are the best MACD settings for swing trading?</p>
+          <p class="bl-faq-a">The standard 12, 26, 9 settings are the best starting point for swing trading on daily charts. They are used by the majority of professional technicians and produce a reliable balance of sensitivity and noise. Changing settings to fit historical charts on a specific stock is curve-fitting, not strategy improvement.</p>
+        </div>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">Is MACD a leading or lagging indicator?</p>
+          <p class="bl-faq-a">MACD is primarily lagging because it is based on moving averages. The crossover signal specifically trails price. However, the histogram and MACD divergence have leading characteristics: they can warn of a momentum shift before price confirms it. Treating the histogram as a leading signal and crossovers as lagging confirmation gives you the most useful framework.</p>
+        </div>
+        <div class="bl-faq-item">
+          <p class="bl-faq-q">How do you combine MACD with RSI?</p>
+          <p class="bl-faq-a">MACD and RSI complement each other because they measure momentum differently. A strong long setup: RSI above 50 with the MACD histogram expanding positively. A strong warning: bearish MACD divergence confirmed by bearish RSI divergence on the same timeframe. When both agree, the signal carries significantly more weight than either alone.</p>
+        </div>
+      </div>
+
+      <div class="bl-cta">
+        <h3>See MACD, RSI, and every other signal in one place.</h3>
+        <p>Stocklio weights MACD alongside RSI, Bollinger Bands, and volume into a single composite score so you never have to manually reconcile conflicting indicators again.</p>
+        <a class="bl-cta-btn" href="https://auth.stocklio.ai/en/signup?redirect_to=https%3A%2F%2Fapp.stocklio.ai%2Fanalyze%3Fticker%3DAAPL">Try Stocklio free &rarr;</a>
+      </div>
+
+    </div><!-- /article-body -->
+  </div><!-- /post-body -->
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <div class="logo" style="font-size:2rem;">stocklio<span class="logo-dot">.</span></div>
+      <div style="font-size:0.8rem;color:#a0aec0;margin-top:6px;">Built for investors who want an edge.</div>
+      <a href="https://x.com/NickMasters_AI" target="_blank" rel="noopener" aria-label="Nick Masters on X" style="display:inline-flex;align-items:center;margin-top:12px;color:#a0aec0;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a0aec0'"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.636L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg></a>
+    </div>
+    <div style="display:flex;gap:48px;flex-wrap:wrap;">
+      <div>
+        <div class="footer-col-title">Product</div>
+        <a href="https://app.stocklio.ai/analyze?ticker=AAPL" class="footer-link">Open Dashboard</a>
+        <a href="/pricing.html" class="footer-link">Pricing</a>
+        <a href="/faq.html" class="footer-link">FAQ</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <a href="/blog/" class="footer-link">Blog</a>
+        <a href="mailto:hello@stocklio.ai" class="footer-link">hello@stocklio.ai</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <a href="https://app.stocklio.ai/privacy" class="footer-link">Privacy Policy</a>
+        <a href="https://app.stocklio.ai/terms" class="footer-link">Terms of Service</a>
+        <a href="https://app.stocklio.ai/cookies" class="footer-link">Cookie Policy</a>
+      </div>
+    </div>
+    <div style="width:100%;border-top:1px solid var(--border);padding-top:20px;" class="footer-copy">
+      &copy; 2025 Stocklio &nbsp;&middot;&nbsp;
+      <a href="https://app.stocklio.ai/privacy">Privacy Policy</a> &nbsp;&middot;&nbsp;
+      <a href="https://app.stocklio.ai/terms">Terms of Service</a>
+    </div>
+  </footer>
+
+</div><!-- /container -->
+</body>
+</html>
